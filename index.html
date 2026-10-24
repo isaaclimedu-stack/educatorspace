@@ -279,6 +279,34 @@ table.rec td { padding: 10px; border-bottom: 1px solid var(--line); font-variant
 .bl-mixi { display: grid; grid-template-columns: 120px 1fr; gap: 10px; align-items: center; background: var(--panel-2); border-radius: 10px; padding: 8px; }
 .bl-mixi canvas { width: 120px; height: 60px; background: var(--panel); border-radius: 6px; }
 @media (max-width: 600px) { .bl-card .tiles { grid-template-columns: 1fr 1fr; } }
+
+/* ── gate tabs, sign-up card ── */
+.gate-tabs { display: grid; grid-template-columns: 1fr 1fr; width: 100%; }
+.gate-tabs button { padding: 10px 12px; }
+.gate-new { display: flex; gap: 12px; align-items: center; justify-content: space-between; border: 1.5px dashed var(--line); border-radius: 10px; padding: 12px 14px; flex-wrap: wrap; }
+.gate-new > div { display: grid; gap: 2px; min-width: 0; flex: 1 1 200px; }
+/* ── assign labs ── */
+.pick-grid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+.pick { display: grid; grid-template-columns: auto 88px minmax(0, 1fr); gap: 12px; align-items: center; padding: 10px; border: 2px solid var(--line); border-radius: 12px; cursor: pointer; background: var(--panel); }
+.pick.on { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.pick input { width: 18px; height: 18px; accent-color: var(--accent); }
+.pick .thumb { width: 88px; height: 60px; border-radius: 8px; overflow: hidden; background: #12292b; display: block; }
+.pick .thumb svg { width: 100%; height: 100%; display: block; }
+.pick b { display: block; font-size: 14.5px; }
+.code-out { display: grid; gap: 10px; padding: 18px; border-radius: 12px; background: var(--accent-soft); }
+.big-code { font-size: clamp(26px, 4vw, 40px); font-weight: 700; letter-spacing: .08em; color: var(--ink); user-select: all; }
+/* ── student version ── */
+.stu { min-height: 100%; display: grid; grid-template-rows: auto 1fr; }
+.stu-top { display: flex; align-items: center; gap: 12px; padding-block: 12px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); background: var(--panel); border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.stu-me { margin-left: auto; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.stu-main { width: min(1100px, 100%); margin: 0 auto; padding-block: 28px 48px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 22px; align-content: start; }
+.send-box { display: grid; gap: 4px; padding: 10px 12px; border-radius: 9px; background: var(--panel-2); border-left: 4px solid var(--muted); }
+.send-box.ok { background: var(--ok-soft); border-color: var(--ok); }
+.send-box.bad, .send-box.warn { background: var(--warn-soft); border-color: var(--warn); }
+.send-box code { font-family: var(--f-mono); background: var(--panel); padding: 6px 8px; border-radius: 6px; word-break: break-word; }
+/* ── Pip ── */
+.pip-row { display: flex; align-items: center; gap: 10px; }
+.pip-row svg { flex: none; }
 </style>
 <div id="app"></div>
 <script>
@@ -287,9 +315,9 @@ table.rec td { padding: 10px; border-bottom: 1px solid var(--line); font-variant
    { id, courses:['hs-bio', ...], title, time, summary, ngss:[[code, text]], run: () => MyLab.start(meta) }
    It then shows up on its course pages, the home page, and in the rail counts. */
 
-const SITE_KEY = 'ap-cd21e4f1047665995d53daddf87f58c7';            /* same key as Educator Hub, so teacher codes match */
+const SITE_KEY = 'es-8b4329cccd8db72e69978a0829794f41';            /* Educator Space's own key (same as SITES.educatorspace in the Apps Script) */
 const CODE_ABC = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
-const BRAND = 'Educator Space', OWNER_EMAIL = 'admin@scholarlab.net';
+const BRAND = 'Educator Space', OWNER_EMAIL = 'admin@educator-space.com', SITE_URL = 'https://educator-space.com', SIGNUP_SITE = 'educatorspace';
 const SIGNUP_ENDPOINT = 'https://script.google.com/macros/s/AKfycby1jWaTEgqIqPZGIKKeDXFbhmuzOPlP304fAmFJJJLSNPPYTHNWHqNY5bdJhckTxm62/exec';
 const SESSION_DAYS = 30;
 
@@ -343,7 +371,7 @@ const ckOf = (email, code) => sha256hex('ck|lab|' + SITE_KEY + '|' + normEmail(e
 async function liveAccess(email) {
   try {
     const ac = new AbortController(), tm = setTimeout(() => ac.abort(), 6000);
-    const r = await fetch(`${SIGNUP_ENDPOINT}?a=status&site=scholarlab&r=teacher&e=${encodeURIComponent(normEmail(email))}`, { signal: ac.signal });
+    const r = await fetch(`${SIGNUP_ENDPOINT}?a=status&site=${SIGNUP_SITE}&r=teacher&e=${encodeURIComponent(normEmail(email))}`, { signal: ac.signal });
     clearTimeout(tm); const d = await r.json(); if (!d || !d.ok) return null; return !!d.on;
   } catch (e) { return null; }
 }
@@ -407,6 +435,9 @@ const IC = {
   star: '<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>',
   play: '<path d="M7 4l13 8-13 8z"/>',
   rocket: '<path d="M12 2c3 2.5 4.5 6 4.5 10.5L18 16l-2.5 1.5h-7L6 16l1.5-3.5C7.5 8 9 4.5 12 2z"/><circle cx="12" cy="9.5" r="1.8"/><path d="M10 19.5l2 2.5 2-2.5"/>',
+  link: '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
+  users: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><circle cx="17" cy="9" r="2.6"/><path d="M16 14.2c3 .2 5.5 2.3 5.5 5.8"/>',
+  copy: '<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/>',
   lock: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>'
 };
 const ico = (n, sw = 1.8) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[n]}</svg>`;
@@ -430,41 +461,77 @@ function go(view) { APP.view = view; try { history.replaceState(null, '', '#' + 
 async function boot() {
   const s = LS.get('session', null);
   if (s && s.email && s.ck && s.exp && Date.parse(s.exp) > Date.now() && s.ck === await ckOf(s.email, await teacherCode(s.email))) {
-    APP.user = { email: s.email };
+    APP.user = { email: s.email, ck: s.ck };
     liveAccess(s.email).then(on => { if (on === false) { LS.del('session'); APP.user = null; APP.gateMsg = `Your teacher access has been turned off. If you think this is a mistake, email ${OWNER_EMAIL}.`; render(); } });
   }
-  const h = (location.hash || '').slice(1);
-  if (h && (h === 'home' || h === 'game' || h === 'blaster' || h === 'records' || COURSES.some(c => c.id === h))) APP.view = h;
+  /* a student link: #j-CODE, ?j=CODE or /j/CODE (the 404 page serves the app for that path) */
+  const h = (location.hash || '').slice(1), qj = new URLSearchParams(location.search).get('j'), pj = (location.pathname.match(/\/j\/([A-Za-z0-9-]{10,20})/) || [])[1];
+  const join = (h.startsWith('j-') ? h.slice(2) : '') || qj || pj;
+  if (join) { APP.joinCode = join.toUpperCase(); APP.gateTab = 'student'; }
+  else if (!APP.user) { const stu = LS.get('student', null); if (stu && stu.code) { const k = await readLabCode(stu.code); if (k) APP.student = Object.assign(stu, { k }); } }
+  if (join && !APP.user) { const stu = LS.get('student', null); if (stu && normCode(stu.code) === normCode(join)) { const k = await readLabCode(stu.code); if (k) { APP.student = Object.assign(stu, { k }); APP.joinCode = ''; } } }
+  if (h && ['home', 'game', 'blaster', 'records', 'assign', 'results'].concat(COURSES.map(c => c.id)).includes(h)) APP.view = h;
   render();
+  if (typeof flushOutbox === 'function') flushOutbox();
 }
 
 function render() {
   if (typeof Kit !== 'undefined') Kit.unmount();
+  if (APP.student && !APP.user) return renderStudent();
   if (!APP.user) return renderGate();
   renderShell();
 }
 
-/* ── gate ── */
+/* ── gate: teachers sign in (or sign up); students join with a lab code ── */
 function renderGate() {
-  const saved = LS.get('lastEmail', '');
+  const saved = LS.get('lastEmail', ''), tab = APP.gateTab || 'teacher', stu = LS.get('student', {}) || {};
   root().innerHTML = `<div class="gate"><div class="gate-card">
     <div class="gate-art">
       <div class="brand" style="padding:0;color:#fff">${logo()}${BRAND}</div>
       ${gateArt()}
       <div style="display:grid;gap:8px"><h1>Practice the lab before the real one.</h1>
-      <p>A virtual lab bench for your classes. Students suit up, gather materials, and run each step with the mouse before they touch real glassware.</p></div>
+      <p>A virtual lab bench for science classes. Suit up, gather materials, and run each step with the mouse before touching real glassware.</p></div>
     </div>
-    <form class="gate-form" id="gForm" novalidate>
-      <div style="display:grid;gap:6px"><span class="eyebrow">Teachers only</span><h2>Sign in</h2>
-      <p class="muted small">Use your email and your teacher access code. It's the same teacher code you use on Educator Hub.</p></div>
-      <label class="fld" for="gEmail">Email<input type="email" id="gEmail" autocomplete="username" value="${esc(saved)}" placeholder="you@school.org"></label>
-      <label class="fld" for="gCode">Teacher access code<input type="password" id="gCode" autocomplete="current-password" placeholder="XXXX-XXXX" class="mono"></label>
-      <label class="check" for="gKeep"><input type="checkbox" id="gKeep" checked> Keep me signed in on this computer for ${SESSION_DAYS} days</label>
-      <div class="err" id="gErr" role="alert">${esc(APP.gateMsg || '')}</div>
-      <button class="btn primary" id="gGo" type="submit" style="justify-content:center;padding:12px">Sign in</button>
-      <div class="contact">Need a teacher code? Email <code>${OWNER_EMAIL}</code></div>
-    </form></div></div>`;
+    <div class="gate-form">
+      <div class="seg gate-tabs" role="tablist"><button role="tab" data-tab="teacher" class="${tab === 'teacher' ? 'on' : ''}" aria-selected="${tab === 'teacher'}">I\u2019m a teacher</button><button role="tab" data-tab="student" class="${tab === 'student' ? 'on' : ''}" aria-selected="${tab === 'student'}">I\u2019m a student</button></div>
+      ${tab === 'teacher' ? `<form id="gForm" novalidate style="display:grid;gap:16px">
+        <div style="display:grid;gap:6px"><h2>Teacher sign in</h2><p class="muted small">Use your email and the teacher code from your Educator Space welcome email.</p></div>
+        <label class="fld" for="gEmail">Email<input type="email" id="gEmail" autocomplete="username" value="${esc(saved)}" placeholder="you@school.org"></label>
+        <label class="fld" for="gCode">Teacher access code<input type="password" id="gCode" autocomplete="current-password" placeholder="XXXX-XXXX" class="mono"></label>
+        <label class="check" for="gKeep"><input type="checkbox" id="gKeep" checked> Keep me signed in on this computer for ${SESSION_DAYS} days</label>
+        <div class="err" id="gErr" role="alert">${esc(APP.gateMsg || '')}</div>
+        <button class="btn primary" id="gGo" type="submit" style="justify-content:center;padding:12px">Sign in</button>
+        <div class="gate-new"><div><b>New teacher?</b><span class="small muted">Sign up and we\u2019ll email your teacher code once you\u2019re approved.</span></div><button type="button" class="btn" id="suOpen">Sign up</button></div>
+        <div class="contact">Forgot your code? Sign up again with the same email and we\u2019ll resend it, or email <code>${OWNER_EMAIL}</code></div>
+      </form>` : `<form id="sForm" novalidate style="display:grid;gap:16px">
+        <div style="display:grid;gap:6px"><h2>Join your teacher\u2019s lab</h2><p class="muted small">Enter the lab code your teacher gave you. No account needed.</p></div>
+        <label class="fld" for="sCode">Lab code<input type="text" id="sCode" class="mono" autocomplete="off" placeholder="XXXX-XXXX-XXXXX" value="${esc(APP.joinCode || stu.code || '')}" style="text-transform:uppercase;letter-spacing:.06em"></label>
+        <label class="fld" for="sName">Your name<input type="text" id="sName" autocomplete="name" maxlength="40" placeholder="First name and last initial" value="${esc(stu.name || '')}"></label>
+        <div class="row" style="gap:12px;align-items:start"><label class="fld" for="sEmail" style="flex:1 1 180px">School email <span class="muted" style="font-weight:400">(optional)</span><input type="email" id="sEmail" autocomplete="email" maxlength="80" placeholder="you@school.org" value="${esc(stu.email || '')}"></label>
+        <label class="fld" for="sPer" style="flex:1 1 120px">Class or period <span class="muted" style="font-weight:400">(optional)</span><input type="text" id="sPer" maxlength="30" placeholder="e.g. Period 3" value="${esc(stu.period || '')}"></label></div>
+        <div class="err" id="sErr" role="alert"></div>
+        <button class="btn primary" id="sGo" type="submit" style="justify-content:center;padding:12px">Start</button>
+        <div class="contact">Your name and results go only to your teacher.</div>
+      </form>`}
+    </div></div></div>`;
   APP.gateMsg = '';
+  $$('[data-tab]').forEach(b => b.onclick = () => { APP.gateTab = b.dataset.tab; renderGate(); });
+  if (tab === 'student') {
+    (APP.joinCode ? $('#sName') : $('#sCode')).focus();
+    $('#sForm').addEventListener('submit', async e => {
+      e.preventDefault(); const err = $('#sErr'), code = $('#sCode').value, name = $('#sName').value.trim().replace(/\s+/g, ' '), em = normEmail($('#sEmail').value), per = $('#sPer').value.trim();
+      const k = await readLabCode(code);
+      if (!k) { err.textContent = 'That lab code doesn\u2019t look right. Check it with your teacher (it has 13 letters and numbers).'; return; }
+      if (!k.labs.length) { err.textContent = 'This code doesn\u2019t include any labs. Ask your teacher for a new one.'; return; }
+      if (name.length < 2) { err.textContent = 'Enter your name so your teacher knows whose results these are.'; return; }
+      if (em && !isEmail(em)) { err.textContent = 'That email doesn\u2019t look right. You can also leave it blank.'; return; }
+      const stu = { code: k.code, name, email: em, period: per }; LS.set('student', stu); APP.student = Object.assign({}, stu, { k }); APP.joinCode = ''; APP.view = 'home';
+      try { history.replaceState(null, '', location.pathname.replace(/\/j\/.*$/, '/') + '#home'); } catch (x) {}
+      SND.ac(); render();
+    });
+    return;
+  }
+  $('#suOpen').onclick = openSignup;
   const f = $('#gForm'); (saved ? $('#gCode') : $('#gEmail')).focus();
   f.addEventListener('submit', async e => {
     e.preventDefault(); const em = normEmail($('#gEmail').value), code = $('#gCode').value, err = $('#gErr'), b = $('#gGo');
@@ -475,10 +542,40 @@ function renderGate() {
     if (!good) { b.disabled = false; b.textContent = 'Sign in'; err.textContent = "That email and teacher code don't match. Check the code in your welcome email, or email " + OWNER_EMAIL + '.'; return; }
     const live = await liveAccess(em);
     if (live === false) { b.disabled = false; b.textContent = 'Sign in'; err.textContent = `Your teacher access has been turned off. If you think this is a mistake, email ${OWNER_EMAIL}.`; return; }
-    LS.set('lastEmail', em);
-    if ($('#gKeep').checked) LS.set('session', { email: em, ck: await ckOf(em, code), exp: new Date(Date.now() + SESSION_DAYS * 864e5).toISOString() }); else LS.del('session');
-    APP.user = { email: em }; SND.ac(); render();
+    LS.set('lastEmail', em); const ck = await ckOf(em, code);
+    if ($('#gKeep').checked) LS.set('session', { email: em, ck, exp: new Date(Date.now() + SESSION_DAYS * 864e5).toISOString() }); else LS.del('session');
+    APP.user = { email: em, ck }; APP.student = null; SND.ac(); render();
   });
+}
+/* teacher sign-up: posts to the shared sign-up script, which emails the teacher code after you approve */
+function openSignup() {
+  const opt = 'Email me news about new Educator Space labs and other products from Comma. Optional. You can unsubscribe anytime.';
+  const sc = document.createElement('div'); sc.className = 'scrim';
+  sc.innerHTML = `<div class="modal" role="dialog" aria-modal="true" aria-labelledby="suT" style="width:min(480px,100%)"><form id="suF" novalidate style="display:grid">
+    <div class="mh"><span class="eyebrow">Teachers</span><h2 id="suT">Sign up for Educator Space</h2><p class="muted small">We\u2019ll email your teacher code once your request is approved.</p></div>
+    <div class="mb"><label class="fld" for="suName">Full name<input type="text" id="suName" autocomplete="name" maxlength="60" placeholder="First and last name"></label>
+      <label class="fld" for="suEmail">School email<input type="email" id="suEmail" autocomplete="email" maxlength="80" placeholder="you@school.org" value="${esc(($('#gEmail') || {}).value || '')}"></label>
+      <label class="fld" for="suSchool">School<input type="text" id="suSchool" maxlength="80" placeholder="e.g. Lincoln High School"></label>
+      <label class="fld" for="suSubj">What do you teach? <span class="muted" style="font-weight:400">(optional)</span><input type="text" id="suSubj" maxlength="80" placeholder="e.g. Biology, Chemistry"></label>
+      <input id="suHp" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
+      <label class="check" for="suOpt" style="align-items:flex-start"><input type="checkbox" id="suOpt" style="margin-top:3px"><span class="small muted">${opt}</span></label>
+      <div class="err" id="suMsg" role="status"></div></div>
+    <div class="mf"><button type="button" class="btn" id="suX">Cancel</button><button type="submit" class="btn primary" id="suGo">Sign up</button></div></form></div>`;
+  document.body.appendChild(sc); $('#suName', sc).focus();
+  const close = () => sc.remove(); $('#suX', sc).onclick = close; sc.addEventListener('pointerdown', e => { if (e.target === sc) close(); });
+  $('#suF', sc).onsubmit = async e => {
+    e.preventDefault(); const m = $('#suMsg', sc), name = $('#suName', sc).value.trim().replace(/\s+/g, ' '), em = normEmail($('#suEmail', sc).value), school = $('#suSchool', sc).value.trim(), subj = $('#suSubj', sc).value.trim();
+    if (name.length < 2) { m.textContent = 'Please enter your name.'; return; } if (!isEmail(em)) { m.textContent = 'Please enter a valid email address.'; return; } if (school.length < 2) { m.textContent = 'Please enter your school.'; return; }
+    const b = $('#suGo', sc); b.disabled = true; m.style.color = 'var(--muted)'; m.textContent = 'Sending…';
+    try {
+      const ac = new AbortController(), tm = setTimeout(() => ac.abort(), 15000);
+      const r = await fetch(SIGNUP_ENDPOINT, { method: 'POST', signal: ac.signal, body: JSON.stringify({ site: SIGNUP_SITE, role: 'teacher', name, email: em, details: ['School: ' + school, subj && 'Teaches: ' + subj].filter(Boolean).join(' · '), optIn: $('#suOpt', sc).checked, optInText: opt, hp: $('#suHp', sc).value }) });
+      clearTimeout(tm); const d = await r.json();
+      if (!d.ok) { m.style.color = ''; m.textContent = d.msg || 'Something went wrong. Please try again.'; b.disabled = false; return; }
+      $('.modal', sc).innerHTML = `<div class="mh" style="text-align:center;padding:30px 24px 10px"><h2>${d.status === 'sent' ? 'Check your email' : 'Request sent'}</h2><p class="muted">${esc(d.msg)}</p><p class="small muted">Don\u2019t see it in a few minutes? Check your spam folder.</p></div><div class="mf" style="justify-content:center"><button class="btn primary" id="suOk">OK</button></div>`;
+      $('#suOk', sc).onclick = close;
+    } catch (x) { m.style.color = ''; m.textContent = 'Couldn\u2019t reach the sign-up service. On the live website this works; you can also email ' + OWNER_EMAIL + '.'; b.disabled = false; }
+  };
 }
 const logo = () => `<svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#0d6e74"/><path d="M12 7h8M13.5 7v6.5L8.6 22a2.4 2.4 0 0 0 2.1 3.5h10.6a2.4 2.4 0 0 0 2.1-3.5l-4.9-8.5V7" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round"/><path d="M10.2 19.5h11.6l1.5 2.6a2.4 2.4 0 0 1-2 3.4H10.7a2.4 2.4 0 0 1-2-3.4z" fill="#ff8a7a"/><circle cx="15" cy="21.8" r="1.1" fill="#fff"/><circle cx="18" cy="23.4" r=".8" fill="#fff"/></svg>`;
 function gateArt() {
@@ -501,6 +598,7 @@ function renderShell() {
   root().innerHTML = `<div class="shell"><aside class="rail">
     <div class="brand">${logo()}${BRAND}</div>
     <nav aria-label="Main">${nv('home', 'Home', 'home')}${nv('records', 'Lab records', 'list')}
+      <div class="grp">Your classes</div>${nv('assign', 'Assign labs', 'link')}${nv('results', 'Student results', 'users')}
       <div class="grp">Games</div>${nv('game', 'Science Showdown', 'trophy')}${nv('blaster', 'Molecule Blaster', 'rocket')}
       <div class="grp">High School Science</div>${band('High School Science')}
       <div class="grp">Middle School Science</div>${band('Middle School Science')}</nav>
@@ -511,7 +609,7 @@ function renderShell() {
   $('#outB').onclick = () => { LS.del('session'); APP.user = null; APP.view = 'home'; render(); };
   $('#sndT').onclick = () => { SND.on = !SND.on; LS.set('sound', SND.on); renderShell(); };
   const m = $('#main');
-  if (v === 'home') pageHome(m); else if (v === 'game') Game.page(m); else if (v === 'blaster') Blaster.page(m); else if (v === 'records') pageRecords(m);
+  if (v === 'home') pageHome(m); else if (v === 'game') Game.page(m); else if (v === 'blaster') Blaster.page(m); else if (v === 'assign') pageAssign(m); else if (v === 'results') pageResults(m); else if (v === 'records') pageRecords(m);
   else { const c = COURSES.find(c => c.id === v); if (c) pageCourse(m, c); else pageHome(m); }
 }
 
@@ -558,7 +656,7 @@ function pageRecords(m) {
     ${recs.length ? `<div class="tbl-wrap">${recTable(recs)}</div><div class="row"><button class="btn sm" id="clrR">Clear all records</button><span class="small muted" id="clrMsg"></span></div>` : `<div class="empty"><b>No lab runs yet.</b><span class="small">Finished labs show up here with the student's name, mistakes, quiz score and time.</span></div>`}`;
   const b = $('#clrR'); if (b) b.onclick = () => { if (b.dataset.sure) { LS.set('records', []); pageRecords(m); } else { b.dataset.sure = 1; b.textContent = 'Click again to clear all records'; b.classList.add('warn'); } };
 }
-function saveRecord(r) { const a = LS.get('records', []); a.push(r); LS.set('records', a.slice(-300)); }
+function saveRecord(r) { const a = LS.get('records', []); a.push(r); LS.set('records', a.slice(-300)); if (APP.student && typeof submitResult === 'function') submitResult(r); }
 
 /* ── lab briefing (shown before a lab starts) ── */
 function openBrief(l, cid) {
@@ -572,10 +670,11 @@ function openBrief(l, cid) {
       <label class="fld" for="stName">Student name (shows in Lab records)<input type="text" id="stName" placeholder="First name and last initial" value="${esc(LS.get('lastStudent', ''))}"></label>
       <p class="small muted">Use a mouse. Hold the left button to pour or squeeze, and move the mouse to stir, mash or shake. About ${esc(l.time)}.</p></div>
     <div class="mf"><button class="btn" id="bX">Cancel</button><button class="btn primary" id="bGo">${ico('play')}Start lab</button></div></div>`;
-  document.body.appendChild(sc); $('#stName', sc).focus();
+  document.body.appendChild(sc); ($('#stName', sc) || $('#bGo', sc)).focus();
   const close = () => sc.remove();
   $('#bX', sc).onclick = close; sc.addEventListener('pointerdown', e => { if (e.target === sc) close(); });
-  $('#bGo', sc).onclick = () => { const nm = $('#stName', sc).value.trim(); LS.set('lastStudent', nm); close(); SND.ac(); l.run({ student: nm, course: c, back: APP.view }); };
+  if (APP.student) { const nf = $('#stName', sc).closest('label'); nf.innerHTML = `<span class="small">Working as <b>${esc(APP.student.name)}</b>${APP.student.period ? ' · ' + esc(APP.student.period) : ''}. Your results go to your teacher when you finish.</span>`; }
+  $('#bGo', sc).onclick = () => { const nm = APP.student ? APP.student.name : $('#stName', sc).value.trim(); if (!APP.student) LS.set('lastStudent', nm); close(); SND.ac(); APP.curLab = l.id; Kit.noHints = !!(APP.student && !(APP.student.k.opts & 1)); l.run({ student: nm, course: c, back: APP.student ? 'home' : APP.view, labId: l.id }); };
 }
 
 /* small confetti burst used by the lab results and the game */
@@ -708,7 +807,7 @@ const Kit = {
   sheet({ steps, cur, title, html, hint, extra }) {
     this.side.innerHTML = `<div class="cur"><span class="eyebrow">${esc(title || '')}</span><div class="instr">${html || ''}</div>
       <div id="kMeters" style="display:grid;gap:10px"></div>${extra || ''}
-      ${hint ? `<div><button class="btn sm" id="kHintB">Show hint</button></div><div class="hint" id="kHint" hidden>${hint}</div>` : ''}</div>
+      ${hint && !this.noHints ? `<div><button class="btn sm" id="kHintB">Show hint</button></div><div class="hint" id="kHint" hidden>${hint}</div>` : ''}</div>
       ${steps ? `<ol class="steps">${steps.map((s, i) => `<li class="${i < cur ? 'done' : i === cur ? 'now' : ''}">${esc(s)}</li>`).join('')}</ol>` : ''}`;
     const hb = $('#kHintB'); if (hb) hb.onclick = () => { $('#kHint').hidden = false; hb.remove(); };
     const now = this.side.querySelector('li.now'); if (now) now.scrollIntoView({ block: 'nearest' });
@@ -729,7 +828,7 @@ const Kit = {
     const t0 = performance.now();
     setTimeout(() => {
       if (!this.live) return; const o = document.createElement('div'); o.className = 'oops';
-      o.innerHTML = `<div class="box" role="alertdialog" aria-labelledby="oT"><span class="eyebrow" style="color:var(--warn)">Mistake</span><h3 id="oT">${esc(title)}</h3><p>${text}</p><div class="why"><b>The science</b>${why}</div><div class="row"><button class="btn primary" id="oR">Clean up and try again</button></div></div>`;
+      o.innerHTML = `<div class="box" role="alertdialog" aria-labelledby="oT"><div class="pip-row">${typeof pipFace === 'function' ? pipFace('oops', 58) : ''}<span class="eyebrow" style="color:var(--warn)">Mistake</span></div><h3 id="oT">${esc(title)}</h3><p>${text}</p><div class="why"><b>The science</b>${why}</div><div class="row"><button class="btn primary" id="oR">Clean up and try again</button></div></div>`;
       this.stage.appendChild(o); $('#oR').focus();
       $('#oR').onclick = () => { o.remove(); this.parts = []; this.stains = []; this.goggleSplat = 0; retry && retry(); };
     }, 1500);
@@ -787,6 +886,17 @@ const Kit = {
   },
   sparkle(at, n = 30) { for (let i = 0; i < n; i++) this.spawn({ x: at.x, y: at.y, vx: rnd(-220, 220), vy: rnd(-260, -40), g: 400, r: rnd(2, 4), c: ['#ffd27a', '#5ad1c8', '#ffffff'][i % 3], life: 1.3 }); }
 };
+
+/* the assistant's speech bubble on the stage (top layer, fades) */
+function pipSay(K, text) {
+  const old = K.top.querySelector('.pipsay'); if (old) old.remove();
+  const words = text.split(' '), lines = ['']; words.forEach(w => { if ((lines[lines.length - 1] + ' ' + w).trim().length > 20) lines.push(w); else lines[lines.length - 1] = (lines[lines.length - 1] + ' ' + w).trim(); });
+  const h = 22 + lines.length * 19, y0 = 200 - h / 2, e = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  const g = sv('g', { class: 'pipsay' }, K.top);
+  g.innerHTML = `<path d="M196,${y0 + h / 2 - 10} L232,${y0 + h / 2 + 4} L196,${y0 + h / 2 + 8}Z" fill="#fff" stroke="#e9d3b6" stroke-width="3" stroke-linejoin="round"/><rect x="18" y="${y0}" width="182" height="${h}" rx="18" fill="#fff" stroke="#e9d3b6" stroke-width="3"/><rect x="194" y="${y0 + h / 2 - 9}" width="6" height="16" fill="#fff"/>
+    ${lines.map((l, i) => `<text x="109" y="${y0 + 26 + i * 19}" font-size="14.5" font-weight="700" fill="#5a3a2a" text-anchor="middle">${e(l)}</text>`).join('')}`;
+  g.style.transition = 'opacity .4s'; clearTimeout(K._pipT); K._pipT = setTimeout(() => { g.style.opacity = 0; }, 3800);
+}
 
 /* ═══════════ DNA lab: drawings ═══════════
    Every drawing uses local coordinates with (0,0) at the bottom centre of the object, so it stands on the bench. */
@@ -913,26 +1023,54 @@ const ART = {
   bagFolded: () => `${ART.shadow(54, 6)}<rect x="-52" y="-74" width="104" height="74" rx="5" fill="#eaf3f7" stroke="#b9cfd8" stroke-width="1.5" opacity=".9"/><rect x="-52" y="-80" width="104" height="5" rx="2" fill="#2f6fd6"/><rect x="-52" y="-76" width="104" height="4" rx="2" fill="#f2d33c"/><rect x="-40" y="-60" width="8" height="50" rx="4" fill="#fff" opacity=".4"/><text x="10" y="-30" font-size="10" font-weight="800" fill="#3c4a50" text-anchor="middle">ZIP-TOP BAG</text>`,
   tubeOnly: () => `${ART.shadow(30, 5)}<rect x="-40" y="-10" width="80" height="10" rx="2" fill="url(#wood)"/><rect x="-42" y="-96" width="84" height="9" rx="2" fill="url(#wood)"/><rect x="-38" y="-96" width="6" height="86" fill="url(#wood)"/><rect x="32" y="-96" width="6" height="86" fill="url(#wood)"/><path d="M-9,-130 L-9,-24 A9,9 0 0 0 9,-24 L9,-130" fill="url(#glassFill)" stroke="url(#glassEdge)" stroke-width="2"/>`,
   /* PPE station */
-  figure() {
-    return `<ellipse cx="0" cy="0" rx="120" ry="14" fill="#000" opacity=".2" filter="url(#soft)"/>
-      <path d="M-46,-205 L-50,-12 L-14,-12 L-6,-180 L6,-180 L14,-12 L50,-12 L46,-205Z" fill="#2c3550"/>
-      <path d="M-56,-14 Q-58,0 -40,0 L-8,0 Q-6,-14 -14,-16Z" fill="#20252e"/><path d="M56,-14 Q58,0 40,0 L8,0 Q6,-14 14,-16Z" fill="#20252e"/>
-      <path d="M-80,-372 Q-96,-366 -100,-340 L-112,-222 Q-114,-208 -100,-206 L-90,-206 L-78,-318Z" fill="url(#shirtG)"/><path d="M80,-372 Q96,-366 100,-340 L112,-222 Q114,-208 100,-206 L90,-206 L78,-318Z" fill="url(#shirtG)"/>
-      <circle class="hand" cx="-102" cy="-196" r="14" fill="url(#skinG)"/><circle class="hand" cx="102" cy="-196" r="14" fill="url(#skinG)"/>
-      <path d="M-80,-374 Q0,-392 80,-374 L74,-196 L-74,-196Z" fill="url(#shirtG)"/>
-      <rect x="-15" y="-404" width="30" height="34" rx="8" fill="#c58c63"/><path d="M-22,-378 Q0,-364 22,-378" fill="none" stroke="#17545c" stroke-width="5"/>
-      <ellipse cx="0" cy="-446" rx="40" ry="48" fill="url(#skinG)"/><ellipse cx="-40" cy="-444" rx="7" ry="11" fill="#c58c63"/><ellipse cx="40" cy="-444" rx="7" ry="11" fill="#c58c63"/>
-      <path d="M-42,-452 Q-46,-500 -4,-500 Q40,-502 42,-456 Q30,-482 -2,-480 Q-30,-480 -42,-452Z" fill="#3a2a1e"/><circle cx="0" cy="-504" r="16" fill="#3a2a1e"/><rect x="-7" y="-494" width="14" height="6" rx="2" fill="#d64045"/>
-      <ellipse cx="-15" cy="-448" rx="4" ry="5" fill="#2a1d14"/><ellipse cx="15" cy="-448" rx="4" ry="5" fill="#2a1d14"/><path d="M-24,-462 q8,-5 16,0M8,-462 q8,-5 16,0" stroke="#3a2a1e" stroke-width="2.6" fill="none" stroke-linecap="round"/>
-      <path d="M-2,-440 q-4,10 2,12" stroke="#a8724d" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M-12,-418 Q0,-410 12,-418" stroke="#8a4a3a" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+  /* the lab assistants: Ollie the otter and Puff the sheep. Flat, chunky, toy-like. Overlays (coat, goggles, gloves)
+     share the same anchor points: head center (0,-300), eyes at (±40,-302), paws at (±100,-190), body center (0,-98). */
+  figure(kind = assist()) {
+    const P = ASSIST[kind].pal, ol = P.line;
+    const eyes = `<ellipse cx="-40" cy="-300" rx="10" ry="13" fill="#2a211d"/><ellipse cx="40" cy="-300" rx="10" ry="13" fill="#2a211d"/><circle cx="-36" cy="-305" r="3.5" fill="#fff"/><circle cx="44" cy="-305" r="3.5" fill="#fff"/>`;
+    const blush = `<ellipse cx="-66" cy="-270" rx="16" ry="9" fill="#ff9fae" opacity=".7"/><ellipse cx="66" cy="-270" rx="16" ry="9" fill="#ff9fae" opacity=".7"/>`;
+    const shirt = `<path d="M-72,-150 Q-80,-110 -66,-68 Q0,-48 66,-68 Q80,-110 72,-150 Q0,-170 -72,-150Z" fill="#3aa0a6" stroke="${ol}" stroke-width="3"/><path d="M-26,-158 Q0,-142 26,-158" fill="none" stroke="${ol}" stroke-width="3" stroke-linecap="round"/><circle cx="0" cy="-104" r="11" fill="#ffd27a" stroke="${ol}" stroke-width="2.5"/><path d="M-5,-104 l4,4 l7,-8" fill="none" stroke="${ol}" stroke-width="2.4" stroke-linecap="round"/>`;
+    let base;
+    if (kind === 'otter') {
+      base = `<path d="M60,-40 Q150,-30 170,-90 Q176,-108 160,-104 Q130,-70 70,-80Z" fill="${P.fur}" stroke="${ol}" stroke-width="3" stroke-linejoin="round"/>
+        <ellipse cx="-34" cy="-12" rx="32" ry="16" fill="${P.dark}" stroke="${ol}" stroke-width="3"/><ellipse cx="34" cy="-12" rx="32" ry="16" fill="${P.dark}" stroke="${ol}" stroke-width="3"/>
+        <path d="M-80,-120 Q-108,-150 -104,-182 L-84,-190 Q-74,-160 -60,-140Z" fill="${P.fur}" stroke="${ol}" stroke-width="3" stroke-linejoin="round"/><path d="M80,-120 Q108,-150 104,-182 L84,-190 Q74,-160 60,-140Z" fill="${P.fur}" stroke="${ol}" stroke-width="3" stroke-linejoin="round"/>
+        <circle class="hand" cx="-100" cy="-190" r="17" fill="${P.dark}" stroke="${ol}" stroke-width="3"/><circle class="hand" cx="100" cy="-190" r="17" fill="${P.dark}" stroke="${ol}" stroke-width="3"/>
+        <ellipse cx="0" cy="-98" rx="86" ry="96" fill="${P.fur}" stroke="${ol}" stroke-width="3"/><ellipse cx="0" cy="-90" rx="54" ry="66" fill="${P.belly}"/>${shirt}<ellipse cx="0" cy="-200" rx="46" ry="18" fill="${P.fur}"/>
+        <circle cx="-86" cy="-372" r="22" fill="${P.fur}" stroke="${ol}" stroke-width="3"/><circle cx="86" cy="-372" r="22" fill="${P.fur}" stroke="${ol}" stroke-width="3"/><circle cx="-86" cy="-372" r="10" fill="${P.dark}"/><circle cx="86" cy="-372" r="10" fill="${P.dark}"/>
+        <ellipse cx="0" cy="-300" rx="114" ry="100" fill="${P.fur}" stroke="${ol}" stroke-width="3"/>
+        <path d="M-96,-272 Q-90,-210 0,-206 Q90,-210 96,-272 Q60,-254 0,-256 Q-60,-254 -96,-272Z" fill="${P.belly}"/><ellipse cx="0" cy="-262" rx="44" ry="30" fill="${P.belly}"/>
+        ${eyes}${blush}<ellipse cx="0" cy="-272" rx="14" ry="9" fill="#3a2a22"/><circle cx="-4" cy="-275" r="3" fill="#fff" opacity=".6"/>
+        <path d="M-12,-256 Q-6,-248 0,-256 Q6,-248 12,-256" fill="none" stroke="#3a2a22" stroke-width="3" stroke-linecap="round"/>
+        ${[-1, 1].map(sd => [0, 1, 2].map(i => `<circle cx="${sd * (24 + i * 9)}" cy="${-262 + (i % 2) * 6}" r="2.6" fill="#7a5a44"/>`).join('')).join('')}
+        <path d="M-106,-268 l-30,-6 M-106,-258 l-30,6 M106,-268 l30,-6 M106,-258 l30,6" stroke="${ol}" stroke-width="2.4" stroke-linecap="round"/>`;
+    } else {
+      const puff = (pts, r) => pts.map(([x, y]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${P.wool}" stroke="${ol}" stroke-width="3"/>`).join('');
+      const fill = (pts, r) => pts.map(([x, y]) => `<circle cx="${x}" cy="${y}" r="${r - 2}" fill="${P.wool}"/>`).join('');
+      const bodyPts = [[-70, -150], [-86, -100], [-74, -48], [-30, -24], [30, -24], [74, -48], [86, -100], [70, -150], [0, -170], [-36, -165], [36, -165]];
+      const headPts = [[-92, -340], [-60, -386], [-14, -400], [32, -398], [72, -378], [98, -334], [-100, -292], [100, -290]];
+      base = `<rect x="-52" y="-42" width="26" height="36" rx="10" fill="${P.dark}" stroke="${ol}" stroke-width="3"/><rect x="26" y="-42" width="26" height="36" rx="10" fill="${P.dark}" stroke="${ol}" stroke-width="3"/>
+        <ellipse cx="-38" cy="-8" rx="26" ry="12" fill="${P.dark}" stroke="${ol}" stroke-width="3"/><ellipse cx="38" cy="-8" rx="26" ry="12" fill="${P.dark}" stroke="${ol}" stroke-width="3"/>
+        ${puff(bodyPts, 40)}<ellipse cx="0" cy="-98" rx="80" ry="78" fill="${P.wool}"/>${fill(bodyPts, 40)}${shirt}
+        <path d="M-74,-150 Q-104,-160 -100,-186 L-84,-192 Q-80,-170 -62,-160Z" fill="${P.dark}" stroke="${ol}" stroke-width="3" stroke-linejoin="round"/><path d="M74,-150 Q104,-160 100,-186 L84,-192 Q80,-170 62,-160Z" fill="${P.dark}" stroke="${ol}" stroke-width="3" stroke-linejoin="round"/>
+        <circle class="hand" cx="-100" cy="-190" r="17" fill="${P.dark}" stroke="${ol}" stroke-width="3"/><circle class="hand" cx="100" cy="-190" r="17" fill="${P.dark}" stroke="${ol}" stroke-width="3"/>
+        <ellipse cx="-112" cy="-300" rx="34" ry="16" fill="${P.face}" stroke="${ol}" stroke-width="3" transform="rotate(-18 -112 -300)"/><ellipse cx="112" cy="-300" rx="34" ry="16" fill="${P.face}" stroke="${ol}" stroke-width="3" transform="rotate(18 112 -300)"/>
+        <ellipse cx="-112" cy="-300" rx="20" ry="7" fill="#e9b7a7" transform="rotate(-18 -112 -300)"/><ellipse cx="112" cy="-300" rx="20" ry="7" fill="#e9b7a7" transform="rotate(18 112 -300)"/>
+        ${puff(headPts, 34)}<ellipse cx="0" cy="-300" rx="92" ry="88" fill="${P.face}" stroke="${ol}" stroke-width="3"/>${fill(headPts.slice(0, 6), 34)}
+        <path d="M-90,-322 Q-60,-372 0,-374 Q60,-372 90,-322 Q60,-346 0,-344 Q-60,-346 -90,-322Z" fill="${P.wool}"/>
+        ${eyes}${blush}<path d="M-8,-276 Q0,-270 8,-276 Q0,-264 -8,-276Z" fill="#a8616a"/><path d="M-12,-258 Q-6,-250 0,-258 Q6,-250 12,-258" fill="none" stroke="#5a3a2a" stroke-width="3" stroke-linecap="round"/>`;
+    }
+    return `<ellipse cx="0" cy="0" rx="118" ry="12" fill="#000" opacity=".14"/>${base}
       <g class="ov-coat" visibility="hidden">
-        <path d="M-84,-376 Q-100,-368 -104,-340 L-118,-210 Q-120,-196 -104,-196 L-90,-198 L-80,-318Z" fill="url(#coatG)" stroke="#c6d0d5"/><path d="M84,-376 Q100,-368 104,-340 L118,-210 Q120,-196 104,-196 L90,-198 L80,-318Z" fill="url(#coatG)" stroke="#c6d0d5"/>
-        <path d="M-84,-376 Q-30,-388 -14,-384 L-4,-120 L-80,-120 Z" fill="url(#coatG)" stroke="#c6d0d5"/><path d="M84,-376 Q30,-388 14,-384 L4,-120 L80,-120 Z" fill="url(#coatG)" stroke="#c6d0d5"/>
-        <path d="M-14,-384 L-36,-322 L-12,-300" fill="none" stroke="#c6d0d5" stroke-width="2"/><path d="M14,-384 L36,-322 L12,-300" fill="none" stroke="#c6d0d5" stroke-width="2"/>
-        <rect x="-66" y="-232" width="34" height="30" rx="3" fill="none" stroke="#c6d0d5" stroke-width="2"/><rect x="40" y="-330" width="26" height="22" rx="3" fill="none" stroke="#c6d0d5" stroke-width="2"/><path d="M48,-336 v12" stroke="#2f6fd6" stroke-width="3"/>
-        <circle cx="-7" cy="-280" r="3" fill="#b6c1c6"/><circle cx="-7" cy="-230" r="3" fill="#b6c1c6"/><circle cx="-7" cy="-180" r="3" fill="#b6c1c6"/></g>
-      <g class="ov-gloves" visibility="hidden"><path d="M-116,-214 L-88,-214 L-87,-196 Q-88,-178 -102,-178 Q-117,-178 -117,-196Z" fill="#6f63d9"/><path d="M116,-214 L88,-214 L87,-196 Q88,-178 102,-178 Q117,-178 117,-196Z" fill="#6f63d9"/><rect x="-118" y="-220" width="32" height="9" rx="3" fill="#5a4fc4"/><rect x="86" y="-220" width="32" height="9" rx="3" fill="#5a4fc4"/></g>
-      <g class="ov-goggles" visibility="hidden"><path d="M-46,-452 L46,-452" stroke="#26343c" stroke-width="7"/><rect x="-38" y="-466" width="76" height="30" rx="13" fill="#bfe6f5" fill-opacity=".45" stroke="#26343c" stroke-width="4"/><path d="M-2,-438 L2,-438" stroke="#26343c" stroke-width="4"/><path d="M-28,-460 l12,0" stroke="#fff" stroke-width="3" opacity=".8" stroke-linecap="round"/></g>`;
+        <path d="M-86,-150 Q-112,-150 -116,-180 L-118,-198 L-88,-206 L-80,-176Z" fill="#fdfdfb" stroke="${ol}" stroke-width="3"/><path d="M86,-150 Q112,-150 116,-180 L118,-198 L88,-206 L80,-176Z" fill="#fdfdfb" stroke="${ol}" stroke-width="3"/>
+        <path d="M-74,-160 Q-40,-178 -12,-170 L-6,-24 L-70,-26 Q-92,-70 -88,-120Z" fill="#fdfdfb" stroke="${ol}" stroke-width="3"/><path d="M74,-160 Q40,-178 12,-170 L6,-24 L70,-26 Q92,-70 88,-120Z" fill="#fdfdfb" stroke="${ol}" stroke-width="3"/>
+        <path d="M-12,-170 L-30,-132 L-8,-112 M12,-170 L30,-132 L8,-112" fill="none" stroke="${ol}" stroke-width="2.5" stroke-linejoin="round"/>
+        <rect x="-58" y="-76" width="30" height="24" rx="6" fill="none" stroke="${ol}" stroke-width="2.5"/><rect x="32" y="-140" width="24" height="20" rx="5" fill="none" stroke="${ol}" stroke-width="2.5"/><path d="M40,-146 v14" stroke="#2f6fd6" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="0" cy="-90" r="4.5" fill="#cdd5d8"/><circle cx="0" cy="-56" r="4.5" fill="#cdd5d8"/></g>
+      <g class="ov-gloves" visibility="hidden"><circle cx="-100" cy="-190" r="21" fill="#9a8cf2" stroke="${ol}" stroke-width="3"/><circle cx="100" cy="-190" r="21" fill="#9a8cf2" stroke="${ol}" stroke-width="3"/><rect x="-114" y="-212" width="28" height="9" rx="4" fill="#7d6de0" stroke="${ol}" stroke-width="2"/><rect x="86" y="-212" width="28" height="9" rx="4" fill="#7d6de0" stroke="${ol}" stroke-width="2"/></g>
+      <g class="ov-goggles" visibility="hidden"><path d="M-112,-304 Q0,-318 112,-304" fill="none" stroke="#2f6fd6" stroke-width="10" stroke-linecap="round"/>
+        <rect x="-74" y="-330" width="66" height="54" rx="24" fill="#d6f0fa" fill-opacity=".55" stroke="${ol}" stroke-width="5"/><rect x="8" y="-330" width="66" height="54" rx="24" fill="#d6f0fa" fill-opacity=".55" stroke="${ol}" stroke-width="5"/>
+        <path d="M-8,-306 h16" stroke="${ol}" stroke-width="5"/><path d="M-62,-318 q8,-6 18,-4 M20,-318 q8,-6 18,-4" stroke="#fff" stroke-width="4" stroke-linecap="round" fill="none"/></g>`;
   },
   ppeItem(id) {
     const tag = t => `<rect x="-56" y="10" width="112" height="22" rx="4" fill="#fffdf6" stroke="#b8a37f"/><text x="0" y="25" font-size="11.5" font-weight="700" fill="#3d3220" text-anchor="middle">${t}</text>`;
@@ -960,7 +1098,7 @@ const ART = {
     <rect x="590" y="56" width="380" height="490" rx="6" fill="url(#peg)" stroke="#a88f68" stroke-width="3"/>
     <rect x="660" y="66" width="240" height="34" rx="4" fill="#0d6e74"/><text x="780" y="89" font-size="16" font-weight="800" fill="#fff" text-anchor="middle">PPE STATION</text>
     <rect y="560" width="1000" height="60" fill="#9aa4a8"/><rect y="560" width="1000" height="4" fill="#7c868a"/>
-    <g transform="translate(450 96)"><rect width="78" height="48" rx="4" fill="#fff" stroke="#c9d1d3"/><text x="39" y="20" font-size="10" font-weight="800" fill="#d4562a" text-anchor="middle">CHECK</text><text x="39" y="34" font-size="9" fill="#25312f" text-anchor="middle">hair tied back</text><text x="39" y="44" font-size="9" fill="#25312f" text-anchor="middle">closed-toe shoes</text></g>`,
+    <g transform="translate(470 96)"><rect width="96" height="48" rx="8" fill="#fff" stroke="#c9d1d3"/><text x="48" y="20" font-size="10" font-weight="800" fill="#d4562a" text-anchor="middle">CHECK</text><text x="48" y="34" font-size="9" fill="#25312f" text-anchor="middle">hair tied back</text><text x="48" y="44" font-size="9" fill="#25312f" text-anchor="middle">closed-toe shoes</text></g>`,
   cabinet: () => `<rect width="1000" height="430" fill="url(#tile)"/><rect width="1000" height="430" fill="url(#wallShade)"/>
     <rect x="30" y="20" width="700" height="404" rx="4" fill="#5d6a72"/><rect x="40" y="28" width="680" height="390" fill="#e9eef0"/>
     ${[148, 270, 392].map(y => `<rect x="40" y="${y}" width="680" height="10" fill="url(#metal)"/><rect x="40" y="${y + 10}" width="680" height="4" fill="#000" opacity=".15"/>`).join('')}
@@ -980,6 +1118,31 @@ function dnaThumb(big) {
     <g transform="translate(270 228) scale(1.05)"><rect x="-13" y="-188" width="26" height="170" rx="13" fill="#fff" opacity=".1" stroke="#cfe7e3" stroke-width="2.4"/><rect x="-11" y="-80" width="22" height="62" rx="10" fill="#d9475f" opacity=".9"/><rect x="-11" y="-140" width="22" height="60" fill="#dcecf5" opacity=".3"/><path d="M-5,-82 q5,-14 -1,-28 q7,-10 2,-22 M4,-84 q-5,-12 2,-24" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round"/></g>
     <g transform="translate(330 220) rotate(10)"><rect x="-2.4" y="-190" width="4.8" height="190" fill="#dcab74"/><ellipse cx="0" cy="-30" rx="10" ry="18" fill="#fff" opacity=".85"/></g>
   </svg>`;
+}
+
+/* the assistants. Each lab picks one; their face appears on mistake and results cards. */
+const ASSIST = {
+  otter: { name: 'Ollie', pal: { fur: '#a8754f', dark: '#7d5638', belly: '#f6e6cc', line: '#4a3426' } },
+  sheep: { name: 'Puff', pal: { wool: '#fffdf8', face: '#f3dcc3', dark: '#5b4c45', line: '#5a4a42' } }
+};
+const ASSIST_BY_LAB = { 'dna-strawberry': 'otter', titration: 'sheep', flame: 'otter', pendulum: 'sheep', ohm: 'otter' };
+const assist = () => ASSIST_BY_LAB[(typeof APP !== 'undefined' && APP.curLab) || ''] || 'otter';
+const asstName = () => ASSIST[assist()].name;
+function pipFace(mood = 'happy', size = 64, kind = assist()) {
+  const P = ASSIST[kind].pal, ol = P.line;
+  const eyes = mood === 'happy' ? `<path d="M-38,-4 q9,-11 18,0 M20,-4 q9,-11 18,0" fill="none" stroke="#2a211d" stroke-width="5" stroke-linecap="round"/>`
+    : mood === 'oops' ? `<path d="M-36,-11 l14,13 M-36,2 l14,-13 M22,-11 l14,13 M22,2 l14,-13" stroke="#2a211d" stroke-width="4.5" stroke-linecap="round"/>`
+    : `<ellipse cx="-28" cy="-4" rx="8" ry="10" fill="#2a211d"/><ellipse cx="28" cy="-4" rx="8" ry="10" fill="#2a211d"/><circle cx="-25" cy="-8" r="3" fill="#fff"/><circle cx="31" cy="-8" r="3" fill="#fff"/>`;
+  const mouth = mood === 'oops' ? '<ellipse cx="0" cy="24" rx="7" ry="8" fill="#5a3a2a"/>' : '<path d="M-9,20 Q-4,27 0,20 Q4,27 9,20" fill="none" stroke="#5a3a2a" stroke-width="3" stroke-linecap="round"/>';
+  const sweat = mood === 'oops' ? '<path d="M56,-34 q9,15 0,21 q-9,-6 0,-21Z" fill="#8fd3ff" stroke="#4a8ab0" stroke-width="1.5"/>' : '';
+  const blush = '<ellipse cx="-42" cy="16" rx="12" ry="7" fill="#ff9fae" opacity=".75"/><ellipse cx="42" cy="16" rx="12" ry="7" fill="#ff9fae" opacity=".75"/>';
+  let head;
+  if (kind === 'otter') head = `<circle cx="-50" cy="-48" r="15" fill="${P.fur}" stroke="${ol}" stroke-width="3"/><circle cx="50" cy="-48" r="15" fill="${P.fur}" stroke="${ol}" stroke-width="3"/><circle cx="-50" cy="-48" r="7" fill="${P.dark}"/><circle cx="50" cy="-48" r="7" fill="${P.dark}"/>
+    <ellipse cx="0" cy="0" rx="70" ry="60" fill="${P.fur}" stroke="${ol}" stroke-width="3"/><path d="M-58,14 Q-52,52 0,54 Q52,52 58,14 Q30,26 0,26 Q-30,26 -58,14Z" fill="${P.belly}"/><ellipse cx="0" cy="18" rx="26" ry="18" fill="${P.belly}"/><ellipse cx="0" cy="12" rx="9" ry="6" fill="#3a2a22"/>`;
+  else head = `<ellipse cx="-66" cy="0" rx="22" ry="10" fill="${P.face}" stroke="${ol}" stroke-width="3" transform="rotate(-18 -66 0)"/><ellipse cx="66" cy="0" rx="22" ry="10" fill="${P.face}" stroke="${ol}" stroke-width="3" transform="rotate(18 66 0)"/>
+    ${[[-52, -30], [-30, -56], [0, -64], [30, -56], [52, -30]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="22" fill="${P.wool}" stroke="${ol}" stroke-width="3"/>`).join('')}
+    <ellipse cx="0" cy="4" rx="58" ry="54" fill="${P.face}" stroke="${ol}" stroke-width="3"/><path d="M-56,-10 Q-36,-44 0,-46 Q36,-44 56,-10 Q30,-26 0,-24 Q-30,-26 -56,-10Z" fill="${P.wool}"/><path d="M-6,12 Q0,16 6,12 Q0,20 -6,12Z" fill="#a8616a"/>`;
+  return `<svg viewBox="-90 -112 180 176" width="${size}" height="${size}" aria-hidden="true">${head}${blush}${eyes}${mouth}${sweat}</svg>`;
 }
 
 /* ═══════════ Lab: DNA extraction from strawberries ═══════════
@@ -1110,11 +1273,11 @@ const DNALab = (() => {
   /* ═════ Part 1: suit up ═════ */
   function phasePPE() {
     K.clear(); K.phase('Part 1 of 4 · Suit up'); K.setBg(ART.locker()); phaseName = 'ppe';
-    const fig = K.obj(330, 590, ART.figure(), 'fixed'); const worn = {};
+    const fig = K.obj(330, 590, ART.figure(), 'fixed'); pipSay(K, `Hi, I\u2019m ${asstName()}! Help me suit up for the lab.`); const worn = {};
     const ids = ['coat', 'goggles', 'gloves', 'sunglasses', 'mitts', 'scarf'].sort(() => Math.random() - .5);
     const slots = [[690, 230], [870, 230], [690, 370], [870, 370], [690, 510], [870, 510]];
     const why = { sunglasses: 'Sunglasses aren’t safety goggles. They don’t seal around your eyes, so splashes get in from the sides.', mitts: 'Oven mitts are for heat. You couldn’t hold a test tube, and liquids soak right through. Use nitrile gloves.', scarf: 'Loose scarves and sleeves can dip into chemicals or knock over glassware. Leave them in your locker.' };
-    const side = () => K.sheet({ title: 'Part 1 · Suit up', html: `Drag the right <b>safety gear</b> from the PPE station onto the student. Only real lab protection belongs on them.<div class="std" style="margin-top:10px">${[['coat', 'Lab coat'], ['goggles', 'Safety goggles'], ['gloves', 'Gloves (put on last)']].map(([k, t]) => `<div class="s"><span class="chip ${worn[k] ? 'ok' : ''}">${worn[k] ? '✓' : '○'}</span><span>${t}</span></div>`).join('')}</div>
+    const side = () => K.sheet({ title: 'Part 1 · Suit up', html: `Drag the right <b>safety gear</b> from the PPE station onto <b>${asstName()}</b>, your lab assistant. Only real lab protection belongs on ${asstName()}.<div class="std" style="margin-top:10px">${[['coat', 'Lab coat'], ['goggles', 'Safety goggles'], ['gloves', 'Gloves (put on last)']].map(([k, t]) => `<div class="s"><span class="chip ${worn[k] ? 'ok' : ''}">${worn[k] ? '✓' : '○'}</span><span>${t}</span></div>`).join('')}</div>
       <div class="small muted" style="margin-top:8px">Also before every lab: long hair tied back, closed-toe shoes, no food or drink.</div>`,
       hint: 'Three items protect you in a wet lab: eyes, body and hands.', extra: Object.keys(worn).length === 3 ? `<button class="btn primary" id="ppeGo">Go to the supply cabinet</button>` : '' });
     side();
@@ -1122,9 +1285,9 @@ const DNALab = (() => {
       const o = K.obj(slots[i][0], slots[i][1], ART.ppeItem(id)); o.hx = o.x; o.hy = o.y;
       K.drag(o, { drop: (oo, x, y) => {
         if (x < 170 || x > 500 || y < 60 || y > 620) return false;
-        if (!['coat', 'goggles', 'gloves'].includes(id)) { SND.nope(); K.msg(why[id], 'bad', 4200); K.addMistake({ title: 'Wrong safety gear: ' + ({ sunglasses: 'sunglasses', mitts: 'oven mitts', scarf: 'scarf' })[id], why: why[id], step: 'Suit up' }); return false; }
+        if (!['coat', 'goggles', 'gloves'].includes(id)) { SND.nope(); pipSay(K, 'Hmm, that won\u2019t protect me!'); K.msg(why[id], 'bad', 4200); K.addMistake({ title: 'Wrong safety gear: ' + ({ sunglasses: 'sunglasses', mitts: 'oven mitts', scarf: 'scarf' })[id], why: why[id], step: 'Suit up' }); return false; }
         if (id === 'gloves' && !worn.coat) { SND.nope(); K.msg('Put on the lab coat first. Gloves go on last so they stay clean.', '', 3400); return false; }
-        worn[id] = true; o.remove(); fig.q('.ov-' + id).setAttribute('visibility', 'visible'); K.ppe(id === 'gloves' ? 'glove' : id, true); SND.ok(); K.sparkle({ x: 330, y: id === 'goggles' ? 140 : id === 'gloves' ? 390 : 300 }, 18);
+        worn[id] = true; o.remove(); fig.q('.ov-' + id).setAttribute('visibility', 'visible'); K.ppe(id === 'gloves' ? 'glove' : id, true); SND.ok(); K.sparkle({ x: 330, y: id === 'goggles' ? 285 : id === 'gloves' ? 400 : 480 }, 18); pipSay(K, id === 'goggles' ? 'I can see clearly!' : id === 'gloves' ? (assist() === 'sheep' ? 'Squeaky clean hooves!' : 'Squeaky clean paws!') : 'So fancy!');
         side(); if (Object.keys(worn).length === 3) { K.msg('Suited up and ready.', 'ok'); const b = $('#ppeGo'); if (b) b.onclick = phaseGather; }
         return true; } });
     });
@@ -1409,7 +1572,7 @@ const DNALab = (() => {
     const n = K.mistakes.length, stars = n === 0 && quizScore >= 4 ? 3 : n <= 2 && quizScore >= 3 ? 2 : 1;
     saveRecord({ name: run.student, lab: META.short, at: new Date().toISOString(), mistakes: n, quiz: `${quizScore}/${QUIZ.length}`, secs, stars });
     const verdict = stars === 3 ? ['Lab ready', 'You followed every step safely. You’re ready for the real lab.'] : stars === 2 ? ['Almost ready', 'Good work. Review the mistakes below before the real lab.'] : ['Practice again', 'Run the virtual lab once more before the real one.'];
-    K.side.innerHTML = `<div class="cur results"><span class="eyebrow">Results${run.student ? ' · ' + esc(run.student) : ''}</span>
+    K.side.innerHTML = `<div class="cur results"><div class="pip-row">${pipFace(stars >= 3 ? 'happy' : 'think', 58)}<span class="eyebrow">Results${run.student ? ' · ' + esc(run.student) : ''}</span></div>
       <div class="res-stars" aria-label="${stars} of 3 stars">${[1, 2, 3].map(i => `<svg viewBox="0 0 24 24" fill="${i <= stars ? '#f2b33d' : 'none'}" stroke="${i <= stars ? '#c98a12' : 'currentColor'}" stroke-width="1.5" style="color:var(--line)">${IC.star}</svg>`).join('')}</div>
       <h2>${verdict[0]}</h2><p class="small">${verdict[1]}</p>
       <div class="tiles"><div class="tile"><span class="eyebrow">Mistakes</span><b>${n}</b></div><div class="tile"><span class="eyebrow">Quiz</span><b>${quizScore}/${QUIZ.length}</b></div><div class="tile"><span class="eyebrow">Time</span><b>${fmtTime(secs)}</b></div></div>
@@ -1484,12 +1647,12 @@ const BG = {
 const LabParts = {
   ppe(K, cfg, done) {
     K.clear(); K.phase('Part 1 of 4 · Suit up'); K.setBg(ART.locker());
-    const fig = K.obj(330, 590, ART.figure(), 'fixed'); const worn = {}, need = cfg.need;
+    const fig = K.obj(330, 590, ART.figure(), 'fixed'); pipSay(K, `Hi, I\u2019m ${asstName()}! Help me suit up for the lab.`); const worn = {}, need = cfg.need;
     const ids = need.concat(cfg.decoys || ['sunglasses', 'mitts', 'scarf']).slice(0, 6).sort(() => Math.random() - .5);
     const slots = [[690, 230], [870, 230], [690, 370], [870, 370], [690, 510], [870, 510]];
     const label = { coat: 'Lab coat', goggles: 'Safety goggles', gloves: 'Gloves (put on last)' };
     const why = Object.assign({ sunglasses: 'Sunglasses aren’t safety goggles. They don’t seal around your eyes, so splashes and flying bits get in from the sides.', mitts: 'Oven mitts aren’t lab gloves. You can’t grip equipment safely with them.', scarf: 'Loose scarves and sleeves can dip into chemicals, catch fire or get tangled in equipment. Leave them in your locker.', coat: 'This lab doesn’t need a lab coat. Goggles are the key protection here.', gloves: 'Gloves aren’t needed for this lab.' }, cfg.why || {});
-    const side = () => K.sheet({ title: 'Part 1 · Suit up', html: `${cfg.intro || 'Drag the right <b>safety gear</b> from the PPE station onto the student.'}<div class="std" style="margin-top:10px">${need.map(k => `<div class="s"><span class="chip ${worn[k] ? 'ok' : ''}">${worn[k] ? '✓' : '○'}</span><span>${label[k]}</span></div>`).join('')}</div>
+    const side = () => K.sheet({ title: 'Part 1 · Suit up', html: `${cfg.intro || 'Drag the right <b>safety gear</b> from the PPE station onto <b>' + asstName() + '</b>, your lab assistant.'}<div class="std" style="margin-top:10px">${need.map(k => `<div class="s"><span class="chip ${worn[k] ? 'ok' : ''}">${worn[k] ? '✓' : '○'}</span><span>${label[k]}</span></div>`).join('')}</div>
       <div class="small muted" style="margin-top:8px">${cfg.note || 'Also before every lab: long hair tied back, closed-toe shoes, no food or drink.'}</div>`,
       hint: cfg.hint || 'Think about what this lab could do to your eyes, body and hands.', extra: need.every(k => worn[k]) ? `<button class="btn primary" id="ppeGo">Go to the supply cabinet</button>` : '' });
     side();
@@ -1497,9 +1660,9 @@ const LabParts = {
       const o = K.obj(slots[i][0], slots[i][1], ART.ppeItem(id));
       K.drag(o, { drop: (oo, x, y) => {
         if (x < 170 || x > 500 || y < 60 || y > 620) return false;
-        if (!need.includes(id)) { SND.nope(); K.msg(why[id], 'bad', 4200); K.addMistake({ title: 'Wrong safety gear: ' + ({ sunglasses: 'sunglasses', mitts: 'oven mitts', scarf: 'scarf', coat: 'lab coat', gloves: 'gloves' })[id], why: why[id], step: 'Suit up' }); return false; }
+        if (!need.includes(id)) { SND.nope(); pipSay(K, 'Hmm, that won\u2019t protect me!'); K.msg(why[id], 'bad', 4200); K.addMistake({ title: 'Wrong safety gear: ' + ({ sunglasses: 'sunglasses', mitts: 'oven mitts', scarf: 'scarf', coat: 'lab coat', gloves: 'gloves' })[id], why: why[id], step: 'Suit up' }); return false; }
         if (id === 'gloves' && need.includes('coat') && !worn.coat) { SND.nope(); K.msg('Put on the lab coat first. Gloves go on last so they stay clean.', '', 3400); return false; }
-        worn[id] = true; o.remove(); fig.q('.ov-' + id).setAttribute('visibility', 'visible'); K.ppe(id === 'gloves' ? 'glove' : id, true); SND.ok(); K.sparkle({ x: 330, y: id === 'goggles' ? 140 : id === 'gloves' ? 390 : 300 }, 18);
+        worn[id] = true; o.remove(); fig.q('.ov-' + id).setAttribute('visibility', 'visible'); K.ppe(id === 'gloves' ? 'glove' : id, true); SND.ok(); K.sparkle({ x: 330, y: id === 'goggles' ? 285 : id === 'gloves' ? 400 : 480 }, 18); pipSay(K, id === 'goggles' ? 'I can see clearly!' : id === 'gloves' ? (assist() === 'sheep' ? 'Squeaky clean hooves!' : 'Squeaky clean paws!') : 'So fancy!');
         side(); if (need.every(k => worn[k])) { K.msg('Suited up and ready.', 'ok'); $('#ppeGo').onclick = done; }
         return true; } });
     });
@@ -1572,7 +1735,7 @@ function makeLab(L) {
     const n = K.mistakes.length, qs = R.quizScore, qn = L.quiz.length, stars = n === 0 && qs >= qn - 1 ? 3 : n <= 2 && qs >= qn - 2 ? 2 : 1;
     saveRecord({ name: R.run.student, lab: L.meta.short, at: new Date().toISOString(), mistakes: n, quiz: `${qs}/${qn}`, secs, stars });
     const verdict = stars === 3 ? ['Lab ready', 'You followed every step safely. You’re ready for the real lab.'] : stars === 2 ? ['Almost ready', 'Good work. Review the mistakes below before the real lab.'] : ['Practice again', 'Run the virtual lab once more before the real one.'];
-    K.side.innerHTML = `<div class="cur results"><span class="eyebrow">Results${R.run.student ? ' · ' + esc(R.run.student) : ''}</span>
+    K.side.innerHTML = `<div class="cur results"><div class="pip-row">${pipFace(stars >= 3 ? 'happy' : 'think', 58)}<span class="eyebrow">Results${R.run.student ? ' · ' + esc(R.run.student) : ''}</span></div>
       <div class="res-stars" aria-label="${stars} of 3 stars">${[1, 2, 3].map(i => `<svg viewBox="0 0 24 24" fill="${i <= stars ? '#f2b33d' : 'none'}" stroke="${i <= stars ? '#c98a12' : 'currentColor'}" stroke-width="1.5" style="color:var(--line)">${IC.star}</svg>`).join('')}</div>
       <h2>${verdict[0]}</h2><p class="small">${verdict[1]}</p>${L.summary ? `<div class="small">${L.summary(R)}</div>` : ''}
       <div class="tiles"><div class="tile"><span class="eyebrow">Mistakes</span><b>${n}</b></div><div class="tile"><span class="eyebrow">Quiz</span><b>${qs}/${qn}</b></div><div class="tile"><span class="eyebrow">Time</span><b>${fmtTime(secs)}</b></div></div>
@@ -2798,6 +2961,176 @@ const Blaster = {
     $('#blS', o).onclick = e => { const n = $('#blN', o).value.trim() || 'Player'; LS.set('blName', n); const b = LS.get('blBoard', []); b.push({ n, s: G.score, m: this.mode === 'rotate' ? 'Mixed' : MOLCLASS[this.mode].name, l: G.level, d: new Date().toISOString() }); b.sort((x, y) => y.s - x.s); LS.set('blBoard', b.slice(0, 10)); e.currentTarget.disabled = true; $('#blSm', o).textContent = 'Saved to the high scores.'; };
   }
 };
+
+/* ═══════════ Classes: lab codes, the student version, and student results ═══════════
+   A teacher makes a lab code (13 characters) that carries the chosen labs, options and a short teacher key, signed with
+   SITE_KEY. Students join with it (no account), run the labs, and each finished lab is posted to the sign-up Apps Script,
+   which saves it in the "educator-space.com · Lab results" tab. Teachers read back only their own students' results.
+   LAB_ORDER is the bit order inside codes: only ever ADD new labs at the end, never reorder. */
+const LAB_ORDER = ['dna-strawberry', 'titration', 'flame', 'pendulum', 'ohm'];
+const OPT = { hints: 1, blaster: 2, repeat: 4 };
+
+const teacherKey = async email => parseInt((await sha256hex('t|' + SITE_KEY + '|' + normEmail(email))).slice(0, 5), 16);
+const fmtLabCode = c => c.slice(0, 4) + '-' + c.slice(4, 8) + '-' + c.slice(8);
+async function makeLabCode(email, labIds, opts, set) {
+  let labs = 0; labIds.forEach(id => { const i = LAB_ORDER.indexOf(id); if (i >= 0) labs |= 1 << i; });
+  const th = await teacherKey(email);
+  const payload = (1n << 38n) | (BigInt(labs) << 28n) | (BigInt(opts & 15) << 24n) | (BigInt(set & 15) << 20n) | BigInt(th);
+  const sg = parseInt((await sha256hex(SITE_KEY + '|lab|' + payload.toString(16).padStart(10, '0'))).slice(0, 6), 16);
+  let n = (payload << 24n) | BigInt(sg), s = '';
+  for (let i = 0; i < 13; i++) { s = CODE_ABC[Number(n % 31n)] + s; n /= 31n; }
+  return fmtLabCode(s);
+}
+async function readLabCode(code) {
+  const c = normCode(code); if (c.length !== 13) return null;
+  let n = 0n; for (const ch of c) { const i = CODE_ABC.indexOf(ch); if (i < 0) return null; n = n * 31n + BigInt(i); }
+  if (n >= (1n << 64n)) return null;
+  const payload = n >> 24n, sg = Number(n & 0xFFFFFFn);
+  if (parseInt((await sha256hex(SITE_KEY + '|lab|' + payload.toString(16).padStart(10, '0'))).slice(0, 6), 16) !== sg) return null;
+  const p = Number(payload), labsBits = Math.floor(p / 2 ** 28) % 1024;
+  return { code: fmtLabCode(c), labs: LAB_ORDER.filter((id, i) => labsBits & (1 << i)), opts: Math.floor(p / 2 ** 24) % 16, set: Math.floor(p / 2 ** 20) % 16, th: p % 2 ** 20 };
+}
+const joinLink = code => (/^https?:$/.test(location.protocol) && !/claude|localhost|^$/.test(location.hostname) ? location.origin : SITE_URL) + '/#j-' + normCode(code);
+function copyBtn(btn, text) {
+  try { navigator.clipboard.writeText(text).then(() => { const t = btn.innerHTML; btn.textContent = 'Copied'; setTimeout(() => { btn.innerHTML = t; }, 1400); }, () => selectFallback(text)); } catch (e) { selectFallback(text); }
+}
+function selectFallback(text) { const ta = document.createElement('textarea'); ta.value = text; ta.style.cssText = 'position:fixed;left:50%;top:40%;transform:translate(-50%,-50%);width:min(520px,90vw);height:140px;z-index:90'; document.body.appendChild(ta); ta.select(); ta.addEventListener('blur', () => ta.remove()); }
+const myCodes = () => (LS.get('codes', {})[normEmail(APP.user.email)] || []);
+const saveMyCodes = list => { const all = LS.get('codes', {}); all[normEmail(APP.user.email)] = list; LS.set('codes', all); };
+const labTitle = id => (LABS.find(l => l.id === id) || {}).title || id;
+
+/* ═════ teacher: assign labs ═════ */
+function pageAssign(m) {
+  const codes = myCodes(), sel = new Set(APP.assignSel || []), ao = APP.assignOpts || { hints: true, rep: true, bl: false, label: '' };
+  m.innerHTML = `<header style="display:grid;gap:6px"><span class="eyebrow">Your classes</span><h1>Assign labs</h1><p class="muted" style="max-width:64ch">Pick the labs, make a code, and share it. Students open the link (or type the code under <b>I’m a student</b>) on their laptops. No student accounts needed. Results come back to <b>Student results</b>.</p></header>
+    <section class="setup">
+      <div style="display:grid;gap:8px"><span class="eyebrow">1 · Choose labs</span>
+        <div class="pick-grid">${LABS.filter(l => LAB_ORDER.includes(l.id)).map(l => { const c = COURSES.find(x => l.courses.includes(x.id)); return `<label class="pick ${sel.has(l.id) ? 'on' : ''}" for="pk-${l.id}"><input type="checkbox" id="pk-${l.id}" data-lab="${l.id}" ${sel.has(l.id) ? 'checked' : ''}><span class="thumb">${l.thumb ? l.thumb() : ''}</span><span><b>${esc(l.title)}</b><span class="small muted">${esc(c.band.replace(' Science', ''))} · ${esc(c.name)} · ${esc(l.time)}</span></span></label>`; }).join('')}</div></div>
+      <div style="display:grid;gap:8px"><span class="eyebrow">2 · Options</span>
+        <label class="check" for="oHints"><input type="checkbox" id="oHints" ${ao.hints ? 'checked' : ''}> Students can use <b>Show hint</b></label>
+        <label class="check" for="oRep"><input type="checkbox" id="oRep" ${ao.rep ? 'checked' : ''}> Students can run a lab again after finishing (each run is sent to you)</label>
+        <label class="check" for="oBl"><input type="checkbox" id="oBl" ${ao.bl ? 'checked' : ''}> Include <b>Molecule Blaster</b> as a bonus game</label></div>
+      <label class="fld" for="oLabel" style="max-width:360px"><span class="eyebrow" style="font-size:11px">3 · Name it (only you see this)</span><input type="text" id="oLabel" maxlength="40" placeholder="e.g. Period 3 Biology" value="${esc(ao.label)}"></label>
+      <div class="row"><button class="btn primary" id="mkCode">${ico('link')}Make lab code</button><span class="err small" id="mkErr"></span></div>
+      <div id="mkOut"></div>
+    </section>
+    <section class="sec"><div class="sec-h"><h2>Your lab codes</h2><span class="small muted">Saved on this computer.</span></div>
+      ${codes.length ? `<div class="tbl-wrap"><table class="rec"><thead><tr><th>Name</th><th>Code</th><th>Labs</th><th>Made</th><th></th></tr></thead><tbody>${codes.slice().reverse().map((c, i) => `<tr><td>${esc(c.label || 'Untitled')}</td><td class="mono">${esc(c.code)}</td><td class="small">${c.labs.map(labTitle).map(esc).join(', ')}${c.opts & OPT.blaster ? ', Molecule Blaster' : ''}</td><td>${new Date(c.at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</td><td><div class="row" style="flex-wrap:nowrap"><button class="btn sm" data-cl="${esc(c.code)}">${ico('copy')}Link</button><button class="btn sm" data-res="${esc(c.code)}">Results</button><button class="btn sm ghost" data-rm="${codes.length - 1 - i}">Remove</button></div></td></tr>`).join('')}</tbody></table></div>`
+        : '<div class="empty"><b>No lab codes yet.</b><span class="small">Make one above. Each class can have its own code.</span></div>'}</section>`;
+  $$('[data-lab]', m).forEach(cb => cb.onchange = () => { cb.checked ? sel.add(cb.dataset.lab) : sel.delete(cb.dataset.lab); cb.closest('.pick').classList.toggle('on', cb.checked); APP.assignSel = [...sel]; });
+  $$('[data-cl]', m).forEach(b => b.onclick = () => copyBtn(b, joinLink(b.dataset.cl)));
+  $$('[data-res]', m).forEach(b => b.onclick = () => { APP.resFilter = b.dataset.res; go('results'); });
+  $$('[data-rm]', m).forEach(b => b.onclick = () => { if (!b.dataset.sure) { b.dataset.sure = 1; b.textContent = 'Click again'; return; } const l = myCodes(); l.splice(+b.dataset.rm, 1); saveMyCodes(l); pageAssign(m); });
+  $('#mkCode', m).onclick = async () => {
+    const err = $('#mkErr', m); if (!sel.size) { err.textContent = 'Choose at least one lab.'; return; } err.textContent = '';
+    const opts = ($('#oHints', m).checked ? OPT.hints : 0) | ($('#oRep', m).checked ? OPT.repeat : 0) | ($('#oBl', m).checked ? OPT.blaster : 0);
+    const labs = LAB_ORDER.filter(id => sel.has(id)), used = new Set(myCodes().filter(c => c.opts === opts && c.labs.join() === labs.join()).map(c => c.set));
+    let set = Math.floor(Math.random() * 16); for (let i = 0; i < 16 && used.has(set); i++) set = (set + 1) % 16;
+    const code = await makeLabCode(APP.user.email, labs, opts, set), label = $('#oLabel', m).value.trim();
+    APP.assignOpts = { hints: $('#oHints', m).checked, rep: $('#oRep', m).checked, bl: $('#oBl', m).checked, label };
+    const list = myCodes(); list.push({ code, label, labs, opts, set, at: new Date().toISOString() }); saveMyCodes(list);
+    const link = joinLink(code), how = `Open ${link} on your laptop (or go to ${SITE_URL.replace('https://', '')}, choose "I'm a student" and enter code ${code}). Type your name, then do: ${labs.map(labTitle).join(', ')}.`;
+    $('#mkOut', m).innerHTML = `<div class="code-out"><span class="eyebrow">${esc(label || 'New lab code')}</span><div class="big-code mono">${code}</div>
+      <div class="row"><button class="btn primary" id="cpLink">${ico('copy')}Copy student link</button><button class="btn" id="cpCode">${ico('copy')}Copy code</button><button class="btn" id="cpHow">${ico('copy')}Copy instructions</button></div>
+      <p class="small muted" style="word-break:break-all">${esc(link)}</p></div>`;
+    $('#cpLink', m).onclick = e => copyBtn(e.currentTarget, link); $('#cpCode', m).onclick = e => copyBtn(e.currentTarget, code); $('#cpHow', m).onclick = e => copyBtn(e.currentTarget, how);
+    SND.ok(); setTimeout(() => { const keep = $('#mkOut', m).innerHTML; pageAssign(m); $('#mkOut', m).innerHTML = keep; $('#cpLink', m).onclick = e => copyBtn(e.currentTarget, link); $('#cpCode', m).onclick = e => copyBtn(e.currentTarget, code); $('#cpHow', m).onclick = e => copyBtn(e.currentTarget, how); $('#mkOut', m).scrollIntoView({ block: 'nearest' }); }, 10);
+  };
+}
+
+/* ═════ teacher: student results (read from the Apps Script) ═════ */
+async function pageResults(m) {
+  const codes = myCodes(), labelOf = c => { const x = codes.find(k => normCode(k.code) === normCode(c)); return x ? (x.label || 'Untitled') : 'Code ' + c; };
+  m.innerHTML = `<header style="display:grid;gap:6px"><span class="eyebrow">Your classes</span><h1>Student results</h1><p class="muted" style="max-width:64ch">Every lab your students finish with one of your codes. Results are also kept in your Google Sheet (tab <b>educator-space.com · Lab results</b>).</p></header>
+    <div class="row" id="rsBar"><button class="btn sm" id="rsRef">Refresh</button><span class="small muted" id="rsMsg">Loading…</span></div><div id="rsBody"></div>`;
+  $('#rsRef', m).onclick = () => pageResults(m);
+  let d = null;
+  if (!APP.user.ck) { $('#rsMsg', m).textContent = 'Sign out and sign in again to load results.'; return; }
+  try {
+    const ac = new AbortController(), tm = setTimeout(() => ac.abort(), 12000);
+    const r = await fetch(`${SIGNUP_ENDPOINT}?a=labresults&e=${encodeURIComponent(APP.user.email)}&ck=${APP.user.ck}`, { signal: ac.signal }); clearTimeout(tm); d = await r.json();
+  } catch (e) { d = null; }
+  if (!m.isConnected) return;
+  if (!d) { $('#rsMsg', m).textContent = ''; $('#rsBody', m).innerHTML = `<div class="empty"><b>Can’t reach the results service from here.</b><span class="small">Results load on your live website (${SITE_URL.replace('https://', '')}). This preview can’t connect to Google. Every result is also saved in your Google Sheet.</span></div>`; return; }
+  if (!d.ok) { $('#rsMsg', m).textContent = d.msg || 'Couldn’t load results.'; return; }
+  const rows = d.rows.slice().reverse(); $('#rsMsg', m).textContent = `${rows.length} result${rows.length === 1 ? '' : 's'}`;
+  if (!rows.length) { $('#rsBody', m).innerHTML = '<div class="empty"><b>No results yet.</b><span class="small">When a student finishes a lab with one of your codes, it shows up here.</span></div>'; return; }
+  const codeOpts = [...new Set(rows.map(r => r.code))], labOpts = [...new Set(rows.map(r => r.lab))];
+  const f = { code: APP.resFilter && codeOpts.some(c => normCode(c) === normCode(APP.resFilter)) ? codeOpts.find(c => normCode(c) === normCode(APP.resFilter)) : '', lab: '' }; APP.resFilter = '';
+  const draw = () => {
+    const vis = rows.filter(r => (!f.code || r.code === f.code) && (!f.lab || r.lab === f.lab));
+    const byLab = {}; vis.forEach(r => { (byLab[r.lab] = byLab[r.lab] || []).push(r); });
+    $('#rsBody', m).innerHTML = `<div class="row" style="gap:12px;margin-bottom:12px"><label class="fld" for="fC" style="min-width:220px">Class code<select id="fC"><option value="">All codes</option>${codeOpts.map(c => `<option value="${esc(c)}" ${f.code === c ? 'selected' : ''}>${esc(labelOf(c))} · ${esc(c)}</option>`).join('')}</select></label>
+      <label class="fld" for="fL" style="min-width:200px">Lab<select id="fL"><option value="">All labs</option>${labOpts.map(c => `<option ${f.lab === c ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select></label>
+      <button class="btn sm" id="cpT" style="align-self:end">${ico('copy')}Copy table for Sheets</button></div>
+      <div class="grid" style="margin-bottom:14px">${Object.entries(byLab).map(([lab, rs]) => { const ready = rs.filter(r => r.result === 'Lab ready').length; return `<div class="card"><span class="eyebrow">${esc(lab)}</span><b style="font-family:var(--f-display);font-size:26px">${ready}/${rs.length}</b><span class="small muted">students lab ready · average ${(rs.reduce((a, r) => a + (+r.mistakes || 0), 0) / rs.length).toFixed(1)} mistakes</span></div>`; }).join('')}</div>
+      <div class="tbl-wrap"><table class="rec"><thead><tr><th>Student</th><th>Class</th><th>Lab</th><th>Date</th><th>Mistakes</th><th>Quiz</th><th>Time</th><th>Result</th></tr></thead><tbody>
+      ${vis.map(r => `<tr title="${esc(r.review || '')}"><td><b>${esc(r.name)}</b>${r.email ? `<div class="small muted">${esc(r.email)}</div>` : ''}</td><td>${esc(r.period || '')}<div class="small muted">${esc(labelOf(r.code))}</div></td><td>${esc(r.lab)}</td><td>${new Date(r.at).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</td><td>${r.mistakes}${r.review ? `<div class="small muted" style="max-width:260px">${esc(r.review)}</div>` : ''}</td><td>${esc(r.quiz)}</td><td class="mono">${esc(r.time)}</td><td>${r.result === 'Lab ready' ? '<span class="chip ok">Lab ready</span>' : r.result === 'Almost ready' ? '<span class="chip acc">Almost ready</span>' : '<span class="chip warn">Practice again</span>'}</td></tr>`).join('')}</tbody></table></div>`;
+    $('#fC', m).onchange = e => { f.code = e.target.value; draw(); }; $('#fL', m).onchange = e => { f.lab = e.target.value; draw(); };
+    $('#cpT', m).onclick = e => copyBtn(e.currentTarget, ['Student\tEmail\tClass\tCode\tLab\tDate\tMistakes\tQuiz\tTime\tResult\tWhat to review'].concat(vis.map(r => [r.name, r.email, r.period, r.code, r.lab, new Date(r.at).toLocaleString(), r.mistakes, r.quiz, r.time, r.result, r.review].map(v => String(v == null ? '' : v).replace(/\t|\n/g, ' ')).join('\t'))).join('\n'));
+  };
+  draw();
+}
+
+/* ═════ student version ═════ */
+function renderStudent() {
+  if (typeof Blaster !== 'undefined') Blaster.stop();
+  const S = APP.student, v = APP.view === 'blaster' && (S.k.opts & OPT.blaster) ? 'blaster' : 'home', done = LS.get('stuDone', {});
+  root().innerHTML = `<div class="stu"><header class="stu-top"><div class="brand" style="padding:0">${logo()}${BRAND}</div><span class="chip acc">Student</span>
+      <div class="stu-me"><span class="small"><b>${esc(S.name)}</b>${S.period ? ' · ' + esc(S.period) : ''}</span><button class="btn sm ghost" id="stSnd" aria-label="Sound">${ico(SND.on ? 'sound' : 'mute')}</button><button class="btn sm" id="stOut">${ico('out')}Leave</button></div></header>
+    <main class="stu-main" id="stMain"></main></div>`;
+  $('#stOut').onclick = () => { if (!$('#stOut').dataset.sure) { $('#stOut').dataset.sure = 1; $('#stOut').textContent = 'Click again to leave'; return; } LS.del('student'); APP.student = null; APP.gateTab = 'student'; render(); };
+  $('#stSnd').onclick = () => { SND.on = !SND.on; LS.set('sound', SND.on); renderStudent(); };
+  const m = $('#stMain');
+  if (v === 'blaster') { m.innerHTML = '<div><button class="btn sm" id="stBack">' + ico('back') + 'Back to my labs</button></div><div id="stBl" style="display:grid;gap:22px"></div>'; $('#stBack').onclick = () => go('home'); Blaster.page($('#stBl')); return; }
+  const labs = S.k.labs.map(id => LABS.find(l => l.id === id)).filter(Boolean), out = LS.get('outbox', []).filter(o => o.code === S.k.code);
+  m.innerHTML = `<header style="display:grid;gap:6px"><span class="eyebrow">Lab code ${esc(S.k.code)}</span><h1>Hi ${esc(S.name.split(' ')[0])}! Here are your labs.</h1><p class="muted" style="max-width:62ch">Do each lab with your mouse. Mistakes are part of practice: you’ll see what goes wrong and why. When you finish a lab, your results go to your teacher.</p></header>
+    ${out.length ? `<div class="send-box warn"><b>${out.length} result${out.length > 1 ? 's' : ''} not sent yet.</b><span class="small">Your computer was offline. <button class="btn sm" id="stRetry">Send now</button></span></div>` : ''}
+    <section class="sec">${labs.map(l => { const key = S.k.code + '|' + l.id, d = done[key], c = COURSES.find(x => l.courses.includes(x.id));
+      const lock = d && !(S.k.opts & OPT.repeat);
+      return `<article class="card labcard"><div class="thumb">${l.thumb ? l.thumb() : ''}</div><div class="body"><span class="eyebrow">${esc(c.band.replace(' Science', ''))} · ${esc(c.name)}</span><h3>${esc(l.title)}</h3><p class="small muted">${esc(l.summary)}</p>
+        <div class="meta">${d ? `<span class="chip ${d.stars >= 3 ? 'ok' : d.stars === 2 ? 'acc' : 'warn'}">${d.stars >= 3 ? 'Lab ready' : d.stars === 2 ? 'Almost ready' : 'Practice again'}</span><span class="chip">${d.sent ? '✓ Sent to teacher' : 'Not sent yet'}</span>` : '<span class="chip">Not started</span>'}<span class="chip">${ico('clock')}${esc(l.time)}</span></div>
+        <div class="row" style="margin-top:4px">${lock ? '<span class="small muted">Done. Your teacher has your results.</span>' : `<button class="btn primary sm" data-lab="${l.id}" data-course="${c.id}">${ico('play')}${d ? 'Run it again' : 'Start lab'}</button>`}</div></div></article>`; }).join('')}
+    ${S.k.opts & OPT.blaster ? `<a class="card" href="#blaster" id="stBlGo" style="max-width:520px"><div class="ic">${ico('rocket')}</div><span class="eyebrow">Bonus game</span><h3>Molecule Blaster</h3><p class="small muted">Shoot only the molecules your mission names.</p></a>` : ''}</section>`;
+  bindLabButtons(m);
+  const bl = $('#stBlGo'); if (bl) bl.onclick = e => { e.preventDefault(); go('blaster'); };
+  const rt = $('#stRetry'); if (rt) rt.onclick = () => flushOutbox(true);
+}
+
+/* ═════ sending a finished lab to the teacher ═════ */
+async function postResult(p) {
+  try { const ac = new AbortController(), tm = setTimeout(() => ac.abort(), 12000);
+    const r = await fetch(SIGNUP_ENDPOINT, { method: 'POST', signal: ac.signal, body: JSON.stringify(p) }); clearTimeout(tm); const d = await r.json(); return d && d.ok ? 'ok' : (d && d.msg) || 'refused'; }
+  catch (e) { return 'offline'; }
+}
+async function submitResult(rec) {
+  const S = APP.student; if (!S) return;
+  const p = { type: 'labresult', code: S.k.code, name: S.name, email: S.email, period: S.period, lab: rec.lab, labId: APP.curLab, mistakes: rec.mistakes, quiz: rec.quiz, secs: rec.secs, stars: rec.stars, at: rec.at,
+    review: (Kit.mistakes || []).map(x => x.step + ': ' + x.title).join('; ').slice(0, 400) };
+  const done = LS.get('stuDone', {}), key = S.k.code + '|' + APP.curLab; done[key] = { stars: rec.stars, sent: false, at: rec.at }; LS.set('stuDone', done);
+  showSend('pending', 'Sending your results to your teacher…');
+  const r = await postResult(p);
+  if (r === 'ok') { done[key].sent = true; LS.set('stuDone', done); showSend('ok', '✓ Sent to your teacher.'); return; }
+  if (r === 'offline') { const ob = LS.get('outbox', []); ob.push(p); LS.set('outbox', ob.slice(-30)); }
+  const txt = `${S.name}${S.period ? ' (' + S.period + ')' : ''} · ${rec.lab} · mistakes ${rec.mistakes} · quiz ${rec.quiz} · time ${fmtTime(rec.secs)} · code ${S.k.code}`;
+  showSend('bad', r === 'offline' ? 'Couldn’t reach your teacher’s results right now. They’ll be sent automatically next time you open Educator Space. You can also show your teacher this:' : 'Your results weren’t accepted (' + esc(r) + '). Show your teacher this:', txt);
+}
+let SEND_ID = 0;
+function showSend(kind, msg, txt) {
+  const id = ++SEND_ID; let tries = 0; const put = () => { if (id !== SEND_ID) return; const box = $('#kSide .results'); if (!box) { if (tries++ < 30) setTimeout(put, 100); return; }
+    let el = $('#sendBox', box); if (!el) { el = document.createElement('div'); el.id = 'sendBox'; box.insertBefore(el, box.children[2] || null); }
+    el.className = 'send-box ' + kind; el.innerHTML = `<span class="small">${msg}</span>${txt ? `<code class="small" style="user-select:all;display:block;margin-top:6px">${esc(txt)}</code>` : ''}`;
+    if (kind === 'ok') Kit.msg && Kit.live && Kit.msg('Results sent to your teacher', 'ok', 2200); };
+  put();
+}
+async function flushOutbox(manual) {
+  const ob = LS.get('outbox', []); if (!ob.length) return; const keep = []; const done = LS.get('stuDone', {});
+  for (const p of ob) { const r = await postResult(p); if (r === 'ok') { const k = p.code + '|' + p.labId; if (done[k]) done[k].sent = true; } else if (r === 'offline') keep.push(p); }
+  LS.set('outbox', keep); LS.set('stuDone', done);
+  if (APP.student && !Kit.live) renderStudent();
+  if (manual && keep.length) alertBox('Still offline', 'Your results are saved on this computer and will be sent when you’re back online.');
+}
+function alertBox(t, msg) { const sc = document.createElement('div'); sc.className = 'scrim'; sc.innerHTML = `<div class="modal" style="width:min(420px,100%)"><div class="mh"><h2>${esc(t)}</h2><p class="muted">${esc(msg)}</p></div><div class="mf"><button class="btn primary">OK</button></div></div>`; document.body.appendChild(sc); $('button', sc).onclick = () => sc.remove(); }
 
 boot();
 </script>
