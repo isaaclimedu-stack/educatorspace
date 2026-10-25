@@ -1358,7 +1358,7 @@ const ASSIST = {
   otter: { name: 'Pippin', pal: { fur: '#a8754f', dark: '#7d5638', belly: '#f6e6cc', line: '#4a3426' } },
   sheep: { name: 'Puff', pal: { wool: '#fffdf8', face: '#f3dcc3', dark: '#5b4c45', line: '#5a4a42' } }
 };
-const ASSIST_BY_LAB = { 'dna-strawberry': 'otter', titration: 'sheep', flame: 'otter', pendulum: 'sheep', ohm: 'otter', mass: 'otter', erosion: 'sheep', onion: 'sheep' };
+const ASSIST_BY_LAB = { 'dna-strawberry': 'otter', titration: 'sheep', flame: 'otter', pendulum: 'sheep', ohm: 'otter', mass: 'otter', erosion: 'sheep', onion: 'sheep', heart: 'otter' };
 const assist = () => ASSIST_BY_LAB[(typeof APP !== 'undefined' && APP.curLab) || ''] || 'otter';
 const asstName = () => ASSIST[assist()].name;
 function pipFace(mood = 'happy', size = 64, kind = assist()) { return charFace(kind, mood, size); }
@@ -2007,7 +2007,12 @@ function labThumb(id, big) {
     erosion: `<rect x="40" y="40" width="300" height="140" rx="8" fill="#e4e8ea"/><rect x="50" y="50" width="250" height="120" fill="#e3c98f"/><path d="M60,80 C110,70 120,130 170,110 S240,90 290,112" fill="none" stroke="#9c7642" stroke-width="12" stroke-linecap="round"/><path d="M60,80 C110,70 120,130 170,110 S240,90 290,112" fill="none" stroke="#5aa9e6" stroke-width="5" stroke-linecap="round" stroke-dasharray="12 6"/>
       <path d="M290,104 Q310,86 330,112 Q310,138 290,120Z" fill="#d9bd85" stroke="#b99a62" stroke-width="2"/><rect x="40" y="186" width="40" height="14" fill="#c9965e"/><path d="M340,112 L370,150" stroke="#5aa9e6" stroke-width="4"/>`,
     onion: `<rect x="40" y="186" width="320" height="2" fill="#fff" opacity=".1"/><circle cx="130" cy="112" r="84" fill="#20292d"/><clipPath id="thOn"><circle cx="130" cy="112" r="78"/></clipPath><g clip-path="url(#thOn)"><rect x="40" y="20" width="180" height="190" fill="#fbf8ec"/>${[0, 1, 2, 3, 4, 5].map(r => [0, 1, 2].map(c => { const x = 40 + c * 70 - (r % 2) * 35, y = 26 + r * 30; return `<rect x="${x}" y="${y}" width="68" height="28" fill="#f3dc9a" stroke="#a8741c" stroke-width="2.5"/><ellipse cx="${x + 24 + (r * 7 + c * 11) % 22}" cy="${y + 14}" rx="6" ry="5" fill="#7d4f10"/>`; }).join('')).join('')}</g><circle cx="130" cy="112" r="78" fill="none" stroke="#dfe6e9" stroke-width="6"/>
-      <rect x="300" y="40" width="16" height="140" rx="4" fill="#3b4a56"/><path d="M308,42 C308,20 290,10 266,10 L258,28 C280,28 296,34 300,50Z" fill="#3b4a56"/><rect x="250" y="50" width="16" height="40" rx="3" fill="#d7dde0"/><rect x="236" y="120" width="96" height="8" rx="2" fill="#3b4a56"/><rect x="230" y="178" width="110" height="10" rx="4" fill="#2f3a44"/><circle cx="308" cy="140" r="10" fill="#59646b"/>`
+      <rect x="300" y="40" width="16" height="140" rx="4" fill="#3b4a56"/><path d="M308,42 C308,20 290,10 266,10 L258,28 C280,28 296,34 300,50Z" fill="#3b4a56"/><rect x="250" y="50" width="16" height="40" rx="3" fill="#d7dde0"/><rect x="236" y="120" width="96" height="8" rx="2" fill="#3b4a56"/><rect x="230" y="178" width="110" height="10" rx="4" fill="#2f3a44"/><circle cx="308" cy="140" r="10" fill="#59646b"/>`,
+    heart: `<rect x="70" y="150" width="260" height="40" rx="6" fill="#2a2f33"/><rect x="80" y="154" width="240" height="30" rx="4" fill="#3b4842"/>
+      <g transform="translate(200 118) scale(.42)"><path d="M-91,-110 L-91,-212" stroke="#d8aaa2" stroke-width="40"/><path d="M8,-70 C4,-120 10,-170 26,-196 L62,-196 C50,-168 44,-122 46,-74Z" fill="#d8aaa2"/><path d="M-130,-42 C-156,-86 -134,-134 -88,-124 C-60,-118 -44,-96 -50,-68 C-72,-56 -102,-40 -130,-42Z" fill="#c4716a"/><path d="M66,-66 C80,-104 132,-104 132,-70 C132,-44 108,-36 92,-46Z" fill="#c4716a"/>
+        <path d="M-124,-50 C-144,30 -74,124 46,172 C86,132 130,52 120,-50 C72,-78 -62,-80 -124,-50Z" fill="#a9524d" stroke="#7c3434" stroke-width="4"/><path d="M-4,-62 C4,10 24,92 44,164" fill="none" stroke="#ecd6a2" stroke-width="16" stroke-linecap="round"/><path d="M-2,-62 C6,10 26,92 44,160" fill="none" stroke="#c23a3a" stroke-width="4"/>
+        <path d="M-50,-58 C-54,-106 -44,-146 -24,-170 L16,-170 C4,-144 -2,-104 -6,-56Z" fill="#e0b6ae" stroke="#a87b74" stroke-width="3"/></g>
+      <g transform="translate(318 132) rotate(-38)"><path d="M-3,0 L-6,-60 L2,-60Z" fill="#cfd6da"/><path d="M3,0 L6,-60 L-2,-60Z" fill="#cfd6da"/><ellipse cx="-10" cy="-78" rx="8" ry="11" fill="none" stroke="#d64045" stroke-width="5"/><ellipse cx="10" cy="-76" rx="8" ry="11" fill="none" stroke="#d64045" stroke-width="5"/></g>`
   };
   void big;
   return `<svg viewBox="0 0 400 240" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${bg}${art[id] || ''}</svg>`;
@@ -3266,6 +3271,290 @@ const OnionLab = (() => {
   });
 })();
 
+/* ═══════════ HS Biology: pig heart dissection ═══════════
+   Place and rinse the preserved heart, turn it ventral side up, tell the ventricles apart by feel, label the great vessels,
+   trace blood flow with a blunt probe, cut open the right and left sides along a guide line, identify the valves and
+   chordae, compare the ventricle walls, then dispose of the specimen properly. */
+const HeartLab = (() => {
+  const K = Kit;
+  const HX = 530, HY = 392; /* heart center on the tray */
+  const BAG = { x: 150, y: 588 }, WASH = { x: 870, y: 588 }, PROBE = { x: 860, y: 560 }, SCIS = { x: 930, y: 560 };
+  const BINS = { trash: { x: 70, y: 590 }, sink: { x: 200, y: 590 }, waste: { x: 890, y: 590 } };
+  const COL = { m: '#a9524d', mDk: '#7c3434', mLt: '#c4716a', fat: '#ecd6a2', fatDk: '#cfb070', art: '#c23a3a', vein: '#5d4f7d', ves: '#d8aaa2', vesDk: '#a87b74', hole: '#5a1a1f', ins: '#7a2328', insDk: '#4f1216', valve: '#efe0cf', valveDk: '#cdb79f', cord: '#f7f0e4' };
+
+  const DEFS = `<radialGradient id="hrtG" cx=".4" cy=".35" r=".75"><stop offset="0" stop-color="${COL.mLt}"/><stop offset=".65" stop-color="${COL.m}"/><stop offset="1" stop-color="${COL.mDk}"/></radialGradient>
+    <radialGradient id="hrtIn" cx=".5" cy=".45" r=".7"><stop offset="0" stop-color="${COL.ins}"/><stop offset="1" stop-color="${COL.insDk}"/></radialGradient>
+    <linearGradient id="vesG" x1="0" x2="1"><stop offset="0" stop-color="#c99189"/><stop offset=".45" stop-color="#e6bdb5"/><stop offset="1" stop-color="#b98179"/></linearGradient>
+    <linearGradient id="trayG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3c4247"/><stop offset="1" stop-color="#2a2f33"/></linearGradient>
+    <linearGradient id="waxG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4b5a52"/><stop offset="1" stop-color="#3b4842"/></linearGradient>`;
+
+  /* cut guide lines, in heart coordinates: right side (viewer's left) and left side (viewer's right) */
+  const CUT = { R: [[-91, -112], [-106, -66], [-110, -8], [-94, 48], [-64, 98]], L: [[96, -52], [108, -8], [104, 50], [84, 108], [52, 150]] };
+  const W = (p) => ({ x: HX + p[0], y: HY + p[1] });
+
+  /* ── drawings ── */
+  const tube = (x, y0, y1, w, cls = '', k = '') => `<g class="${cls}" ${k ? `data-k="${k}"` : ''}><path d="M${x - w / 2},${y0} L${x - w / 2},${y1} L${x + w / 2},${y1} L${x + w / 2},${y0}Z" fill="url(#vesG)" stroke="${COL.vesDk}" stroke-width="2"/><ellipse cx="${x}" cy="${y1}" rx="${w / 2}" ry="${w / 5}" fill="${COL.hole}" stroke="${COL.vesDk}" stroke-width="2"/></g>`;
+  function ventral(st) {
+    const oR = st.openR, oL = st.openL;
+    return `<g class="hv">
+      <!-- great vessels at the top -->
+      ${tube(-91, -110, -212, 40, 'ves', 'svc')}
+      <path d="M8,-70 C4,-120 10,-170 26,-196 L62,-196 C50,-168 44,-122 46,-74Z" fill="url(#vesG)" stroke="${COL.vesDk}" stroke-width="2" class="ves" data-k="aorta"/>
+      <path d="M26,-196 C30,-214 50,-228 70,-226" fill="none" stroke="${COL.vesDk}" stroke-width="2"/><path d="M62,-196 C66,-206 74,-210 86,-208 L84,-224 C64,-226 40,-218 26,-196" fill="url(#vesG)" stroke="${COL.vesDk}" stroke-width="2"/>
+      <ellipse cx="44" cy="-196" rx="18" ry="6" fill="${COL.hole}" stroke="${COL.vesDk}" stroke-width="2" class="ves" data-k="aorta"/>
+      <path d="M58,-214 L56,-246 L76,-246 L76,-220" fill="url(#vesG)" stroke="${COL.vesDk}" stroke-width="2"/><ellipse cx="66" cy="-246" rx="10" ry="3.5" fill="${COL.hole}"/>
+      <!-- left auricle (viewer's right) -->
+      <path d="M66,-66 C80,-104 132,-104 132,-70 C132,-44 108,-36 92,-46 C82,-52 72,-56 66,-66Z" fill="${COL.mLt}" stroke="${COL.mDk}" stroke-width="2"/>
+      <path d="M84,-78 q10,-6 20,0 q10,6 20,-2" fill="none" stroke="${COL.mDk}" stroke-width="1.4" opacity=".6"/>
+      <!-- right atrium and auricle (viewer's left) -->
+      <path d="M-130,-42 C-156,-86 -134,-134 -88,-124 C-60,-118 -44,-96 -50,-68 C-72,-56 -102,-40 -130,-42Z" fill="${COL.mLt}" stroke="${COL.mDk}" stroke-width="2" class="ra"/>
+      <path d="M-128,-74 q12,-8 24,0 q12,8 24,-2" fill="none" stroke="${COL.mDk}" stroke-width="1.4" opacity=".6"/>
+      <!-- ventricles -->
+      <path d="M-124,-50 C-144,30 -74,124 46,172 C86,132 130,52 120,-50 C72,-78 -62,-80 -124,-50Z" fill="url(#hrtG)" stroke="${COL.mDk}" stroke-width="2.5"/>
+      <path class="zone" data-k="rv" d="M-118,-40 C-130,30 -80,100 -6,140 C8,80 0,0 -10,-60 C-50,-64 -90,-56 -118,-40Z" fill="transparent"/>
+      <path class="zone" data-k="lv" d="M10,-60 C24,10 32,90 46,166 C86,128 124,52 114,-44 C80,-62 40,-64 10,-60Z" fill="transparent"/>
+      <!-- fat and coronary vessels in the grooves -->
+      <path d="M-120,-50 C-62,-74 66,-76 118,-50" fill="none" stroke="${COL.fat}" stroke-width="15" stroke-linecap="round" opacity=".95" pointer-events="none"/>
+      <path d="M-4,-62 C4,10 24,92 44,164" fill="none" stroke="${COL.fat}" stroke-width="17" stroke-linecap="round" opacity=".95" pointer-events="none"/>
+      <path d="M-2,-62 C6,10 26,92 44,160" fill="none" stroke="${COL.art}" stroke-width="3.5" pointer-events="none"/><path d="M-8,-60 C0,12 20,94 38,160" fill="none" stroke="${COL.vein}" stroke-width="2.4" opacity=".8" pointer-events="none"/>
+      <path d="M8,30 C30,40 46,58 60,80 M14,80 C30,92 40,110 46,130" fill="none" stroke="${COL.art}" stroke-width="2" opacity=".75" pointer-events="none"/>
+      <!-- pulmonary trunk, in front of the aorta -->
+      <path d="M-50,-58 C-54,-106 -44,-146 -24,-170 L16,-170 C4,-144 -2,-104 -6,-56Z" fill="url(#vesG)" stroke="${COL.vesDk}" stroke-width="2" class="ves" data-k="pt"/>
+      <ellipse cx="-4" cy="-170" rx="20" ry="6.5" fill="${COL.hole}" stroke="${COL.vesDk}" stroke-width="2" class="ves" data-k="pt"/>
+      <path d="M-62,-46 C-40,-58 -20,-58 0,-52" fill="none" stroke="${COL.fat}" stroke-width="8" stroke-linecap="round" pointer-events="none"/>
+      <ellipse cx="-62" cy="0" rx="26" ry="40" fill="#fff" opacity=".07" pointer-events="none"/>
+      ${oR ? openRight(st) : ''}${oL ? openLeft(st) : ''}
+    </g>`;
+  }
+  function dorsal() {
+    return `<g class="hd">
+      ${tube(91, -110, -212, 40)}
+      <path d="M-8,-70 C-4,-120 -10,-170 -26,-196 L-62,-196 C-50,-168 -44,-122 -46,-74Z" fill="url(#vesG)" stroke="${COL.vesDk}" stroke-width="2"/><ellipse cx="-44" cy="-196" rx="18" ry="6" fill="${COL.hole}" stroke="${COL.vesDk}" stroke-width="2"/>
+      <path d="M130,-42 C156,-86 134,-134 88,-124 C60,-118 44,-96 50,-68 C72,-56 102,-40 130,-42Z" fill="${COL.mLt}" stroke="${COL.mDk}" stroke-width="2"/>
+      <path d="M126,-30 C140,-10 140,14 126,22 L104,10 C112,0 112,-16 104,-30Z" fill="url(#vesG)" stroke="${COL.vesDk}" stroke-width="2"/><ellipse cx="128" cy="6" rx="8" ry="15" fill="${COL.hole}" transform="rotate(-20 128 6)"/>
+      <path d="M-60,-112 C-40,-126 30,-126 50,-110 C56,-90 40,-70 0,-66 C-40,-70 -66,-90 -60,-112Z" fill="${COL.mLt}" stroke="${COL.mDk}" stroke-width="2"/>
+      ${[[-48, -122], [-22, -132], [12, -132], [38, -122]].map(([x, y]) => `<path d="M${x - 8},${y + 8} L${x - 9},${y - 12} L${x + 9},${y - 12} L${x + 8},${y + 8}Z" fill="url(#vesG)" stroke="${COL.vesDk}" stroke-width="1.6"/><ellipse cx="${x}" cy="${y - 12}" rx="9" ry="3.4" fill="${COL.hole}"/>`).join('')}
+      <path d="M124,-50 C144,30 74,124 -46,172 C-86,132 -130,52 -120,-50 C-72,-78 62,-80 124,-50Z" fill="url(#hrtG)" stroke="${COL.mDk}" stroke-width="2.5"/>
+      <path d="M-118,-50 C-62,-70 66,-72 120,-50" fill="none" stroke="${COL.fat}" stroke-width="14" stroke-linecap="round" opacity=".95"/>
+      <path d="M-120,-48 C-60,-66 60,-66 118,-48" fill="none" stroke="${COL.vein}" stroke-width="7" opacity=".55"/>
+      <path d="M6,-58 C2,10 -10,92 -34,164" fill="none" stroke="${COL.fat}" stroke-width="15" stroke-linecap="round" opacity=".95"/>
+      <path d="M6,-58 C2,10 -10,92 -34,160" fill="none" stroke="${COL.art}" stroke-width="3"/>
+      <ellipse cx="60" cy="0" rx="26" ry="40" fill="#fff" opacity=".06"/>
+    </g>`;
+  }
+  /* the right side, cut open: right atrium above, tricuspid valve, right ventricle with chordae and a papillary muscle */
+  function openRight(st) {
+    const wall = `<path d="M-112,-104 C-126,-56 -124,8 -96,58 C-82,84 -66,104 -52,112" fill="none" stroke="${COL.mLt}" stroke-width="7" stroke-linecap="round"/>`;
+    return `<g class="openR">
+      <path d="M-112,-112 C-128,-60 -124,6 -96,58 C-78,92 -56,112 -44,110 C-52,60 -64,-30 -66,-112Z" fill="url(#hrtIn)" stroke="${COL.mDk}" stroke-width="2"/>
+      ${wall}<path class="tg" data-k="rvw" d="M-112,-104 C-126,-56 -124,8 -96,58 C-82,84 -66,104 -52,112" fill="none" stroke="transparent" stroke-width="14"/>
+      <path class="tg" data-k="ra" d="M-108,-108 C-116,-84 -112,-66 -104,-58 L-70,-62 C-70,-84 -70,-100 -70,-110Z" fill="#8a3035" opacity=".55"/>
+      <g class="tg" data-k="tri">${[[-104, -54, -12], [-88, -50, 6], [-74, -56, 18]].map(([x, y, r]) => `<path d="M${x - 9},${y} C${x - 10},${y + 16} ${x},${y + 26} ${x + 2},${y + 28} C${x + 6},${y + 20} ${x + 10},${y + 10} ${x + 9},${y}Z" fill="${COL.valve}" stroke="${COL.valveDk}" stroke-width="1.4" transform="rotate(${r} ${x} ${y})"/>`).join('')}<rect x="-118" y="-62" width="52" height="36" fill="transparent"/></g>
+      <g class="tg" data-k="cho">${[[-104, -26], [-90, -24], [-78, -28], [-70, -22]].map(([x, y]) => `<path d="M${x},${y} L-84,34" stroke="${COL.cord}" stroke-width="1.6"/>`).join('')}<path d="M-104,-24 L-84,34 L-68,-22Z" fill="transparent" stroke="transparent" stroke-width="10"/></g>
+      <g class="tg" data-k="pap"><path d="M-96,52 C-96,36 -90,30 -84,30 C-76,30 -72,38 -72,52Z" fill="${COL.mLt}" stroke="${COL.mDk}" stroke-width="1.4"/></g>
+      <path class="tg" data-k="rvc" d="M-108,10 C-104,40 -96,62 -80,84 C-70,96 -60,102 -54,102 C-58,70 -62,40 -64,10Z" fill="transparent"/>
+      ${st.showWalls ? `<text x="-150" y="20" font-size="12" font-weight="800" fill="#fff" text-anchor="end">thin</text><path d="M-146,14 L-122,12" stroke="#fff" stroke-width="2"/>` : ''}
+    </g>`;
+  }
+  /* the left side, cut open: thick left ventricle wall, mitral valve with chordae, and the aortic semilunar valve at the base of the aorta */
+  function openLeft(st) {
+    return `<g class="openL">
+      <path d="M66,-60 C96,-30 102,40 74,116 C66,136 56,148 48,146 C56,80 52,0 40,-62Z" fill="url(#hrtIn)" stroke="${COL.mDk}" stroke-width="2"/>
+      <path d="M68,-58 C100,-30 108,40 80,118 C72,138 60,150 50,150" fill="none" stroke="${COL.mLt}" stroke-width="22" stroke-linecap="round" opacity=".95"/>
+      <path class="tg" data-k="lvw" d="M68,-58 C100,-30 108,40 80,118 C72,138 60,150 50,150" fill="none" stroke="transparent" stroke-width="24"/>
+      <g class="tg" data-k="mit">${[[56, -44, -10], [74, -40, 14]].map(([x, y, r]) => `<path d="M${x - 11},${y} C${x - 12},${y + 18} ${x},${y + 30} ${x + 2},${y + 32} C${x + 8},${y + 22} ${x + 12},${y + 10} ${x + 11},${y}Z" fill="${COL.valve}" stroke="${COL.valveDk}" stroke-width="1.4" transform="rotate(${r} ${x} ${y})"/>`).join('')}<rect x="40" y="-50" width="48" height="40" fill="transparent"/></g>
+      <g class="tg" data-k="cho">${[[52, -12], [62, -10], [72, -12], [80, -8]].map(([x, y]) => `<path d="M${x},${y} L66,64" stroke="${COL.cord}" stroke-width="1.6"/>`).join('')}<path d="M52,-12 L66,64 L80,-8Z" fill="transparent"/></g>
+      <g class="tg" data-k="pap"><path d="M54,82 C54,66 60,60 66,60 C74,60 78,68 78,82Z" fill="${COL.mLt}" stroke="${COL.mDk}" stroke-width="1.4"/></g>
+      <g class="aov">
+        <path d="M14,-74 C12,-100 16,-124 24,-138 L50,-138 C46,-120 44,-98 46,-74Z" fill="#e9c7bf" stroke="${COL.vesDk}" stroke-width="2"/>
+        <g class="tg" data-k="aov">${[[22, -96], [34, -100], [44, -96]].map(([x, y]) => `<path d="M${x - 6},${y} Q${x},${y + 13} ${x + 6},${y}" fill="${COL.valve}" stroke="${COL.valveDk}" stroke-width="1.6"/>`).join('')}<rect x="12" y="-112" width="38" height="26" fill="transparent"/></g>
+      </g>
+      ${st.showWalls ? `<text x="140" y="40" font-size="12" font-weight="800" fill="#fff">thick</text><path d="M136,34 L104,30" stroke="#fff" stroke-width="2"/>` : ''}
+    </g>`;
+  }
+  const heartArt = st => st.side === 'dorsal' ? dorsal() : ventral(st);
+  /* a small version of the heart for carrying it around */
+  const smallHeart = () => `${ART.shadow(40, 7)}<g transform="translate(0 -46) scale(.3)">${ventral({})}</g><rect x="-50" y="-120" width="100" height="124" fill="transparent"/>`;
+  const A = {
+    tray: wet => `<path d="M-238,0 L238,0 L210,-376 L-210,-376Z" fill="url(#trayG)" stroke="#1e2326" stroke-width="3"/><path d="M-220,-12 L220,-12 L196,-364 L-196,-364Z" fill="url(#waxG)"/>
+      ${wet ? `<ellipse cx="0" cy="-60" rx="${120 + wet * 60}" ry="${20 + wet * 12}" fill="#9fc9dc" opacity="${.18 + wet * .2}"/>` : ''}
+      <path d="M-196,-364 L-210,-376" stroke="#1e2326" stroke-width="2"/><text x="0" y="-372" font-size="9" font-weight="800" fill="#9aa5ab" text-anchor="middle" letter-spacing=".2em">DISSECTING TRAY</text>`,
+    bag: full => `${ART.shadow(54, 7)}<path d="M-52,0 C-60,-40 -56,-96 -46,-118 L46,-118 C56,-96 60,-40 52,0Z" fill="rgba(225,238,244,.55)" stroke="#a9c3cc" stroke-width="2"/><rect x="-48" y="-128" width="96" height="12" rx="3" fill="#2f6fd6"/>
+      ${full ? `<g transform="translate(0 -44) scale(.22)">${ventral({})}</g>` : ''}<path d="M-52,0 C-58,-30 -56,-46 -54,-60 L54,-60 C56,-46 58,-30 52,0Z" fill="#cfe2b8" opacity=".35"/>
+      <rect x="-40" y="-110" width="80" height="22" rx="3" fill="#fff" opacity=".9"/><text y="-95" font-size="10" font-weight="800" text-anchor="middle" fill="#25312f">PIG HEART</text><rect x="-60" y="-132" width="120" height="136" fill="transparent"/>`,
+    wash: (tip = false) => `${ART.shadow(28, 5)}<path d="M-26,0 L-28,-96 Q-28,-106 -18,-108 L18,-108 Q28,-106 28,-96 L26,0Z" fill="#f3f8fb" stroke="#9fb4bd" stroke-width="2"/><rect x="-24" y="-70" width="48" height="34" rx="3" fill="#2f6fd6"/><text y="-49" font-size="10" font-weight="800" text-anchor="middle" fill="#fff">WATER</text>
+      <rect x="-12" y="-122" width="24" height="16" rx="3" fill="#e2e8f0" stroke="#9fb4bd"/><path d="M6,-120 C30,-150 50,-150 64,-142" fill="none" stroke="#cbd5e1" stroke-width="6" stroke-linecap="round"/>${tip ? '<circle cx="64" cy="-142" r="3" fill="#9fdcff"/>' : ''}<rect x="-34" y="-156" width="104" height="160" fill="transparent"/>`,
+    probe: () => `<g transform="rotate(-30)"><rect x="-3" y="-150" width="6" height="104" rx="3" fill="url(#metal)" stroke="#7f898f"/><circle cx="0" cy="-150" r="3.6" fill="#cfd6da" stroke="#7f898f"/><rect x="-7" y="-48" width="14" height="50" rx="5" fill="#2f6fd6"/></g><rect x="-60" y="-150" width="90" height="156" fill="transparent"/>`,
+    scissors: () => `<g transform="rotate(-38)"><path d="M-3,0 L-6,-78 L2,-78 L3,-4Z" fill="url(#metal)" stroke="#7f898f"/><path d="M3,0 L6,-78 L-2,-78 L-3,-4Z" fill="url(#metal)" stroke="#7f898f" transform="rotate(6 0 -78)"/><circle cx="0" cy="-78" r="3" fill="#59646b"/>
+      <ellipse cx="-12" cy="-104" rx="10" ry="14" fill="none" stroke="#d64045" stroke-width="6"/><ellipse cx="12" cy="-102" rx="10" ry="14" fill="none" stroke="#d64045" stroke-width="6"/></g><rect x="-30" y="-130" width="110" height="136" fill="transparent"/>`,
+    knife: () => `${ART.shadow(50, 5)}<g transform="rotate(-12)"><path d="M-70,-8 L30,-8 C50,-8 66,-14 76,-22 L80,-6 L30,0 L-70,0Z" fill="url(#metal)" stroke="#7f898f"/><rect x="-118" y="-12" width="52" height="16" rx="5" fill="#5a3a22"/></g>`,
+    bin: (kind) => kind === 'sink' ? `<path d="M-64,0 L64,0 L70,-46 L-70,-46Z" fill="#cfd6da" stroke="#7f898f" stroke-width="2"/><ellipse cx="0" cy="-46" rx="70" ry="10" fill="#9aa5ab"/><ellipse cx="0" cy="-44" rx="58" ry="7" fill="#6c777d"/><circle cy="-44" r="4" fill="#2f3a44"/><path d="M40,-46 L40,-96 C40,-110 20,-112 14,-100" fill="none" stroke="#9aa5ab" stroke-width="7" stroke-linecap="round"/><text y="-14" font-size="10" font-weight="800" text-anchor="middle" fill="#3b4a56">SINK</text><rect x="-74" y="-112" width="148" height="116" fill="transparent"/>`
+      : kind === 'trash' ? `${ART.shadow(44, 6)}<path d="M-40,0 L-46,-96 L46,-96 L40,0Z" fill="#59646b" stroke="#2f3a44" stroke-width="2"/><rect x="-50" y="-104" width="100" height="10" rx="3" fill="#3b4a56"/><text y="-44" font-size="11" font-weight="800" text-anchor="middle" fill="#e7eef0">TRASH</text><rect x="-54" y="-110" width="108" height="114" fill="transparent"/>`
+      : `${ART.shadow(46, 6)}<path d="M-42,0 L-48,-100 L48,-100 L42,0Z" fill="#f2c94c" stroke="#a87c12" stroke-width="2"/><rect x="-52" y="-108" width="104" height="10" rx="3" fill="#c99a1a"/><circle cy="-62" r="15" fill="none" stroke="#7a1a1a" stroke-width="3"/><text y="-60" font-size="9" font-weight="800" text-anchor="middle" fill="#7a1a1a">BIO</text><text y="-26" font-size="9.5" font-weight="800" text-anchor="middle" fill="#5a3a00">SPECIMEN</text><text y="-14" font-size="9.5" font-weight="800" text-anchor="middle" fill="#5a3a00">WASTE</text><rect x="-56" y="-114" width="112" height="118" fill="transparent"/>`
+  };
+
+  /* the tray and the big heart lying on it */
+  function scene(R, o = {}) {
+    K.obj(HX, 600, A.tray(o.wet || 0), 'fixed');
+    if (o.heart === false) return {};
+    const h = K.obj(HX, HY, heartArt(R.st), 'fixed'); h.update = () => { h.inner.innerHTML = heartArt(R.st); };
+    return { h };
+  }
+  const targetAt = (e) => { const t = e.target && e.target.closest ? e.target.closest('[data-k]') : null; return t ? t.dataset.k : null; };
+
+  /* the cutting tool: drag the scissors to the start of the dotted line, then press and follow the line slowly */
+  function cutTool(R, side, onDone) {
+    const pts = CUT[side].map(W), seg = [], cum = [0]; for (let i = 1; i < pts.length; i++) { const L = Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y); seg.push(L); cum.push(cum[i - 1] + L); }
+    const total = cum[cum.length - 1], at = d => { let i = 0; while (i < seg.length - 1 && d > cum[i + 1]) i++; const t = clamp((d - cum[i]) / seg[i], 0, 1); return { x: lerp(pts[i].x, pts[i + 1].x, t), y: lerp(pts[i].y, pts[i + 1].y, t) }; };
+    const near = p => { let best = { d: 1e9, s: 0 }; for (let i = 0; i < seg.length; i++) { const a = pts[i], b = pts[i + 1], vx = b.x - a.x, vy = b.y - a.y, t = clamp(((p.x - a.x) * vx + (p.y - a.y) * vy) / (vx * vx + vy * vy), 0, 1), x = a.x + vx * t, y = a.y + vy * t, d = Math.hypot(p.x - x, p.y - y); if (d < best.d) best = { d, s: cum[i] + t * seg[i] }; } return best; };
+    const guide = sv('path', { d: 'M' + pts.map(p => `${p.x},${p.y}`).join(' L'), fill: 'none', stroke: '#fff', 'stroke-width': 2.5, 'stroke-dasharray': '7 6', opacity: .85 }, K.top);
+    const done = sv('path', { fill: 'none', stroke: '#3a0c10', 'stroke-width': 4, 'stroke-linecap': 'round' }, K.top);
+    const start = sv('circle', { cx: pts[0].x, cy: pts[0].y, r: 9, fill: 'none', stroke: '#ffd27a', 'stroke-width': 3 }, K.top);
+    const sc = K.obj(SCIS.x, SCIS.y, A.scissors()); let posed = false, prog = 0, hot = 0, warned = false;
+    const m = K.meter('Cut along the line', 100, '%', [99, 100]), sp = K.meter('Cutting speed', 2400, '', [60, 1100], 1500);
+    const draw = () => { const n = Math.max(2, Math.ceil(prog / 6)), d = []; for (let i = 0; i <= n; i++) { const p = at(prog * i / n); d.push(`${p.x.toFixed(1)},${p.y.toFixed(1)}`); } done.setAttribute('d', 'M' + d.join(' L')); m(prog / total * 100, Math.round(prog / total * 100) + '%'); };
+    K.drag(sc, { can: () => !posed, drop: (o, x, y) => { if (Math.hypot(x - pts[0].x, y - pts[0].y) > 60) { K.msg('Start at the yellow circle at the top of the dotted line.'); return false; } posed = true; start.remove(); o.g.classList.add('press'); o.to(pts[0].x, pts[0].y, 0, 160, () => K.msg('Now press on the scissors and follow the dotted line slowly.')); return true; } });
+    K.press(sc.g, { can: () => posed,
+      move: (s) => { sc.x = s.x; sc.y = s.y; sc.place(); const n = near(s); if (n.d > 30) { if (!warned) { warned = true; R.mistake('Cut off the guide line', 'Stay on the line so you open the chamber without slicing through the septum or the valves you need to see.'); K.msg('Off the line! Come back to the dotted line.', 'bad', 2600); } return; }
+        if (n.s > prog && n.s < prog + 40 && s.speed < 1500) { prog = Math.min(total, n.s); draw(); if (Math.random() < .25) SND.tone(1700, .03, 'square', .04); }
+        if (prog >= total - 4) { K.clearInteractions(); guide.remove(); done.remove(); SND.ok(); onDone(); } },
+      tick: (s, dt) => { sp(s.speed, s.speed < 60 ? 'still' : s.speed <= 1100 ? 'steady' : 'too fast!'); hot = s.speed > 1500 ? hot + dt : Math.max(0, hot - dt);
+        if (hot > .3) { guide.remove(); done.remove(); R.oops({ title: 'Hack job', text: 'You raced the scissors down the heart. They jumped off the line, shredded the muscle and flicked preservative straight at your face.', why: 'Dissection is slow, small snips with the tips of the scissors pointed up and away from you. Rushing tears the tissue, so you can no longer see the structures you came to find, and it splashes preservative. That’s why goggles stay on the whole time.', fx: ['goggles', 'pulp'], at: { x: sc.x, y: sc.y } }); } } });
+  }
+
+  const steps = [
+    { id: 'tray', name: 'Rinse the heart in the tray', title: 'Put the heart in the tray and rinse it', html: '1. Drag the <b>pig heart</b> out of its bag onto the <b>dissecting tray</b>.<br>2. Drag the <b>wash bottle</b> over the tray, then <b>press and hold</b> it to rinse off the preservative. Let go when the rinse meter is in the green.', hint: 'Rinsing removes the preservative, which smells strong and irritates skin and eyes. A short rinse is enough.' },
+    { id: 'orient', name: 'Turn it ventral side up', title: 'Find the front (ventral) side', html: 'Dissection guides describe the heart from the <b>ventral</b> (front) side. Is the ventral side facing up right now? Use <b>Flip the heart</b> until it is, then click <b>The ventral side is up</b>.', hint: 'On the ventral side, the pulmonary trunk crosses in front of the aorta, and a fatty groove with a blood vessel runs diagonally across the ventricles.' },
+    { id: 'feel', name: 'Find the left ventricle by feel', title: 'Squeeze the ventricles', html: '<b>Press and hold</b> on the lower part of the heart on <b>both sides</b> of the diagonal groove to feel the walls.', hint: 'One ventricle feels soft and squishy. The other feels firm and solid. The firm one has the thick wall.' },
+    { id: 'vessels', name: 'Label the great vessels', title: 'Label the blood vessels', html: 'Drag each <b>label</b> onto the blood vessel it names.', hint: 'The aorta has the thickest, most rubbery wall and arches over the top. The pulmonary trunk sits in front of it. The superior vena cava is the thin-walled vein entering the right atrium.' },
+    { id: 'probe', name: 'Trace blood flow with the probe', title: 'Trace where blood goes', html: 'Drag the <b>blunt probe</b> to the opening of the <b>superior vena cava</b>. Then <b>press on it and move the mouse down slowly</b> to slide it in.', hint: 'Let the probe follow the opening. Pushing hard pokes it straight through the vessel wall.' },
+    { id: 'cutR', name: 'Open the right side', title: 'Cut open the right side', html: 'Drag the <b>scissors</b> to the <b>yellow circle</b>. Then <b>press on the scissors and follow the dotted line slowly</b>, from the vena cava down into the right ventricle.', hint: 'Small, steady snips. If you leave the line, come back to it before you keep going.' },
+    { id: 'insideR', name: 'Find the tricuspid valve', title: 'Look inside the right side', html: 'Click the <b>tricuspid valve</b>: the three thin flaps between the right atrium and the right ventricle.', hint: 'The flaps are pale and thin, just below where the atrium meets the ventricle.' },
+    { id: 'cutL', name: 'Open the left side', title: 'Cut open the left side', html: 'Drag the <b>scissors</b> to the yellow circle on the left side of the heart (on <b>your right</b>), then follow the dotted line slowly down to the apex.', hint: 'Remember: with the ventral side up, the heart’s left side is on your right.' },
+    { id: 'insideL', name: 'Find the mitral and aortic valves', title: 'Look inside the left side', html: 'Click the <b>mitral (bicuspid) valve</b>: the two flaps between the left atrium and the left ventricle.', hint: 'It looks like the tricuspid valve, but with two flaps instead of three.' },
+    { id: 'clean', name: 'Clean up', title: 'Clean up the dissection', html: 'Drag the heart to the right <b>disposal container</b>. Then click <b>Wash my hands</b>.', hint: 'Animal specimens don’t go down the drain or in the regular trash.' }
+  ];
+
+  const S = {
+    tray(R) { const st = R.st, tr = K.obj(HX, 600, A.tray(0), 'fixed'); let placed = false, posed = false, held = false;
+      const bag = K.obj(BAG.x, BAG.y, A.bag(true), 'fixed');
+      const hs = K.obj(BAG.x, BAG.y - 40, smallHeart());
+      const m = K.meter('Rinse', 100, '', [55, 100], 120);
+      K.drag(hs, { drop: (o, x, y) => { if (x < HX - 200 || x > HX + 200 || y < 240) { K.msg('Put the heart in the middle of the dissecting tray.'); return false; } o.remove(); bag.inner.innerHTML = A.bag(false); placed = true; const h = K.obj(HX, HY, heartArt(st), 'fixed'); h.g.style.opacity = .97; K.layer.insertBefore(h.g, wb.g); SND.splat(); K.msg('Now rinse it with the wash bottle.'); return true; } });
+      const wb = K.obj(WASH.x, WASH.y, A.wash());
+      K.drag(wb, { can: () => !posed, drop: (o, x, y) => { if (!placed) { K.msg('Put the heart on the tray first.'); return false; } if (Math.abs(x - HX) > 240 || y > 600) return false; posed = true; o.g.classList.add('press'); o.to(HX + 150, HY + 10, -20, 200, () => K.msg('Press and hold the bottle to rinse.')); return true; } });
+      K.press(wb.g, { can: () => posed && !held, down: () => { SND.pourStart(1300); },
+        tick: (s, dt) => { st.rinse = Math.min(200, st.rinse + dt * 34); m(Math.min(st.rinse, 120), st.rinse < 55 ? 'keep rinsing' : st.rinse <= 100 ? 'clean' : 'too much!'); tr.inner.innerHTML = A.tray(Math.min(1, st.rinse / 100)); const sp = wb.world(64, -142); K.stream('rinse', sp, { x: HX - 10 + Math.sin(st.rinse) * 30, y: HY + 30 }, '#bfe3f2', 4);
+          if (st.rinse > 120) { held = true; K.stream('rinse', null); SND.pourStop(); R.oops({ title: 'Heart soup', text: 'You kept squeezing until the tray overflowed. Preservative water poured over the edge, across the bench and onto your shoes.', why: 'A quick rinse is enough to wash the preservative off the surface. Flooding the tray spreads the preservative, which irritates skin and eyes, and makes the bench slippery. Use just enough water.', fx: 'flood', at: { x: HX, y: 560 } }); } },
+        up: () => { K.stream('rinse', null); SND.pourStop(); if (held) return; if (st.rinse >= 55 && st.rinse <= 100) { held = true; K.clearInteractions(); R.next(); } else if (st.rinse < 55) K.msg('Not clean yet. Rinse a little more.'); } }); },
+    orient(R) { const st = R.st; st.side = 'dorsal'; const sc = scene(R);
+      LabUI.button('Flip the heart', () => { const h = sc.h; let t = 0; K.loop(dt => { t += dt * 4; const sx = Math.abs(Math.cos(Math.min(t, 1) * Math.PI)); if (t >= .5 && !h.flipped) { h.flipped = true; st.side = st.side === 'dorsal' ? 'ventral' : 'dorsal'; h.update(); } h.sx = Math.max(.04, sx); h.place(); if (t >= 1) { h.sx = 1; h.place(); h.flipped = false; return false; } }); SND.tick(); }, '');
+      LabUI.button('The ventral side is up', () => { if (st.side === 'ventral') { K.clearInteractions(); SND.ok(); R.next(); } else { R.mistake('Mixed up ventral and dorsal', 'On the ventral side the pulmonary trunk crosses in front of the aorta and the fatty groove runs diagonally. On the dorsal side you see the pulmonary veins entering the left atrium.'); K.msg('That’s the dorsal (back) side: you can see the pulmonary veins at the top. Flip it.', 'bad', 3600); } }); },
+    feel(R) { const st = R.st, sc = scene(R), felt = {}; let asked = false;
+      const fm = K.meter('How it feels', 100, '', null);
+      const dent = sv('circle', { r: 0, fill: 'rgba(0,0,0,.18)', stroke: 'rgba(255,255,255,.4)' }, K.top);
+      ['rv', 'lv'].forEach(k => { const z = sc.h.q(`[data-k="${k}"]`);
+        K.press(z, { down: s => { dent.setAttribute('cx', s.x); dent.setAttribute('cy', s.y); },
+          tick: (s, dt) => { s.p = Math.min(1, (s.p || 0) + dt * 2); dent.setAttribute('r', (k === 'rv' ? 16 : 6) * s.p); fm(k === 'rv' ? 25 : 90, k === 'rv' ? 'soft and squishy' : 'firm and solid'); if (s.p >= 1 && !felt[k]) { felt[k] = true; SND.tick(); K.msg(k === 'rv' ? 'This side squishes in easily. The wall is thin.' : 'This side barely gives. The wall is thick.'); } },
+          up: () => { dent.setAttribute('r', 0); if (felt.rv && felt.lv && !asked) ask(); } }); });
+      const ask = () => { asked = true; LabUI.html('<p class="small" style="margin:6px 0 0"><b>Which side of the heart is the left ventricle?</b></p>');
+        LabUI.choices(['The firm side, on <b>my right</b>', 'The soft side, on <b>my left</b>'], 0, () => { K.clearInteractions(); dent.remove(); K.msg('Right! The heart’s left side is on your right when the ventral side faces you.', 'ok', 3200); R.next(1200); },
+          () => R.mistake('Picked the wrong ventricle', 'The left ventricle has the thick, firm wall, and with the ventral side up the heart’s left side is on YOUR right, like a person facing you.')); }; },
+    vessels(R) { const st = R.st, sc = scene(R), placed = {};
+      const T = { aorta: { name: 'Aorta', at: [44, -168] }, pt: { name: 'Pulmonary trunk', at: [-26, -128] }, svc: { name: 'Superior vena cava', at: [-91, -168] } };
+      const tag = n => `<rect x="-70" y="-14" width="140" height="28" rx="14" fill="#fffdf6" stroke="#2f6fd6" stroke-width="2.5"/><text y="5" font-size="13" font-weight="800" text-anchor="middle" fill="#14306b">${n}</text>`;
+      const keys = Object.keys(T).sort(() => Math.random() - .5);
+      keys.forEach((k, i) => { const o = K.obj(130, 470 + i * 44, tag(T[k].name));
+        K.drag(o, { drop: (oo, x, y) => { const dist = j => Math.hypot(x - (HX + T[j].at[0]), y - (HY + T[j].at[1])), hit = Object.keys(T).filter(j => !placed[j] && dist(j) < 50).sort((a, b) => dist(a) - dist(b))[0];
+          if (!hit) { K.msg('Drop the label right on a blood vessel.'); return false; }
+          if (hit !== k) { R.mistake(`Labeled the ${T[hit].name.toLowerCase()} as the ${T[k].name.toLowerCase()}`, { aorta: 'The aorta has the thickest wall and arches over the top of the heart, behind the pulmonary trunk.', pt: 'The pulmonary trunk leaves the right ventricle and crosses in front of the aorta.', svc: 'The superior vena cava is the thin-walled vein that empties into the right atrium.' }[k]); K.msg(`Not quite. That vessel is the ${T[hit].name.toLowerCase()}.`, 'bad', 3200); return false; }
+          placed[k] = true; o.g.style.pointerEvents = 'none'; o.to(HX + T[k].at[0] + (k === 'aorta' ? 96 : k === 'svc' ? -96 : 0), HY + T[k].at[1] + (k === 'pt' ? 0 : -30), 0, 200); SND.ok();
+          if (Object.keys(placed).length === 3) { K.clearInteractions(); K.msg('All three vessels labeled.', 'ok'); R.next(1100); } return true; } }); }); },
+    probe(R) { const st = R.st, stage = st.probeDone ? 1 : 0; scene(R); let posed = false, depth = 0, hot = 0;
+      const G = [{ k: 'svc', name: 'superior vena cava', open: [-91, -212], len: 96, q: 'The probe tip came out in which chamber?', a: ['The right atrium', 'The left atrium', 'The left ventricle', 'The right ventricle'], e: 'The superior vena cava brings oxygen-poor blood from the body into the right atrium.' },
+        { k: 'aorta', name: 'aorta', open: [44, -196], len: 116, q: 'Which chamber pumps blood into the aorta?', a: ['The left ventricle', 'The right ventricle', 'The right atrium', 'The left atrium'], e: 'The left ventricle pumps oxygen-rich blood into the aorta, which carries it to the whole body.' }], g = G[stage];
+      if (stage === 1) R.sheet('', 'Now trace the other side. Drag the probe to the opening of the <b>aorta</b>, then <b>press on it and move the mouse down slowly</b> to slide it in.');
+      const pr = K.obj(PROBE.x, PROBE.y, A.probe());
+      const m = K.meter('Probe depth', 100, '%', [99, 100]), sp = K.meter('Pushing speed', 600, '', [10, 220], 300);
+      K.drag(pr, { can: () => !posed, drop: (o, x, y) => { const op = W(g.open), hit = G.find(q => Math.hypot(x - W(q.open).x, y - W(q.open).y) < 42);
+        if (!hit) { K.msg(Math.hypot(x - (HX - 4), y - (HY - 170)) < 40 ? `That’s the pulmonary trunk. Find the ${g.name}.` : `Put the probe on the opening of the ${g.name}.`); return false; }
+        if (hit !== g) { K.msg(`Trace the ${g.name} ${stage ? 'now' : 'first'}.`); return false; }
+        posed = true; o.g.classList.add('press'); o.inner.innerHTML = `<rect x="-3" y="-104" width="6" height="104" rx="3" fill="url(#metal)" stroke="#7f898f"/><rect x="-7" y="-150" width="14" height="50" rx="5" fill="#2f6fd6"/><rect x="-20" y="-154" width="40" height="160" fill="transparent"/>`;
+        o.to(op.x, op.y, 0, 180, () => K.msg('Press on the probe and move the mouse down slowly.')); return true; } });
+      K.press(pr.g, { can: () => posed, down: s => { s.d0 = depth; },
+        move: s => { if (s.speed > 300) return; const nd = clamp(s.d0 + (s.y - s.y0) / g.len, 0, 1); if (nd <= depth) return; depth = nd; pr.y = W(g.open).y + depth * g.len; pr.place(); m(depth * 100, Math.round(depth * 100) + '%'); if (Math.random() < .2) SND.tick();
+          if (depth >= 1) { K.clearInteractions(); SND.ok(); K.sparkle({ x: pr.x, y: pr.y }, 16);
+            LabUI.html(`<p class="small" style="margin:6px 0 0"><b>${g.q}</b></p>`);
+            LabUI.choices(g.a, 0, () => { K.msg(g.e, 'ok', 3600); if (stage === 0) { st.probeDone = 1; K.after(1800, () => R.runStep(R.i)); } else R.next(1800); }, () => R.mistake('Traced blood flow the wrong way', g.e)); } },
+        tick: (s, dt) => { sp(s.speed, s.speed < 10 ? 'still' : s.speed <= 220 ? 'gentle' : 'too hard!'); hot = s.speed > 300 ? hot + dt : Math.max(0, hot - dt);
+          if (hot > .25) R.oops({ title: 'Shish kebab', text: 'You rammed the probe in so hard that it punched straight through the side of the vessel and out of the heart.', why: 'A blunt probe follows the natural openings without cutting. Forced in, it tears through the thin vessel and valve walls and makes a fake passage, so you can no longer see where the blood really flows. Slide it gently and let it find its own way.', fx: 'bonk', at: { x: pr.x, y: pr.y + 40 } }); } }); },
+    cutR(R) { const st = R.st, sc = scene(R); cutTool(R, 'R', () => { st.openR = true; sc.h.update(); K.sparkle(W([-90, 0]), 24); K.msg('The right side is open.', 'ok'); R.next(1100); }); },
+    insideR(R) { const st = R.st; st.openR = true; const sc = scene(R); let want = 'tri';
+      const NAMES = { tri: 'the tricuspid valve', cho: 'the chordae tendineae (heart strings)', pap: 'a papillary muscle', rvw: 'the wall of the right ventricle', ra: 'the inside of the right atrium', rvc: 'the inside of the right ventricle', mit: 'the mitral valve', lvw: 'the wall of the left ventricle', aov: 'the aortic valve', rv: 'the outside of the right ventricle', lv: 'the outside of the left ventricle', svc: 'the superior vena cava', aorta: 'the aorta', pt: 'the pulmonary trunk' };
+      K.on(sc.h.g, 'pointerdown', e => { const k = targetAt(e); if (!k) return; const p = K.pt(e);
+        if (k === want) { SND.ok(); K.sparkle(p, 18);
+          if (want === 'tri') { want = 'cho'; R.sheet('', 'That’s the <b>tricuspid valve</b>: three flaps that let blood flow from the right atrium into the right ventricle, then snap shut. Now click the <b>chordae tendineae</b>: the thin white strings that tie the flaps down.'); K.msg('Tricuspid valve found!', 'ok'); }
+          else { K.msg('Chordae tendineae found!', 'ok'); K.clearInteractions(); R.next(1000); } return; }
+        R.mistake(`Clicked ${NAMES[k] || 'the wrong part'}`, `You were looking for ${NAMES[want]}.`); K.msg(`That’s ${NAMES[k] || 'a different part'}. Look for ${want === 'tri' ? 'the three thin, pale flaps just below the atrium' : 'the thin white strings below the flaps'}.`, 'bad', 3400); }); },
+    cutL(R) { const st = R.st; st.openR = true; const sc = scene(R);
+      cutTool(R, 'L', () => { st.openL = true; st.showWalls = true; sc.h.update(); K.sparkle(W([80, 30]), 24);
+        R.sheet('', 'Both sides are open. Compare the walls of the two ventricles (labeled <b>thin</b> and <b>thick</b>).<p class="small" style="margin:8px 0 0"><b>Why is the left ventricle’s wall so much thicker?</b></p>');
+        LabUI.choices(['It pumps blood to the whole body, which takes much more force', 'It holds more blood', 'It pumps blood only to the lungs', 'It has to stretch more'], 0, () => { K.msg('Exactly. The right ventricle only pushes blood next door to the lungs.', 'ok', 3200); R.next(1500); },
+          () => R.mistake('Wrong reason for the thick left ventricle', 'The left ventricle pumps blood to the entire body at high pressure, so it has a thick, muscular wall. The right ventricle only pumps to the nearby lungs.')); }); },
+    insideL(R) { const st = R.st; st.openR = st.openL = st.showWalls = true; const sc = scene(R); let want = 'mit';
+      const NAMES = { tri: 'the tricuspid valve', cho: 'the chordae tendineae', pap: 'a papillary muscle', rvw: 'the wall of the right ventricle', ra: 'the inside of the right atrium', rvc: 'the inside of the right ventricle', mit: 'the mitral valve', lvw: 'the wall of the left ventricle', aov: 'the aortic semilunar valve', rv: 'the outside of the right ventricle', lv: 'the outside of the left ventricle', svc: 'the superior vena cava', aorta: 'the aorta', pt: 'the pulmonary trunk' };
+      K.on(sc.h.g, 'pointerdown', e => { const k = targetAt(e); if (!k) return; const p = K.pt(e);
+        if (k === want) { SND.ok(); K.sparkle(p, 18);
+          if (want === 'mit') { want = 'aov'; R.sheet('', 'That’s the <b>mitral (bicuspid) valve</b>: two flaps between the left atrium and the left ventricle. Now click the <b>aortic semilunar valve</b>: three small pocket-shaped cusps at the base of the aorta.'); K.msg('Mitral valve found!', 'ok'); }
+          else { K.msg('Aortic valve found!', 'ok'); K.clearInteractions(); R.next(1000); } return; }
+        R.mistake(`Clicked ${NAMES[k] || 'the wrong part'}`, `You were looking for ${NAMES[want]}.`); K.msg(`That’s ${NAMES[k] || 'a different part'}. Look for ${want === 'mit' ? 'the two pale flaps on the left side (your right)' : 'the three little half-moon pockets where the aorta leaves the heart'}.`, 'bad', 3400); }); },
+    clean(R) { const st = R.st; st.openR = st.openL = true; scene(R, { heart: false }); let binned = false;
+      Object.entries(BINS).forEach(([k, b]) => K.obj(b.x, b.y, A.bin(k), 'fixed'));
+      const hs = K.obj(HX, HY + 120, `<g transform="translate(0 -40) scale(.4)">${ventral({ openR: true, openL: true })}</g><rect x="-60" y="-130" width="120" height="136" fill="transparent"/>`);
+      K.drag(hs, { can: () => !binned, drop: (o, x, y) => { const k = Object.keys(BINS).filter(j => Math.abs(x - BINS[j].x) < 80 && y > 440).sort((a, b) => Math.abs(x - BINS[a].x) - Math.abs(x - BINS[b].x))[0]; if (!k) return false;
+        if (k === 'sink') { o.g.setAttribute('visibility', 'hidden'); R.oops({ title: 'Clogged!', text: 'You shoved the heart down the sink. It jammed the drain and the sink overflowed with pink water.', why: 'Tissue never goes down a drain: it clogs pipes and puts preserved animal material into the water system. Specimens go in the container your teacher sets out for them.', fx: 'flood', at: { x: BINS.sink.x, y: 540 } }); return true; }
+        if (k === 'trash') { R.mistake('Put the specimen in the regular trash', 'Preserved specimens go in the specimen waste container, not the classroom trash, where they smell, leak and attract pests.'); K.msg('Not the regular trash. Use the container for specimens.', 'bad', 3200); return false; }
+        binned = true; o.remove(); SND.drop(); K.msg('Specimen disposed of. Now wash up.', 'ok'); return true; } });
+      LabUI.button('Wash my hands', () => { if (!binned) { K.msg('Dispose of the heart first.'); return; } K.clearInteractions(); SND.fizz(); K.msg('Tools rinsed, bench wiped, hands washed with soap.', 'ok'); R.next(1200); }); }
+  };
+
+  return makeLab({
+    defs: DEFS,
+    fresh: () => ({ rinse: 0, side: 'dorsal', openR: false, openL: false, showWalls: false, probeDone: 0 }),
+    ppe: { need: ['coat', 'goggles', 'gloves'], decoys: ['sunglasses', 'mitts', 'scarf'], why: { mitts: 'Oven mitts are far too clumsy for dissecting scissors and a probe. Wear nitrile gloves.' }, hint: 'Preserved specimens sit in fluid that irritates eyes and skin, and fluid can squirt out when you cut.' },
+    gather: { hint: 'You need the specimen, something to hold it, tools to explore and cut it, and water to rinse it.', items: [
+      { id: 'heart', name: 'Preserved pig heart', ok: true, art: () => A.bag(true), scale: .55 },
+      { id: 'tray', name: 'Dissecting tray', ok: true, art: () => `<g transform="scale(.26)">${A.tray(0)}</g>`, scale: .9 },
+      { id: 'scis', name: 'Dissecting scissors', ok: true, art: () => `<g transform="translate(58 -10) rotate(-52)">${A.scissors()}</g>`, scale: .7 },
+      { id: 'probe', name: 'Blunt probe', ok: true, art: () => `<g transform="translate(70 -12) rotate(-60)">${A.probe()}</g>`, scale: .7 },
+      { id: 'wash', name: 'Wash bottle of water', ok: true, art: () => A.wash(), scale: .6 },
+      { id: 'knife', ok: false, art: A.knife, scale: .6, why: 'A kitchen knife isn’t lab equipment. It’s too big and clumsy to control on delicate tissue. Dissecting scissors do the cutting here.' },
+      { id: 'bleach', ok: false, fx: 'cloud', art: () => ART.bottle({ shape: 'jug', body: '#f7f9fb', stroke: '#aab4ba', cap: '#2a6bb5', label: 'BLEACH', sub: 'CORROSIVE', lc: '#2a6bb5', hazard: true, h: 140, w: 66 }), why: 'Bleach isn’t part of this lab. It would damage the tissue and can react with the preservative.' },
+      { id: 'bun', ok: false, art: () => `${ART.shadow(36, 5)}<ellipse cx="0" cy="-6" rx="38" ry="8" fill="#3d464c"/><rect x="-9" y="-120" width="18" height="110" rx="3" fill="url(#metal)"/>`, why: 'Nothing gets heated in a dissection, so the Bunsen burner stays on the shelf.' },
+      { id: 'juice', ok: false, art: () => ART.bottle({ shape: 'carton', body: '#fff6e0', stroke: '#e0b45a', cap: '#2fa25a', label: 'ORANGE JUICE', lc: '#9a5a00', h: 120, w: 56 }), why: 'No food or drinks in the lab, especially during a dissection.' }
+    ] },
+    steps, S,
+    bg: () => BG.bench('DISSECTION RULES', ['Goggles on the whole time', 'Cut away from your body', 'Scissor tips point up', 'Specimen stays in the tray', 'Wash hands after lab'], true),
+    finale(R) { R.st.openR = R.st.openL = R.st.showWalls = true; R.st.side = 'ventral'; scene(R); },
+    summary: R => `You dissected a pig heart, traced blood from the vena cava and into the aorta, and compared the thin right ventricle with the thick left ventricle.`,
+    finaleMsg: 'Dissection complete! Now check your thinking.',
+    quiz: [
+      { q: 'Why is the wall of the left ventricle much thicker than the right ventricle’s?', a: ['It pumps blood to the whole body, which needs more force', 'It holds more blood than the right ventricle', 'It only pumps blood to the lungs', 'It is the first chamber blood enters'], c: 0, e: 'The left ventricle pushes blood through the entire body at high pressure. The right ventricle only pumps to the nearby lungs, so its wall is thinner.' },
+      { q: 'What do the chordae tendineae (heart strings) do?', a: ['Hold the valve flaps so they don’t flip back into the atria when the ventricles squeeze', 'Carry blood to the heart muscle', 'Send electrical signals to start each beat', 'Connect the heart to the ribs'], c: 0, e: 'Like the ropes on a parachute, the chordae tie the AV valve flaps to the papillary muscles so blood can’t leak backward into the atria.' },
+      { q: 'Oxygen-poor blood from the body enters the heart through the vena cava into which chamber?', a: ['Right atrium', 'Left atrium', 'Right ventricle', 'Left ventricle'], c: 0, e: 'Body → vena cava → right atrium → right ventricle → pulmonary trunk → lungs.' },
+      { q: 'Why do you trace vessels with a blunt probe instead of the scissors?', a: ['It follows the openings without cutting through the walls you want to see', 'It’s sharper', 'It keeps the specimen cold', 'It measures blood pressure'], c: 0, e: 'A blunt probe slides through natural openings. A sharp tool would make new holes and hide the real path of the blood.' },
+      { q: 'Why do classes dissect pig hearts to learn about the human heart?', a: ['A pig heart is about the same size and has the same four chambers, valves and vessels', 'Pig hearts have only two chambers, so they’re simpler', 'Pigs are cold-blooded like humans', 'Pig hearts have no valves, so they’re easier to cut'], c: 0, e: 'Pigs are mammals, and their hearts are very close to ours in size and structure: four chambers, the same valves, and the same great vessels.' }
+    ],
+    meta: { id: 'heart', short: 'Pig Heart', title: 'Pig Heart Dissection', courses: ['hs-bio'], time: '20–25 min',
+      summary: 'Dissect a preserved pig heart: find the ventral side, feel the ventricles, label the great vessels, trace blood flow with a probe, open both sides and find the valves.',
+      objective: 'Identify the chambers, valves and great vessels of a mammalian heart and explain how the structure of each part fits its job in moving blood.',
+      materials: ['Preserved pig heart', 'Dissecting tray', 'Dissecting scissors', 'Blunt probe', 'Wash bottle of water'],
+      safety: ['Goggles, lab coat and gloves the whole time: preservative irritates eyes and skin', 'Cut slowly, away from your body, with scissor tips pointed up', 'Keep the specimen in the tray', 'Dispose of tissue in the specimen waste container, never the sink or trash', 'Wash your hands with soap when you finish'],
+      ngss: [['HS-LS1-2', 'Develop and use a model to illustrate the hierarchical organization of interacting systems that provide specific functions within multicellular organisms.'], ['SEP 3', 'Planning and carrying out investigations: perform a careful dissection and record observations.'], ['CCC 6', 'Structure and function: the thickness of each wall and the shape of each valve match its job.']],
+      thumb: big => labThumb('heart', big) }
+  });
+})();
+
 /* ═══════════ Science Showdown: team quiz board for the projector ═══════════
    Teams take turns picking a tile. A wrong answer lets the next team steal for half the points.
    One hidden tile is a Lab Bonus (double points, no steal). Answer order is shuffled every time.
@@ -4349,7 +4638,7 @@ const Zombies = {
    SITE_KEY. Students join with it (no account), run the labs, and each finished lab is posted to the sign-up Apps Script,
    which saves it in the "educator-space.com · Lab results" tab. Teachers read back only their own students' results.
    LAB_ORDER is the bit order inside codes: only ever ADD new labs at the end, never reorder. */
-const LAB_ORDER = ['dna-strawberry', 'titration', 'flame', 'pendulum', 'ohm', 'mass', 'erosion', 'onion'];
+const LAB_ORDER = ['dna-strawberry', 'titration', 'flame', 'pendulum', 'ohm', 'mass', 'erosion', 'onion', 'heart'];
 /* GAME_ORDER is also append-only. A code with games = the usual 13 signed characters + a short tail holding a bitmask
    (labs in bits 0–11, games from bit 12). The 13-character core is version 2 and carries a 10-bit check of the tail, so the
    tail can't be edited. Only the core is sent with results, so the Apps Script needs no change. */
