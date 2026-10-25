@@ -793,12 +793,12 @@ function renderGate() {
         <label class="fld" for="sName">Your name<input type="text" id="sName" autocomplete="name" maxlength="40" placeholder="First name and last initial" value="${esc(stu.name || '')}"></label>
         <div class="row" style="gap:12px;align-items:start"><label class="fld" for="sEmail" style="flex:1 1 180px">School email <span class="muted" style="font-weight:400">(optional)</span><input type="email" id="sEmail" autocomplete="email" maxlength="80" placeholder="you@school.org" value="${esc(stu.email || '')}"></label>
         <label class="fld" for="sPer" style="flex:1 1 120px">Class or period <span class="muted" style="font-weight:400">(optional)</span><input type="text" id="sPer" maxlength="30" placeholder="e.g. Period 3" value="${esc(stu.period || '')}"></label></div>
-        <div class="err" id="sErr" role="alert"></div>
+        <div class="err" id="sErr" role="alert">${esc(APP.gateMsgStu || '')}</div>
         <button class="btn primary" id="sGo" type="submit" style="justify-content:center;padding:12px">Start</button>
         <p class="contact">Your name and results go only to your teacher.</p>
       </form>`}
     </div></div></div>`;
-  APP.gateMsg = '';
+  APP.gateMsg = ''; APP.gateMsgStu = '';
   $$('[data-tab]').forEach(b => b.onclick = () => { APP.gateTab = b.dataset.tab; renderGate(); });
   if (tab === 'student') {
     (APP.joinCode ? $('#sName') : $('#sCode')).focus();
@@ -809,6 +809,8 @@ function renderGate() {
       if (!k.labs.length && !k.games.length) { err.textContent = 'This code doesn\u2019t include any labs or games. Ask your teacher for a new one.'; return; }
       if (name.length < 2) { err.textContent = 'Enter your name so your teacher knows whose results these are.'; return; }
       if (em && !isEmail(em)) { err.textContent = 'That email doesn\u2019t look right. You can also leave it blank.'; return; }
+      const b = $('#sGo'); b.disabled = true; b.textContent = 'Checking code…'; const op = await codeOpen(k.code); b.disabled = false; b.textContent = 'Start';
+      if (op === false) { err.textContent = 'This class code has been closed by your teacher. Ask your teacher for a new one.'; return; }
       const stu = { code: k.code, name, email: em, period: per }; LS.set('student', stu); APP.student = Object.assign({}, stu, { k }); APP.joinCode = ''; APP.view = 'home';
       setPath('home', true);
       SND.ac(); render();
@@ -4385,6 +4387,21 @@ async function readLabCode(code) {
   else { if (ver === 2) return null; labs = LAB_ORDER.filter((id, i) => field & (1 << i)); if (opts & OPT.blaster) games = ['blaster']; }
   return { code: fmtLabCode(c) + (ext ? '-' + ext : ''), core: fmtLabCode(c), labs, games, opts, set: Math.floor(p / 2 ** 20) % 16, th: p % 2 ** 20 };
 }
+/* class codes in the Google Sheet: each code is registered when it's made; the teacher (or the Sheet) can close it,
+   or it closes by itself after its closing date. Every check fails open when Google can't be reached (previews). */
+async function sheetCall(q, body) {
+  try { const ac = new AbortController(), tm = setTimeout(() => ac.abort(), 10000);
+    const r = await fetch(body ? SIGNUP_ENDPOINT : `${SIGNUP_ENDPOINT}?${q}`, body ? { method: 'POST', signal: ac.signal, body: JSON.stringify(body) } : { signal: ac.signal }); clearTimeout(tm); return await r.json(); }
+  catch (e) { return null; }
+}
+async function codeOpen(code) { const d = await sheetCall('a=codestatus&c=' + normCode(code).slice(0, 13)); return d && d.ok ? d.open : null; }
+const CLOSE_OPTS = [['1d', 'In 1 day', 1], ['1w', 'In 1 week', 7], ['2w', 'In 2 weeks', 14], ['1m', 'In 1 month', 30], ['3m', 'In 3 months', 91], ['date', 'On a date I choose…'], ['never', 'Never (open until I close it)']];
+const ymd = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const dayPassed = s => { if (!s) return false; const [y, mo, d] = String(s).slice(0, 10).split('-').map(Number); return Date.now() >= new Date(y, mo - 1, d + 1).getTime(); };
+const fmtDay = s => s ? new Date(String(s).slice(0, 10) + 'T12:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'Never';
+const itemsOf = c => c.labs.map(labTitle).concat((c.games || (c.opts & OPT.blaster ? ['blaster'] : [])).map(gameTitle));
+/* a student whose code was closed goes back to the join screen with a message */
+function closeStudent() { if (typeof GameHub !== 'undefined') GameHub.stopAll(); if (typeof Kit !== 'undefined') Kit.unmount(); const c = APP.student ? APP.student.k.code : ''; LS.del('student'); APP.student = null; APP.gateTab = 'student'; APP.joinCode = ''; APP.view = 'home'; APP.gateMsgStu = `The class code ${c} has been closed by your teacher, so its labs and games aren’t available anymore. Ask your teacher if you need a new code.`; setPath('home', true); render(); }
 const joinLink = code => (/^https?:$/.test(location.protocol) && !/claude|localhost|^$/.test(location.hostname) ? location.origin : SITE_URL) + '/j/' + normCode(code);
 function copyBtn(btn, text) {
   try { navigator.clipboard.writeText(text).then(() => { const t = btn.innerHTML; btn.textContent = 'Copied'; setTimeout(() => { btn.innerHTML = t; }, 1400); }, () => selectFallback(text)); } catch (e) { selectFallback(text); }
@@ -4396,7 +4413,7 @@ const labTitle = id => (LABS.find(l => l.id === id) || {}).title || id;
 
 /* ═════ teacher: assign labs ═════ */
 function pageAssign(m) {
-  const codes = myCodes(), sel = new Set(APP.assignSel || []), gsel = new Set(APP.assignGames || []), ao = APP.assignOpts || { hints: true, rep: true, label: '' };
+  const codes = myCodes(), sel = new Set(APP.assignSel || []), gsel = new Set(APP.assignGames || []), ao = Object.assign({ hints: true, rep: true, label: '', close: '2w', date: '' }, APP.assignOpts || {});
   m.innerHTML = `<header style="display:grid;gap:6px"><span class="eyebrow">Your classes</span><h1>Assign labs and games</h1><p class="muted" style="max-width:64ch">Pick labs and games, make a code, and share it. Students open the link (or type the code under <b>I’m a student</b>) on their laptops. No student accounts needed. Results come back to <b>Student results</b>.</p></header>
     <section class="setup">
       <div style="display:grid;gap:8px"><span class="eyebrow">1 · Choose labs</span>
@@ -4406,33 +4423,64 @@ function pageAssign(m) {
       <div style="display:grid;gap:8px"><span class="eyebrow">3 · Options</span>
         <label class="check" for="oHints"><input type="checkbox" id="oHints" ${ao.hints ? 'checked' : ''}> Students can use <b>Show hint</b></label>
         <label class="check" for="oRep"><input type="checkbox" id="oRep" ${ao.rep ? 'checked' : ''}> Students can run a lab again after finishing (each run is sent to you)</label></div>
-      <label class="fld" for="oLabel" style="max-width:360px"><span class="eyebrow" style="font-size:11px">4 · Name it (only you see this)</span><input type="text" id="oLabel" maxlength="40" placeholder="e.g. Period 3 Biology" value="${esc(ao.label)}"></label>
+      <div style="display:grid;gap:8px"><span class="eyebrow">4 · Code closes</span><div class="row" style="gap:10px"><select id="oClose" style="max-width:300px" aria-label="When the code closes">${CLOSE_OPTS.map(o => `<option value="${o[0]}" ${ao.close === o[0] ? 'selected' : ''}>${o[1]}</option>`).join('')}</select><input type="date" id="oDate" style="max-width:200px" aria-label="Closing date" min="${ymd(new Date())}" value="${esc(ao.date)}" ${ao.close === 'date' ? '' : 'hidden'}></div>
+        <span class="small muted" style="max-width:70ch">After the closing date, students can’t open these labs or games or send results anymore. You can also close or reopen a code any time below, or in your Google Sheet (tab <b>educator-space.com · Class codes</b>).</span></div>
+      <label class="fld" for="oLabel" style="max-width:360px"><span class="eyebrow" style="font-size:11px">5 · Name it (only you see this)</span><input type="text" id="oLabel" maxlength="40" placeholder="e.g. Period 3 Biology" value="${esc(ao.label)}"></label>
       <div class="row"><button class="btn primary" id="mkCode">${ico('link')}Make class code</button><span class="err small" id="mkErr"></span></div>
       <div id="mkOut"></div>
     </section>
-    <section class="sec"><div class="sec-h"><h2>Your lab codes</h2><span class="small muted">Saved on this computer.</span></div>
-      ${codes.length ? `<div class="tbl-wrap"><table class="rec"><thead><tr><th>Name</th><th>Code</th><th>Labs and games</th><th>Made</th><th></th></tr></thead><tbody>${codes.slice().reverse().map((c, i) => `<tr><td>${esc(c.label || 'Untitled')}</td><td class="mono">${esc(c.code)}</td><td class="small">${c.labs.map(labTitle).concat((c.games || (c.opts & OPT.blaster ? ['blaster'] : [])).map(gameTitle)).map(esc).join(', ')}</td><td>${new Date(c.at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</td><td><div class="row" style="flex-wrap:nowrap"><button class="btn sm" data-cl="${esc(c.code)}">${ico('copy')}Link</button><button class="btn sm" data-res="${esc(c.code)}">Results</button><button class="btn sm ghost" data-rm="${codes.length - 1 - i}">Remove</button></div></td></tr>`).join('')}</tbody></table></div>`
-        : '<div class="empty"><b>No lab codes yet.</b><span class="small">Make one above. Each class can have its own code.</span></div>'}</section>`;
+    <section class="sec"><div class="sec-h"><h2>Your class codes</h2><span class="small muted" id="cdSync">Checking your Google Sheet…</span></div><div id="codesBox"></div></section>`;
+  void codes; drawCodes(m); syncCodes(m);
+  $('#oClose', m).onchange = e => { const d = $('#oDate', m); d.hidden = e.target.value !== 'date'; if (!d.hidden && !d.value) { const t = new Date(); t.setDate(t.getDate() + 14); d.value = ymd(t); } };
   $$('[data-lab]', m).forEach(cb => cb.onchange = () => { cb.checked ? sel.add(cb.dataset.lab) : sel.delete(cb.dataset.lab); cb.closest('.pick').classList.toggle('on', cb.checked); APP.assignSel = [...sel]; });
   $$('[data-gm]', m).forEach(cb => cb.onchange = () => { cb.checked ? gsel.add(cb.dataset.gm) : gsel.delete(cb.dataset.gm); cb.closest('.pick').classList.toggle('on', cb.checked); APP.assignGames = [...gsel]; });
-  $$('[data-cl]', m).forEach(b => b.onclick = () => copyBtn(b, joinLink(b.dataset.cl)));
-  $$('[data-res]', m).forEach(b => b.onclick = () => { APP.resFilter = b.dataset.res; go('results'); });
-  $$('[data-rm]', m).forEach(b => b.onclick = () => { if (!b.dataset.sure) { b.dataset.sure = 1; b.textContent = 'Click again'; return; } const l = myCodes(); l.splice(+b.dataset.rm, 1); saveMyCodes(l); pageAssign(m); });
   $('#mkCode', m).onclick = async () => {
     const err = $('#mkErr', m); if (!sel.size && !gsel.size) { err.textContent = 'Choose at least one lab or game.'; return; } err.textContent = '';
     const opts = ($('#oHints', m).checked ? OPT.hints : 0) | ($('#oRep', m).checked ? OPT.repeat : 0);
     const labs = LAB_ORDER.filter(id => sel.has(id)), games = GAME_ORDER.filter(id => gsel.has(id)), used = new Set(myCodes().filter(c => c.opts === opts && c.labs.join() === labs.join() && (c.games || []).join() === games.join()).map(c => c.set));
     let set = Math.floor(Math.random() * 16); for (let i = 0; i < 16 && used.has(set); i++) set = (set + 1) % 16;
+    const copt = $('#oClose', m).value, cdate = $('#oDate', m).value; let closes = '';
+    if (copt === 'date') { if (!cdate || dayPassed(cdate)) { err.textContent = 'Pick a closing date that’s today or later.'; return; } closes = cdate; }
+    else if (copt !== 'never') { const t = new Date(); t.setDate(t.getDate() + CLOSE_OPTS.find(o => o[0] === copt)[2]); closes = ymd(t); }
     const code = await makeLabCode(APP.user.email, labs, opts, set, games), label = $('#oLabel', m).value.trim();
-    APP.assignOpts = { hints: $('#oHints', m).checked, rep: $('#oRep', m).checked, label };
-    const list = myCodes(); list.push({ code, label, labs, games, opts, set, at: new Date().toISOString() }); saveMyCodes(list);
+    APP.assignOpts = { hints: $('#oHints', m).checked, rep: $('#oRep', m).checked, label, close: copt, date: cdate };
+    const list = myCodes(); list.push({ code, label, labs, games, opts, set, closes, at: new Date().toISOString() }); saveMyCodes(list);
+    const reg = sheetCall('', { type: 'labcode', email: APP.user.email, ck: APP.user.ck, code, label, items: itemsOf({ labs, games }).join(', '), closes });
     const link = joinLink(code), how = `Open ${link} on your laptop (or go to ${SITE_URL.replace('https://', '')}, choose "I'm a student" and enter code ${code}). Type your name, then do: ${labs.map(labTitle).concat(games.map(gameTitle)).join(', ')}.`;
     $('#mkOut', m).innerHTML = `<div class="code-out"><span class="eyebrow">${esc(label || 'New class code')}</span><div class="big-code mono">${code}</div>
       <div class="row"><button class="btn primary" id="cpLink">${ico('copy')}Copy student link</button><button class="btn" id="cpCode">${ico('copy')}Copy code</button><button class="btn" id="cpHow">${ico('copy')}Copy instructions</button></div>
-      <p class="small muted" style="word-break:break-all">${esc(link)}</p></div>`;
+      <p class="small muted" style="word-break:break-all">${esc(link)}</p><p class="small" id="mkReg"><b>Closes:</b> ${closes ? fmtDay(closes) + ' (works through the end of that day)' : 'never, until you close it'} · <span class="muted">saving to your Google Sheet…</span></p></div>`;
+    reg.then(d => { const e = $('#mkReg', m); if (e) e.innerHTML = `<b>Closes:</b> ${closes ? fmtDay(closes) + ' (works through the end of that day)' : 'never, until you close it'} · ${d && d.ok ? '✓ Saved to your Google Sheet' : '<span class="muted">Couldn’t reach your Google Sheet from here. On the live site, codes are saved there automatically.</span>'}`; if (d && d.ok) { APP.codeStat = APP.codeStat || {}; APP.codeStat[normCode(code).slice(0, 13)] = { open: true, closes }; drawCodes(m); } });
     $('#cpLink', m).onclick = e => copyBtn(e.currentTarget, link); $('#cpCode', m).onclick = e => copyBtn(e.currentTarget, code); $('#cpHow', m).onclick = e => copyBtn(e.currentTarget, how);
-    SND.ok(); setTimeout(() => { const keep = $('#mkOut', m).innerHTML; pageAssign(m); $('#mkOut', m).innerHTML = keep; $('#cpLink', m).onclick = e => copyBtn(e.currentTarget, link); $('#cpCode', m).onclick = e => copyBtn(e.currentTarget, code); $('#cpHow', m).onclick = e => copyBtn(e.currentTarget, how); $('#mkOut', m).scrollIntoView({ block: 'nearest' }); }, 10);
+    SND.ok(); setTimeout(() => { const keep = $('#mkOut', m).innerHTML; pageAssign(m); $('#mkOut', m).innerHTML = keep; drawCodes(m); $('#cpLink', m).onclick = e => copyBtn(e.currentTarget, link); $('#cpCode', m).onclick = e => copyBtn(e.currentTarget, code); $('#cpHow', m).onclick = e => copyBtn(e.currentTarget, how); $('#mkOut', m).scrollIntoView({ block: 'nearest' }); }, 10);
   };
+}
+
+/* the class code list: status comes from the Google Sheet when it can be reached */
+function codeIsOpen(c) { const s = (APP.codeStat || {})[normCode(c.code).slice(0, 13)]; return s ? s.open : !(c.closedHere || dayPassed(c.closes)); }
+function drawCodes(m) {
+  const box = $('#codesBox', m); if (!box) return; const codes = myCodes();
+  box.innerHTML = codes.length ? `<div class="tbl-wrap"><table class="rec"><thead><tr><th>Name</th><th>Code</th><th>Labs and games</th><th>Closes</th><th>Status</th><th></th></tr></thead><tbody>${codes.slice().reverse().map((c, i) => { const open = codeIsOpen(c), s = (APP.codeStat || {})[normCode(c.code).slice(0, 13)], closes = s ? s.closes : c.closes;
+    return `<tr><td>${esc(c.label || 'Untitled')}<div class="small muted" style="white-space:nowrap">Made ${new Date(c.at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</div></td><td class="mono" style="white-space:nowrap">${esc(c.code)}</td><td class="small">${itemsOf(c).map(esc).join(', ')}</td><td class="small" style="white-space:nowrap">${esc(fmtDay(closes))}</td><td>${open ? '<span class="chip ok">Open</span>' : '<span class="chip warn">Closed</span>'}</td>
+      <td><div class="row" style="flex-wrap:nowrap"><button class="btn sm" data-cl="${esc(c.code)}">${ico('copy')}Link</button><button class="btn sm" data-res="${esc(c.code)}">Results</button><button class="btn sm ${open ? 'warn' : ''}" data-st="${codes.length - 1 - i}">${open ? 'Close now' : 'Reopen'}</button><button class="btn sm ghost" data-rm="${codes.length - 1 - i}">Remove</button></div></td></tr>`; }).join('')}</tbody></table></div>`
+    : '<div class="empty"><b>No class codes yet.</b><span class="small">Make one above. Each class can have its own code.</span></div>';
+  $$('[data-cl]', box).forEach(b => b.onclick = () => copyBtn(b, joinLink(b.dataset.cl)));
+  $$('[data-res]', box).forEach(b => b.onclick = () => { APP.resFilter = b.dataset.res; go('results'); });
+  $$('[data-rm]', box).forEach(b => b.onclick = () => { if (!b.dataset.sure) { b.dataset.sure = 1; b.textContent = 'Remove from list?'; return; } const l = myCodes(); l.splice(+b.dataset.rm, 1); saveMyCodes(l); drawCodes(m); });
+  $$('[data-st]', box).forEach(b => b.onclick = async () => {
+    const l = myCodes(), c = l[+b.dataset.st], open = codeIsOpen(c), sync = $('#cdSync', m); b.disabled = true; b.textContent = open ? 'Closing…' : 'Reopening…';
+    const d = await sheetCall('', { type: 'codestatus', email: APP.user.email, ck: APP.user.ck, code: c.code, status: open ? 'Closed' : 'Open', label: c.label, items: itemsOf(c).join(', ') });
+    if (d && d.ok) { APP.codeStat = APP.codeStat || {}; APP.codeStat[normCode(c.code).slice(0, 13)] = { open: d.open, closes: d.closes }; c.closes = d.closes; c.closedHere = !d.open; saveMyCodes(l); SND.ok(); if (sync) sync.textContent = open ? 'Closed. Students with this code are locked out within a minute.' : 'Reopened.'; }
+    else if (sync) sync.textContent = d && d.msg ? d.msg : 'Couldn’t reach your Google Sheet from here. On the live site this works, or change Status in the Sheet.';
+    drawCodes(m); });
+}
+async function syncCodes(m) {
+  const d = await sheetCall(`a=mycodes&e=${encodeURIComponent(APP.user.email)}&ck=${APP.user.ck}`), sync = $('#cdSync', m); if (!m.isConnected) return;
+  if (!d || !d.ok) { if (sync) sync.textContent = 'Saved on this computer. (Your Google Sheet can’t be reached from here.)'; return; }
+  APP.codeStat = {}; const l = myCodes();
+  for (const s of d.codes) { const core = normCode(s.code).slice(0, 13); APP.codeStat[core] = { open: s.open, closes: s.closes };
+    if (!l.some(c => normCode(c.code).slice(0, 13) === core)) { const k = await readLabCode(s.code); if (k) l.unshift({ code: k.code, label: s.label, labs: k.labs, games: k.games, opts: k.opts, set: k.set, closes: s.closes, at: s.made || new Date().toISOString() }); } }
+  saveMyCodes(l); if (sync) sync.textContent = 'Synced with your Google Sheet.'; drawCodes(m);
 }
 
 /* ═════ teacher: student results (read from the Apps Script) ═════ */
@@ -4479,7 +4527,7 @@ function renderStudent() {
   $('#stOut').onclick = () => { if (!$('#stOut').dataset.sure) { $('#stOut').dataset.sure = 1; $('#stOut').textContent = 'Click again to leave'; return; } LS.del('student'); APP.student = null; APP.gateTab = 'student'; render(); };
   $('#stSnd').onclick = () => { SND.on = !SND.on; LS.set('sound', SND.on); renderStudent(); };
   const m = $('#stMain');
-  if (v !== 'home') { const g = GAMES.find(x => x.id === v); m.innerHTML = `<div><button class="btn sm" id="stBack">${ico('back')}Back to my assignments</button></div><div id="stG" class="gh-body"></div>`; $('#stBack').onclick = () => go('home'); GH.runT0 = performance.now(); if (g.ext) extGame($('#stG'), g); else g.page($('#stG')); return; }
+  if (v !== 'home') { codeOpen(S.k.code).then(op => { if (op === false && APP.student === S) closeStudent(); }); const g = GAMES.find(x => x.id === v); m.innerHTML = `<div><button class="btn sm" id="stBack">${ico('back')}Back to my assignments</button></div><div id="stG" class="gh-body"></div>`; $('#stBack').onclick = () => go('home'); GH.runT0 = performance.now(); if (g.ext) extGame($('#stG'), g); else g.page($('#stG')); return; }
   const labs = S.k.labs.map(id => LABS.find(l => l.id === id)).filter(Boolean), gl = games.map(id => GAMES.find(g => g.id === id)).filter(Boolean), out = LS.get('outbox', []).filter(o => o.code === (S.k.core || S.k.code));
   m.innerHTML = `<header style="display:grid;gap:6px"><span class="eyebrow">Class code ${esc(S.k.code)}</span><h1>Hi ${esc(S.name.split(' ')[0])}! Here are your ${labs.length && gl.length ? 'labs and games' : labs.length ? 'labs' : 'games'}.</h1><p class="muted" style="max-width:62ch">${labs.length ? 'Do each lab with your mouse. Mistakes are part of practice: you’ll see what goes wrong and why. ' : ''}When you finish, your results go to your teacher.</p></header>
     ${out.length ? `<div class="send-box warn"><b>${out.length} result${out.length > 1 ? 's' : ''} not sent yet.</b><span class="small">Your computer was offline. <button class="btn sm" id="stRetry">Send now</button></span></div>` : ''}
@@ -4494,6 +4542,9 @@ function renderStudent() {
         <div class="row" style="margin-top:4px"><a class="btn primary sm" href="${HP}${g.id}" data-sg="${g.id}">${ico('play')}${d ? 'Play again' : 'Play'}</a></div></div></article>`; }).join('')}</section>` : ''}`;
   bindLabButtons(m);
   $$('[data-sg]', m).forEach(a => a.onclick = e => { e.preventDefault(); go(a.dataset.sg); });
+  /* check the code is still open before each lab or game (and once on this page) */
+  $$('[data-lab], [data-sg]', m).forEach(b => { const f = b.onclick; b.onclick = async e => { if (e) e.preventDefault(); if (await codeOpen(S.k.code) === false) return closeStudent(); f.call(b, e); }; });
+  codeOpen(S.k.code).then(op => { if (op === false && APP.student === S) closeStudent(); });
   const rt = $('#stRetry'); if (rt) rt.onclick = () => flushOutbox(true);
 }
 
