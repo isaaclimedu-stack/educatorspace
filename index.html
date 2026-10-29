@@ -229,6 +229,57 @@ table.rec td { padding: 10px; border-bottom: 1px solid var(--line); font-variant
 .quiz .opt.right { background: var(--ok-soft); border-color: var(--ok); }
 .quiz .opt.wrong { background: var(--bad-soft); border-color: var(--bad); }
 .quiz .exp { font-size: 13.5px; color: var(--muted); }
+/* ── VSEPR builder (side panel) ── */
+.vs-ctl { display: grid; gap: 7px; }
+.vs-lab { font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; font-weight: 700; color: var(--muted); margin-top: 4px; }
+.vs-els { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 5px; }
+.vs-el { display: grid; place-items: center; padding: 5px 0 4px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); cursor: pointer; color: var(--ink); font: inherit; }
+.vs-el b { font-family: var(--f-display); font-size: 16px; line-height: 1.1; }
+.vs-el small { font-size: 10.5px; color: var(--muted); }
+.vs-el:hover { border-color: var(--accent); }
+.vs-el.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.vs-el.on small { color: inherit; opacity: .85; }
+.vs-add { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+.vs-add > span { font-size: 12.5px; font-weight: 650; color: var(--muted); min-width: 84px; }
+.vs-add > span + span { min-width: 0; margin-left: 6px; }
+.vs-add .btn.sm { padding: 5px 9px; min-width: 38px; justify-content: center; }
+.vs-add .vs-lpb { border-color: color-mix(in srgb, #8f6bff 60%, var(--line)); }
+.vs-add .vs-lpb span { color: #8f6bff; letter-spacing: .1em; }
+.vs-list { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; min-height: 28px; }
+.vs-dom { font: inherit; font-size: 13px; font-weight: 650; padding: 4px 9px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel-2); color: var(--ink); cursor: pointer; }
+.vs-dom.lp { background: color-mix(in srgb, #8f6bff 16%, var(--panel)); border-color: color-mix(in srgb, #8f6bff 45%, var(--line)); }
+.vs-dom:hover { border-color: var(--bad); }
+.vs-dom span { color: var(--muted); margin-left: 3px; }
+.vs-tog { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; }
+.vs-tog label { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
+.vs-goal { border: 1px solid var(--line); border-radius: 10px; padding: 9px 11px; display: grid; gap: 4px; background: var(--panel-2); margin-top: 2px; }
+.vs-goal .vs-lab { margin: 0 0 2px; color: var(--accent); }
+.vs-ck { display: grid; grid-template-columns: 18px 1fr; gap: 6px; font-size: 13.5px; color: var(--muted); }
+.vs-ck.ok { color: var(--ok); }
+.vs-qz { border-top: 1px solid var(--line); padding-top: 10px; }
+/* ── the info card inside the stage (a foreignObject, so sizes are in stage units) ── */
+.vs-fo { width: 346px; height: 592px; box-sizing: border-box; overflow: hidden; background: #f7fafd; color: #0f2238; border-radius: 14px; padding: 15px 17px; font: 14px/1.42 var(--f-body); display: flex; flex-direction: column; }
+.vs-card { display: flex; flex-direction: column; min-height: 100%; }
+.vs-card .muted { color: #5b6b80; }
+.vs-hd { border-bottom: 2px solid #d5dfea; padding-bottom: 8px; margin-bottom: 6px; }
+.vs-f { font: 800 30px/1.1 var(--f-display); letter-spacing: -.01em; }
+.vs-r { display: flex; justify-content: space-between; gap: 10px; padding: 3.5px 0; border-bottom: 1px dashed #e1e8f0; font-size: 13.5px; }
+.vs-r span { color: #5b6b80; flex: none; }
+.vs-r b { text-align: right; font-weight: 700; }
+.vs-r.hi b { color: #1167c2; font-size: 15px; }
+.vs-r.pol b { color: #b4461a; }
+.vs-why { margin: 9px 0 8px; font-size: 13px; background: #eaf3fd; border-radius: 8px; padding: 7px 9px; }
+.vs-orb p { margin: 4px 0 0; font-size: 11.5px; color: #33475e; }
+.vs-obs { display: flex; flex-wrap: wrap; gap: 3px; align-items: flex-end; }
+.vs-ob { display: grid; justify-items: center; gap: 1px; }
+.vs-ob i { width: 26px; height: 24px; border: 1.5px solid #3a4d63; display: grid; place-items: center; font-style: normal; font-weight: 800; font-size: 13px; background: #fff; color: #0f2238; }
+.vs-ob.lp i { background: #efe9ff; border-color: #6a45e8; color: #4b2bb8; }
+.vs-ob.pi i { background: #fff6dd; border-color: #c98a12; }
+.vs-ob.empty i { border-style: dashed; background: transparent; }
+.vs-ob small { font-size: 9.5px; color: #5b6b80; }
+.vs-gap { width: 8px; }
+.vs-e { margin-top: auto; display: flex; justify-content: space-between; gap: 8px; font-size: 12px; color: #33475e; border-top: 1px solid #d5dfea; padding-top: 7px; flex-wrap: wrap; }
+.vs-e .warn { color: #c2410c; font-weight: 700; }
 
 /* ── game ── */
 .game { display: grid; gap: 18px; }
@@ -1794,14 +1845,14 @@ const DNALab = (() => {
     show();
   }
   function results(secs) {
-    const n = K.mistakes.length, stars = n === 0 && quizScore >= 4 ? 3 : n <= 2 && quizScore >= 3 ? 2 : 1;
+    const mis = uniqMistakes(K.mistakes), n = mis.length, stars = labStars(n, quizScore, QUIZ.length, STEPS.length);
     saveRecord({ name: run.student, lab: META.short, at: new Date().toISOString(), mistakes: n, quiz: `${quizScore}/${QUIZ.length}`, secs, stars });
     const verdict = stars === 3 ? ['Lab ready', 'You followed every step safely. You’re ready for the real lab.'] : stars === 2 ? ['Almost ready', 'Good work. Review the mistakes below before the real lab.'] : ['Practice again', 'Run the virtual lab once more before the real one.'];
     K.side.innerHTML = `<div class="cur results"><div class="pip-row">${pipFace(stars >= 3 ? 'happy' : 'think', 58)}<span class="eyebrow">Results${run.student ? ' · ' + esc(run.student) : ''}</span></div>
       <div class="res-stars" aria-label="${stars} of 3 stars">${[1, 2, 3].map(i => `<svg viewBox="0 0 24 24" fill="${i <= stars ? '#f2b33d' : 'none'}" stroke="${i <= stars ? '#c98a12' : 'currentColor'}" stroke-width="1.5" style="color:var(--line)">${IC.star}</svg>`).join('')}</div>
       <h2>${verdict[0]}</h2><p class="small">${verdict[1]}</p>
       <div class="tiles"><div class="tile"><span class="eyebrow">Mistakes</span><b>${n}</b></div><div class="tile"><span class="eyebrow">Quiz</span><b>${quizScore}/${QUIZ.length}</b></div><div class="tile"><span class="eyebrow">Time</span><b>${fmtTime(secs)}</b></div></div>
-      ${n ? `<div class="mist"><span class="eyebrow">Watch for these in the real lab</span>${K.mistakes.map(m => `<div><b>${esc(m.step)}:</b> ${esc(m.title)}</div>`).join('')}</div>` : ''}
+      ${n ? `<div class="mist"><span class="eyebrow">Watch for these in the real lab</span>${mis.map(m => `<div><b>${esc(m.step)}:</b> ${esc(m.title)}</div>`).join('')}</div>` : ''}
       <div class="row"><button class="btn primary" id="rAgain">Run the lab again</button><button class="btn" id="rBack">Back to labs</button></div></div>`;
     $('#rAgain').onclick = () => start(run); $('#rBack').onclick = () => K.exit();
     if (stars === 3) { SND.win(); confetti(); }
@@ -1825,6 +1876,7 @@ const DNALab = (() => {
 /* ═══════════ Shared lab parts ═══════════
    makeLab() turns a lab description into a full lab: suit up → gather → procedure steps → check your thinking → results.
    A lab supplies: meta, defs, fresh(), ppe {need, decoys}, gather {items, hint}, steps [{id,name,title,html,hint}],
+   (or noSetup: true to skip suit-up and gathering and go straight to the steps, e.g. a modeling activity),
    S {stepId: R => build the scene and interactions}, quiz [{q,a,c,e}], bg(), finale(R).
    Inside a step, read and write R.st (the lab state). Call R.next() when the step is done and R.oops({...}) for a mistake. */
 
@@ -1916,20 +1968,26 @@ const LabParts = {
   }
 };
 
+/* stars for a finished lab. The same mistake made again (for example on a retry) counts once, and the number of
+   mistakes allowed grows with the length of the lab, so one slip at suit-up doesn't decide the result.
+   3 stars: quiz 80%+ and at most a quarter as many mistakes as steps (min 2).  2 stars: quiz 60%+ and at most about twice that.  Otherwise 1. */
+function uniqMistakes(list) { const seen = new Set(); return list.filter(m => { const k = (m.step || '') + '|' + m.title; if (seen.has(k)) return false; seen.add(k); return true; }); }
+function labStars(n, qs, qn, nSteps) { const q = qn ? qs / qn : 1, ok = Math.max(2, Math.round((nSteps || 8) / 4)); return q >= .8 && n <= ok ? 3 : q >= .6 && n <= ok * 2 + 2 ? 2 : 1; }
+
 function makeLab(L) {
   const K = Kit, R = { st: null, i: 0, run: null, snap: '', quizScore: 0 };
   const steps = L.steps;
-  R.sheet = (extra, html) => { const s = steps[R.i]; K.sheet({ title: `Part 3 · Step ${R.i + 1} of ${steps.length}`, html: `<h3 style="margin-bottom:4px">${s.title}</h3>${html || s.html}`, hint: s.hint, steps: steps.map(x => x.name), cur: R.i, extra }); };
+  R.sheet = (extra, html) => { const s = steps[R.i]; K.sheet({ title: L.noSetup ? `Part 1 · Challenge ${R.i + 1} of ${steps.length}` : `Part 3 · Step ${R.i + 1} of ${steps.length}`, html: `<h3 style="margin-bottom:4px">${s.title}</h3>${html || s.html}`, hint: s.hint, steps: steps.map(x => x.name), cur: R.i, extra }); };
   R.next = (delay = 650) => { if (R._adv) return; R._adv = true; SND.step(); K.msg('Step complete', 'ok', 1400); K.after(delay, () => { R.i++; if (R.i >= steps.length) quiz(); else R.runStep(R.i); }); };
   R.retry = () => { R.st = JSON.parse(R.snap); R.runStep(R.i); };
   R.oops = o => K.oops(Object.assign({ retry: R.retry, step: steps[R.i].title }, o));
   R.slip = (o, extra = '') => { const at = { x: o.x, y: o.y - 50 }; o.g.setAttribute('visibility', 'hidden'); R.oops({ title: 'Butterfingers!', text: 'You moved the glassware so fast that it slipped and shattered.' + extra, why: 'Glassware is slippery, especially with gloves on. Move it slowly and keep it low over the bench. Tell your teacher about broken glass and never pick it up with your hands.', fx: 'shatter', at }); };
   R.mistake = (title, why) => { K.addMistake({ title, why, step: steps[R.i].title }); SND.nope(); };
-  R.runStep = i => { K.clear(); R._adv = false; K.phase('Part 3 of 4 · Procedure'); R.i = i; R.snap = JSON.stringify(R.st); K.setBg(L.bg ? L.bg() : BG.bench()); R.sheet(); L.S[steps[i].id](R); };
+  R.runStep = i => { K.clear(); R._adv = false; K.phase(L.noSetup ? 'Part 1 of 2 · Build and explore' : 'Part 3 of 4 · Procedure'); R.i = i; R.snap = JSON.stringify(R.st); K.setBg(L.bg ? L.bg() : BG.bench()); R.sheet(); L.S[steps[i].id](R); };
   function start(r) {
     R.run = r; R.st = L.fresh(); R.i = 0;
-    K.mount({ title: L.meta.title, defs: DNA_DEFS + (L.defs || ''), back: r.back, onExit: confirmExit, ppe: L.ppe.need });
-    LabParts.ppe(K, L.ppe, () => LabParts.gather(K, L.gather, () => R.runStep(0)));
+    K.mount({ title: L.meta.title, defs: DNA_DEFS + (L.defs || ''), back: r.back, onExit: confirmExit, ppe: L.ppe ? L.ppe.need : [] });
+    if (L.noSetup) R.runStep(0); else LabParts.ppe(K, L.ppe, () => LabParts.gather(K, L.gather, () => R.runStep(0)));
   }
   function confirmExit() {
     if (K.frozen) { K.exit(); return; } if ($('#xL', K.stage)) return;
@@ -1938,13 +1996,13 @@ function makeLab(L) {
     K.stage.appendChild(o); $('#xS').onclick = () => o.remove(); $('#xL').onclick = () => K.exit();
   }
   function quiz() {
-    K.clear(); K.phase('Part 4 of 4 · Check your thinking'); K.frozen = true; const secs = K.secs();
+    K.clear(); K.phase(L.noSetup ? 'Part 2 of 2 · Check your thinking' : 'Part 4 of 4 · Check your thinking'); K.frozen = true; const secs = K.secs();
     K.setBg(L.bg ? L.bg() : BG.bench()); L.finale && L.finale(R);
     let qi = 0; R.quizScore = 0; const Q = L.quiz;
     const show = () => {
       if (qi >= Q.length) return results(secs);
       const q = Q[qi], order = q.a.map((_, i) => i).sort(() => Math.random() - .5);
-      K.side.innerHTML = `<div class="cur"><span class="eyebrow">Part 4 · Question ${qi + 1} of ${Q.length}</span><div class="quiz"><div class="q">${esc(q.q)}</div><div class="opts">${order.map(i => `<button class="opt" data-i="${i}">${esc(q.a[i])}</button>`).join('')}</div><div class="exp" id="qExp"></div></div></div>`;
+      K.side.innerHTML = `<div class="cur"><span class="eyebrow">Part ${L.noSetup ? 2 : 4} · Question ${qi + 1} of ${Q.length}</span><div class="quiz"><div class="q">${esc(q.q)}</div><div class="opts">${order.map(i => `<button class="opt" data-i="${i}">${esc(q.a[i])}</button>`).join('')}</div><div class="exp" id="qExp"></div></div></div>`;
       let lock = false;
       $$('.opt', K.side).forEach(b => b.onclick = () => {
         if (lock) return; lock = true; const i = +b.dataset.i, ok = i === q.c;
@@ -1956,19 +2014,19 @@ function makeLab(L) {
     K.msg(L.finaleMsg || 'Procedure complete. Now check your thinking.', 'ok', 4000); show();
   }
   function results(secs) {
-    const n = K.mistakes.length, qs = R.quizScore, qn = L.quiz.length, stars = n === 0 && qs >= qn - 1 ? 3 : n <= 2 && qs >= qn - 2 ? 2 : 1;
+    const mis = uniqMistakes(K.mistakes), n = mis.length, qs = R.quizScore, qn = L.quiz.length, stars = labStars(n, qs, qn, steps.length);
     saveRecord({ name: R.run.student, lab: L.meta.short, at: new Date().toISOString(), mistakes: n, quiz: `${qs}/${qn}`, secs, stars });
-    const verdict = stars === 3 ? ['Lab ready', 'You followed every step safely. You’re ready for the real lab.'] : stars === 2 ? ['Almost ready', 'Good work. Review the mistakes below before the real lab.'] : ['Practice again', 'Run the virtual lab once more before the real one.'];
+    const verdict = L.verdicts ? L.verdicts[3 - stars] : stars === 3 ? ['Lab ready', 'You followed every step safely. You’re ready for the real lab.'] : stars === 2 ? ['Almost ready', 'Good work. Review the mistakes below before the real lab.'] : ['Practice again', 'Run the virtual lab once more before the real one.'];
     K.side.innerHTML = `<div class="cur results"><div class="pip-row">${pipFace(stars >= 3 ? 'happy' : 'think', 58)}<span class="eyebrow">Results${R.run.student ? ' · ' + esc(R.run.student) : ''}</span></div>
       <div class="res-stars" aria-label="${stars} of 3 stars">${[1, 2, 3].map(i => `<svg viewBox="0 0 24 24" fill="${i <= stars ? '#f2b33d' : 'none'}" stroke="${i <= stars ? '#c98a12' : 'currentColor'}" stroke-width="1.5" style="color:var(--line)">${IC.star}</svg>`).join('')}</div>
       <h2>${verdict[0]}</h2><p class="small">${verdict[1]}</p>${L.summary ? `<div class="small">${L.summary(R)}</div>` : ''}
       <div class="tiles"><div class="tile"><span class="eyebrow">Mistakes</span><b>${n}</b></div><div class="tile"><span class="eyebrow">Quiz</span><b>${qs}/${qn}</b></div><div class="tile"><span class="eyebrow">Time</span><b>${fmtTime(secs)}</b></div></div>
-      ${n ? `<div class="mist"><span class="eyebrow">Watch for these in the real lab</span>${K.mistakes.map(m => `<div><b>${esc(m.step)}:</b> ${esc(m.title)}</div>`).join('')}</div>` : ''}
+      ${n ? `<div class="mist"><span class="eyebrow">${L.reviewLabel || 'Watch for these in the real lab'}</span>${mis.map(m => `<div><b>${esc(m.step)}:</b> ${esc(m.title)}</div>`).join('')}</div>` : ''}
       <div class="row"><button class="btn primary" id="rAgain">Run the lab again</button><button class="btn" id="rBack">Back to labs</button></div></div>`;
     $('#rAgain').onclick = () => start(R.run); $('#rBack').onclick = () => K.exit();
     if (stars === 3) { SND.win(); confetti(); }
   }
-  const api = { start, R, _jump: (i, o) => { R.st = Object.assign(L.fresh(), o || {}); L.ppe.need.forEach(k => K.ppe(k === 'gloves' ? 'glove' : k, true)); R.runStep(i); } };
+  const api = { start, R, _jump: (i, o) => { R.st = Object.assign(L.fresh(), o || {}); (L.ppe ? L.ppe.need : []).forEach(k => K.ppe(k === 'gloves' ? 'glove' : k, true)); R.runStep(i); } };
   L.meta.run = r => start(r); LABS.push(L.meta);
   return api;
 }
@@ -2019,7 +2077,16 @@ function labThumb(id, big) {
       <g transform="translate(200 118) scale(.42)"><path d="M-91,-110 L-91,-212" stroke="#d8aaa2" stroke-width="40"/><path d="M8,-70 C4,-120 10,-170 26,-196 L62,-196 C50,-168 44,-122 46,-74Z" fill="#d8aaa2"/><path d="M-130,-42 C-156,-86 -134,-134 -88,-124 C-60,-118 -44,-96 -50,-68 C-72,-56 -102,-40 -130,-42Z" fill="#c4716a"/><path d="M66,-66 C80,-104 132,-104 132,-70 C132,-44 108,-36 92,-46Z" fill="#c4716a"/>
         <path d="M-124,-50 C-144,30 -74,124 46,172 C86,132 130,52 120,-50 C72,-78 -62,-80 -124,-50Z" fill="#a9524d" stroke="#7c3434" stroke-width="4"/><path d="M-4,-62 C4,10 24,92 44,164" fill="none" stroke="#ecd6a2" stroke-width="16" stroke-linecap="round"/><path d="M-2,-62 C6,10 26,92 44,160" fill="none" stroke="#c23a3a" stroke-width="4"/>
         <path d="M-50,-58 C-54,-106 -44,-146 -24,-170 L16,-170 C4,-144 -2,-104 -6,-56Z" fill="#e0b6ae" stroke="#a87b74" stroke-width="3"/></g>
-      <g transform="translate(318 132) rotate(-38)"><path d="M-3,0 L-6,-60 L2,-60Z" fill="#cfd6da"/><path d="M3,0 L6,-60 L-2,-60Z" fill="#cfd6da"/><ellipse cx="-10" cy="-78" rx="8" ry="11" fill="none" stroke="#d64045" stroke-width="5"/><ellipse cx="10" cy="-76" rx="8" ry="11" fill="none" stroke="#d64045" stroke-width="5"/></g>`
+      <g transform="translate(318 132) rotate(-38)"><path d="M-3,0 L-6,-60 L2,-60Z" fill="#cfd6da"/><path d="M3,0 L6,-60 L-2,-60Z" fill="#cfd6da"/><ellipse cx="-10" cy="-78" rx="8" ry="11" fill="none" stroke="#d64045" stroke-width="5"/><ellipse cx="10" cy="-76" rx="8" ry="11" fill="none" stroke="#d64045" stroke-width="5"/></g>`,
+    vsepr: `<ellipse cx="200" cy="120" rx="150" ry="100" fill="#1d3a5c" opacity=".5"/>
+      <ellipse cx="200" cy="62" rx="26" ry="40" fill="#8f6bff" opacity=".55"/><circle cx="194" cy="48" r="3.4" fill="#3b1f8f"/><circle cx="206" cy="48" r="3.4" fill="#3b1f8f"/>
+      <line x1="200" y1="122" x2="128" y2="168" stroke="#0a1420" stroke-width="11" stroke-linecap="round"/><line x1="200" y1="122" x2="128" y2="168" stroke="#dfe6ee" stroke-width="7" stroke-linecap="round"/>
+      <line x1="200" y1="122" x2="276" y2="166" stroke="#0a1420" stroke-width="11" stroke-linecap="round"/><line x1="200" y1="122" x2="276" y2="166" stroke="#dfe6ee" stroke-width="7" stroke-linecap="round"/>
+      <line x1="200" y1="122" x2="214" y2="196" stroke="#0a1420" stroke-width="11" stroke-linecap="round"/><line x1="200" y1="122" x2="214" y2="196" stroke="#dfe6ee" stroke-width="7" stroke-linecap="round"/>
+      <path d="M160,148 Q200,170 240,146" fill="none" stroke="#ffd27a" stroke-width="2.4" stroke-dasharray="5 4"/>
+      <circle cx="128" cy="168" r="15" fill="#f4f4f4"/><circle cx="276" cy="166" r="15" fill="#f4f4f4"/><circle cx="214" cy="196" r="16" fill="#f4f4f4"/>
+      <circle cx="200" cy="120" r="27" fill="#3b6fe0"/><circle cx="191" cy="110" r="8" fill="#fff" opacity=".35"/><text x="200" y="128" font-size="22" font-weight="800" fill="#fff" text-anchor="middle" font-family="sans-serif">N</text>
+      <text x="318" y="98" font-size="20" font-weight="800" fill="#ffd27a" text-anchor="middle" font-family="sans-serif">107°</text>`,
   };
   void big;
   return `<svg viewBox="0 0 400 240" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${bg}${art[id] || ''}</svg>`;
@@ -3584,6 +3651,387 @@ const HeartLab = (() => {
   });
 })();
 
+/* ═══ VSEPR geometry + chemistry (pure functions; no DOM). Shared by the lab and by the test script. ═══ */
+const VG = (() => {
+  const R = d => d * Math.PI / 180, nrm = a => { const l = Math.hypot(a[0], a[1], a[2]) || 1; return [a[0] / l, a[1] / l, a[2] / l]; };
+  const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+  const ang = (a, b) => Math.acos(Math.max(-1, Math.min(1, dot(nrm(a), nrm(b))))) * 180 / Math.PI;
+  /* central atoms: valence electrons, period, electronegativity, colour */
+  const EL = {
+    Be: { v: 2, p: 2, en: 1.57, c: '#5fb37a', n: 'beryllium' }, B: { v: 3, p: 2, en: 2.04, c: '#f2a68a', n: 'boron' },
+    C: { v: 4, p: 2, en: 2.55, c: '#4b5563', n: 'carbon' }, N: { v: 5, p: 2, en: 3.04, c: '#3b6fe0', n: 'nitrogen' },
+    O: { v: 6, p: 2, en: 3.44, c: '#e0453a', n: 'oxygen' }, Si: { v: 4, p: 3, en: 1.90, c: '#d9b384', n: 'silicon' },
+    P: { v: 5, p: 3, en: 2.19, c: '#f08a24', n: 'phosphorus' }, S: { v: 6, p: 3, en: 2.58, c: '#e8c62e', n: 'sulfur' },
+    Cl: { v: 7, p: 3, en: 3.16, c: '#2fbf4f', n: 'chlorine' }, Br: { v: 7, p: 4, en: 2.96, c: '#a5312a', n: 'bromine' },
+    I: { v: 7, p: 5, en: 2.66, c: '#8a3fb5', n: 'iodine' }, Xe: { v: 8, p: 5, en: 2.6, c: '#3fb6c9', n: 'xenon' },
+    H: { v: 1, p: 1, en: 2.20, c: '#f4f4f4', n: 'hydrogen' }, F: { v: 7, p: 2, en: 3.98, c: '#9be27a', n: 'fluorine' }
+  };
+  const CENTRAL = ['Be', 'B', 'C', 'N', 'O', 'Si', 'P', 'S', 'Cl', 'Br', 'I', 'Xe'];
+  /* outer atoms you can attach, by bond order */
+  const OUTER = { 1: ['H', 'F', 'Cl', 'Br', 'I'], 2: ['O', 'S'], 3: ['N'] };
+  const RAD = { H: .2, F: .27, Cl: .32, Br: .34, I: .37, O: .29, S: .33, N: .3 };
+
+  const S3 = Math.sqrt(3) / 2, T1 = 1 / 3, T2 = Math.sqrt(8) / 3;
+  /* ideal electron-domain directions; y is up */
+  const SITES = {
+    1: [[0, -1, 0]],
+    2: [[1, 0, 0], [-1, 0, 0]],
+    3: [[0, 1, 0], [S3, -.5, 0], [-S3, -.5, 0]],
+    4: [[0, 1, 0], [T2, -T1, 0], [-T2 / 2, -T1, Math.sqrt(2 / 3)], [-T2 / 2, -T1, -Math.sqrt(2 / 3)]],
+    5: [[1, 0, 0], [-.5, 0, S3], [-.5, 0, -S3], [0, 1, 0], [0, -1, 0]],
+    6: [[0, -1, 0], [0, 1, 0], [1, 0, 0], [-1, 0, 0], [0, 0, 1], [0, 0, -1]]
+  };
+  const EGEOM = { 1: 'Linear', 2: 'Linear', 3: 'Trigonal planar', 4: 'Tetrahedral', 5: 'Trigonal bipyramidal', 6: 'Octahedral' };
+  const IDEAL = { 2: '180°', 3: '120°', 4: '109.5°', 5: '90°, 120° and 180°', 6: '90° and 180°' };
+  const HYB = { 2: 'sp', 3: 'sp²', 4: 'sp³', 5: 'sp³d', 6: 'sp³d²' };
+  const SHAPE = { '2,0': 'Linear', '2,1': 'Linear', '3,0': 'Trigonal planar', '3,1': 'Bent', '3,2': 'Linear', '4,0': 'Tetrahedral', '4,1': 'Trigonal pyramidal', '4,2': 'Bent', '4,3': 'Linear',
+    '5,0': 'Trigonal bipyramidal', '5,1': 'Seesaw', '5,2': 'T-shaped', '5,3': 'Linear', '6,0': 'Octahedral', '6,1': 'Square pyramidal', '6,2': 'Square planar', '6,3': 'T-shaped', '6,4': 'Linear' };
+  const SUB = n => String(n).replace(/\d/g, d => '₀₁₂₃₄₅₆₇₈₉'[d]);
+
+  /* bond domains vs lone pairs; returns everything the lab shows */
+  function analyze(b) {
+    const c = EL[b.c], bonds = b.doms.filter(d => !d.lp), L = b.doms.length - bonds.length, B = bonds.length, D = B + L;
+    const sig = B, pi = bonds.reduce((s, d) => s + d.order - 1, 0), shared = bonds.reduce((s, d) => s + d.order, 0);
+    const fc = c.v - 2 * L - shared, around = 2 * shared + 2 * L;
+    const r = { D, B, L, sigma: sig, pi, fc, around, el: c };
+    r.egeom = D >= 2 ? EGEOM[D] : '—'; r.hyb = D >= 2 ? HYB[D] : '—';
+    r.shape = B === 0 ? 'No molecule yet' : B === 1 ? 'Linear (two atoms)' : SHAPE[D + ',' + L] || '—';
+    r.axe = 'AX' + (B > 1 ? SUB(B) : B === 1 ? '' : SUB(0)) + (L ? 'E' + (L > 1 ? SUB(L) : '') : '');
+    r.formula = formula(b, fc); r.name = NAMES[r.formula] || '';
+    return r;
+  }
+  function formula(b, fc) {
+    const cnt = {}; b.doms.forEach(d => { if (!d.lp) cnt[d.at] = (cnt[d.at] || 0) + 1; });
+    const ks = Object.keys(cnt).sort((x, y) => (x === 'H' ? -1 : y === 'H' ? 1 : x < y ? -1 : 1));
+    const part = k => k + (cnt[k] > 1 ? SUB(cnt[k]) : '');
+    /* water-style names put H first (H₂O, H₂S); hydrides of N, P, C, Si put the central atom first */
+    /* usual way of writing: H₂O and H₂S put hydrogen first, HCN is written in bond order, everything else central atom first */
+    let f = ((b.c === 'O' || b.c === 'S') && ks.length === 1 && ks[0] === 'H') ? part('H') + b.c
+      : (b.c === 'C' && cnt.H === 1 && cnt.N === 1 && ks.length === 2) ? 'HCN'
+      : (['F', 'Cl', 'Br', 'I'].includes(b.c) && ks.length === 1 && ks[0] === 'H') ? 'H' + b.c
+      : b.c + ks.map(part).join('');
+    if (Math.abs(fc) === 1) f += fc > 0 ? '⁺' : '⁻'; /* a real ion; larger charges only happen halfway through building */
+    return f;
+  }
+  const NAMES = { 'CH₄': 'methane', 'NH₃': 'ammonia', 'H₂O': 'water', 'CO₂': 'carbon dioxide', 'BF₃': 'boron trifluoride', 'BeCl₂': 'beryllium chloride', 'HCN': 'hydrogen cyanide',
+    'CH₂O': 'formaldehyde', 'SO₂': 'sulfur dioxide', 'SO₃': 'sulfur trioxide', 'PCl₅': 'phosphorus pentachloride', 'SF₄': 'sulfur tetrafluoride', 'ClF₃': 'chlorine trifluoride', 'XeF₂': 'xenon difluoride',
+    'SF₆': 'sulfur hexafluoride', 'BrF₅': 'bromine pentafluoride', 'XeF₄': 'xenon tetrafluoride', 'PCl₃': 'phosphorus trichloride', 'CCl₄': 'carbon tetrachloride', 'SiH₄': 'silane', 'H₂S': 'hydrogen sulfide',
+    'NF₃': 'nitrogen trifluoride', 'OF₂': 'oxygen difluoride', 'BCl₃': 'boron trichloride', 'CH₃Cl': 'chloromethane', 'CH₂Cl₂': 'dichloromethane', 'CHCl₃': 'chloroform', 'PH₃': 'phosphine', 'BeH₂': 'beryllium hydride',
+    'CS₂': 'carbon disulfide', 'NH₄⁺': 'ammonium ion', 'BF₄⁻': 'tetrafluoroborate ion', 'ICl₄⁻': 'tetrachloroiodate ion', 'IF₅': 'iodine pentafluoride', 'ClF₅': 'chlorine pentafluoride', 'I₃⁻': 'triiodide ion',
+    'PF₅': 'phosphorus pentafluoride', 'HCl': 'hydrogen chloride', 'HBr': 'hydrogen bromide', 'HI': 'hydrogen iodide', 'SCl₂': 'sulfur dichloride', 'XeO₃': 'xenon trioxide', 'SiCl₄': 'silicon tetrachloride', 'BH₃': 'borane', 'BrF₃': 'bromine trifluoride', 'IF₃': 'iodine trifluoride', 'SeF₄': 'selenium tetrafluoride' };
+
+  /* can this domain be added? returns '' or the reason */
+  function canAdd(b, dom) {
+    const c = EL[b.c], nb = { c: b.c, doms: b.doms.concat([dom]) }, a = analyze(nb), maxD = c.p === 2 ? 4 : 6;
+    if (a.D > maxD) return c.p === 2 ? `${cap(c.n)} is in period 2. It only has one 2s and three 2p orbitals, so it can hold at most 4 electron domains.` : 'Six electron domains is the most an atom can hold in this model.';
+    if (c.p === 2 && a.around > 8) return `That would put ${a.around} electrons around ${c.n}. Period-2 atoms can’t go past an octet (8 electrons): there are no 2d orbitals.`;
+    if (a.around > 12) return `That would put ${a.around} electrons around ${c.n}. Even expanded octets top out at 12 here.`;
+    if (a.fc < -1) return `${cap(c.n)} has only ${c.v} valence electrons. Adding that would give it a formal charge of ${a.fc}: it doesn’t have that many electrons to share.`;
+    return '';
+  }
+  const cap = s => s[0].toUpperCase() + s.slice(1);
+
+  /* ── directions for each domain (in b.doms order), using measured angles for the squeezed shapes ── */
+  function dirs(b) {
+    const D = b.doms.length, L = b.doms.filter(d => d.lp).length, B = D - L; if (!D) return [];
+    const lpIdx = b.doms.map((d, i) => d.lp ? i : -1).filter(i => i >= 0), bIdx = b.doms.map((d, i) => d.lp ? -1 : i).filter(i => i >= 0);
+    let lpV = [], bV = [];
+    const multi = bIdx.map(i => b.doms[i].order > 1);
+    if (D === 3 && L === 1) { const t = R((multi[0] && multi[1]) ? 119 : 117) / 2; lpV = [[0, 1, 0]]; bV = [[Math.sin(t), -Math.cos(t), 0], [-Math.sin(t), -Math.cos(t), 0]]; }
+    else if (D === 3 && L === 0 && multi.filter(Boolean).length === 1) { /* formaldehyde-like: the double bond spreads the two singles to 122°, squeezing them to 116° */
+      const t = R(58), singles = [[Math.sin(t), -Math.cos(t), 0], [-Math.sin(t), -Math.cos(t), 0]]; let j = 0; bV = multi.map(m => m ? [0, 1, 0] : singles[j++]); }
+    else if (D === 4 && L === 1) { /* trigonal pyramid, 107° */ const a = polarFor(107); lpV = [[0, 1, 0]]; bV = [0, 120, 240].map(p => [Math.sin(a) * Math.cos(R(p)), -Math.cos(a), Math.sin(a) * Math.sin(R(p))]); }
+    else if (D === 4 && L === 2) { const t = R(104.5) / 2, u = R(57.5); bV = [[Math.sin(t), -Math.cos(t), 0], [-Math.sin(t), -Math.cos(t), 0]]; lpV = [[0, Math.cos(u), Math.sin(u)], [0, Math.cos(u), -Math.sin(u)]]; }
+    else if (D === 5 && L === 1) { /* seesaw: equatorial 102°, axial 173° bent away from the lone pair */ const t = R(51), k = R(3.5); lpV = [[1, 0, 0]]; bV = [[-Math.cos(t), 0, Math.sin(t)], [-Math.cos(t), 0, -Math.sin(t)], [-Math.sin(k), Math.cos(k), 0], [-Math.sin(k), -Math.cos(k), 0]]; }
+    else if (D === 5 && L === 2) { /* T-shape: 87.5° */ const k = R(2.5); lpV = [[.5, 0, S3], [.5, 0, -S3]]; bV = [[-1, 0, 0], [-Math.sin(k), Math.cos(k), 0], [-Math.sin(k), -Math.cos(k), 0]]; }
+    else if (D === 5 && L === 3) { lpV = [[1, 0, 0], [-.5, 0, S3], [-.5, 0, -S3]]; bV = [[0, 1, 0], [0, -1, 0]]; }
+    else if (D === 6 && L === 1) { /* square pyramid: 84.8° from the apex */ const e = R(90 - 84.8); lpV = [[0, -1, 0]]; bV = [[0, 1, 0]].concat([0, 90, 180, 270].map(p => [Math.cos(e) * Math.cos(R(p)), Math.sin(e), Math.cos(e) * Math.sin(R(p))])); }
+    else if (D === 6 && L === 2) { lpV = [[0, -1, 0], [0, 1, 0]]; bV = [[1, 0, 0], [0, 0, 1], [-1, 0, 0], [0, 0, -1]]; }
+    else if (D === 4 && L === 3) { /* one bond (HF, HCl): the bond points down, the three lone pairs spread above it */
+      bV = [[0, -1, 0]]; lpV = [[T2, T1, 0], [-T2 / 2, T1, Math.sqrt(2 / 3)], [-T2 / 2, T1, -Math.sqrt(2 / 3)]]; }
+    else { /* ideal: lone pairs take the first sites in this order (equatorial first for 5; opposite pairs for 6) */
+      const S = SITES[D], lpSites = [0, 1, 2, 3, 4, 5], used = new Set(lpSites.slice(0, L));
+      lpV = lpSites.slice(0, L).map(i => S[i]); bV = S.filter((_, i) => !used.has(i)); }
+    const out = new Array(D); lpIdx.forEach((di, k) => { out[di] = nrm(lpV[k]); }); bIdx.forEach((di, k) => { out[di] = nrm(bV[k]); });
+    return out;
+  }
+  /* polar angle α (from the downward axis) that gives three equivalent bonds a bond angle θ */
+  function polarFor(theta) { const c = Math.cos(R(theta)); /* cosθ = cos²α − ½sin²α = 1.5cos²α − .5 */ return Math.acos(Math.sqrt((c + .5) / 1.5)); }
+
+  /* which bond angles to label: pairs of bond indices (into b.doms) + text */
+  function arcs(b, v) {
+    const bi = b.doms.map((d, i) => d.lp ? -1 : i).filter(i => i >= 0), D = b.doms.length, L = D - bi.length;
+    if (bi.length < 2) return [];
+    const pairs = []; for (let x = 0; x < bi.length; x++) for (let y = x + 1; y < bi.length; y++) pairs.push([bi[x], bi[y], ang(v[bi[x]], v[bi[y]])]);
+    const fmt = a => (Math.abs(a - Math.round(a)) < .05 ? Math.round(a) : Math.round(a * 10) / 10) + '°';
+    /* one arc per distinct angle (rounded), smallest first; skip 180° when other angles exist (it is hard to see) */
+    const seen = new Map(); pairs.forEach(p => { const k = Math.round(p[2] * 2) / 2; if (!seen.has(k)) seen.set(k, p); });
+    let list = [...seen.values()].sort((a, b2) => a[2] - b2[2]);
+    /* seesaw: label the two angles chemists quote (equatorial ≈102°, axial ≈173°) */
+    if (D === 5 && L === 1) list = [100, 175].map(t => list.reduce((m, p) => Math.abs(p[2] - t) < Math.abs(m[2] - t) ? p : m));
+    else { if (list.length > 1) list = list.filter(p => p[2] < 179); if (list.length > 2) list = list.slice(0, 2); }
+    return list.map(p => ({ i: p[0], j: p[1], deg: p[2], t: fmt(p[2]) }));
+  }
+
+  /* net dipole from bond dipoles (toward the more electronegative atom) and lone pairs */
+  function polarity(b, v) {
+    const c = EL[b.c]; let s = [0, 0, 0], polarBond = false;
+    b.doms.forEach((d, i) => { const w = d.lp ? 1 : (EL[d.at].en - c.en); if (!d.lp && Math.abs(w) >= .4) polarBond = true; /* C–H (0.35) counts as a nonpolar bond */ s = [s[0] + v[i][0] * w, s[1] + v[i][1] * w, s[2] + v[i][2] * w]; });
+    const B = b.doms.filter(d => !d.lp).length; if (B < 1) return null;
+    const m = Math.hypot(...s); return { polar: m > .08 && (polarBond || b.doms.some(d => d.lp)), polarBond, m };
+  }
+  return { EL, CENTRAL, OUTER, RAD, analyze, canAdd, dirs, arcs, polarity, ang, SUB, NAMES };
+})();
+
+/* ═══════════ HS Chemistry: VSEPR shapes (a molecule builder, no lab bench) ═══════════
+   Students pick a central atom, add single/double/triple bonds and lone pairs, and watch a 3D model rearrange.
+   The side panel gives a challenge molecule at each step; a short question checks the idea before moving on.
+   Geometry and chemistry come from VG (above): measured angles for squeezed shapes, hybridization, polarity. */
+const VseprLab = (() => {
+  const K = Kit;
+  const CX = 318, CY = 316, SC = 150;
+  const view = { yaw: -.6, pitch: .3, spin: true, angles: true, clouds: false, dragAt: 0 };
+  const shown = {}; let nid = 0;
+  const Y = d => Math.PI / 180 * d;
+
+  /* ── 3D helpers ── */
+  const rotV = v => { const cy = Math.cos(view.yaw), sy = Math.sin(view.yaw), cp = Math.cos(view.pitch), sp = Math.sin(view.pitch);
+    const x = v[0] * cy + v[2] * sy, z0 = -v[0] * sy + v[2] * cy; return [x, v[1] * cp - z0 * sp, v[1] * sp + z0 * cp]; };
+  const proj = v => { const r = rotV(v), f = 4.2 / (4.2 - r[2]); return { x: CX + r[0] * SC * f, y: CY - r[1] * SC * f, z: r[2], f }; };
+  const mul = (v, k) => [v[0] * k, v[1] * k, v[2] * k];
+  const nrm = a => { const l = Math.hypot(a[0], a[1], a[2]) || 1; return [a[0] / l, a[1] / l, a[2] / l]; };
+  const slerp = (a, b, t) => { const d = Math.max(-1, Math.min(1, a[0] * b[0] + a[1] * b[1] + a[2] * b[2])), w = Math.acos(d);
+    if (w < 1e-4) return b.slice(); if (Math.PI - w < 1e-3) { const p = nrm(Math.abs(a[1]) < .9 ? [a[2], 0, -a[0]] : [0, -a[2], a[1]]); return nrm(t < .5 ? [a[0] + p[0] * t * 2, a[1] + p[1] * t * 2, a[2] + p[2] * t * 2] : [b[0] + p[0] * (1 - t) * 2, b[1] + p[1] * (1 - t) * 2, b[2] + p[2] * (1 - t) * 2]); }
+    const s = Math.sin(w), k1 = Math.sin((1 - t) * w) / s, k2 = Math.sin(t * w) / s; return [a[0] * k1 + b[0] * k2, a[1] * k1 + b[1] * k2, a[2] * k1 + b[2] * k2]; };
+  const lighten = (h, t) => mixHex(h, '#ffffff', t), darken = (h, t) => mixHex(h, '#000000', t);
+
+  const DEFS = () => `<radialGradient id="vsLp" cx=".5" cy=".5" r=".6"><stop offset="0" stop-color="#e2d4ff" stop-opacity=".8"/><stop offset=".7" stop-color="#9a7bff" stop-opacity=".5"/><stop offset="1" stop-color="#6a45e8" stop-opacity=".3"/></radialGradient>
+    <radialGradient id="vsCl" cx=".5" cy=".5" r=".6"><stop offset="0" stop-color="#bfe6ff" stop-opacity=".55"/><stop offset="1" stop-color="#6cbcf0" stop-opacity=".12"/></radialGradient>
+    ${Object.entries(VG.EL).map(([k, e]) => `<radialGradient id="vsA-${k}" cx=".36" cy=".32" r=".75"><stop offset="0" stop-color="${lighten(e.c, .55)}"/><stop offset=".55" stop-color="${e.c}"/><stop offset="1" stop-color="${darken(e.c, .45)}"/></radialGradient>`).join('')}`;
+  const bg = () => `<rect width="1000" height="620" fill="#0d1b2c"/><defs><pattern id="vsGrid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#fff" stroke-opacity=".045"/></pattern></defs><rect width="640" height="620" fill="url(#vsGrid)"/>
+    <ellipse cx="${CX}" cy="${CY}" rx="300" ry="260" fill="#1d3a5c" opacity=".35"/><text x="22" y="600" font-size="13" fill="#9fb4ca">Drag the model to turn it</text>`;
+
+  /* ── the model ── */
+  function lobe(p0, p1, w, fill, dots) {
+    const dx = p1.x - p0.x, dy = p1.y - p0.y, l = Math.hypot(dx, dy);
+    if (l < w * .5) return `<circle cx="${p1.x}" cy="${p1.y}" r="${w * .95}" fill="${fill}"/>${dots ? `<circle cx="${p1.x - 5}" cy="${p1.y}" r="3.2" fill="#3b1f8f"/><circle cx="${p1.x + 5}" cy="${p1.y}" r="3.2" fill="#3b1f8f"/>` : ''}`;
+    const a = Math.atan2(dy, dx) * 180 / Math.PI, cx = p0.x + dx * .58, cy = p0.y + dy * .58, rx = Math.max(l * .58, w * .8);
+    const tx = p0.x + dx * .78, ty = p0.y + dy * .78, nx = -dy / l * 5.5, ny = dx / l * 5.5;
+    return `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${w}" transform="rotate(${a} ${cx} ${cy})" fill="${fill}"/>${dots ? `<circle cx="${tx + nx}" cy="${ty + ny}" r="3.2" fill="#3b1f8f"/><circle cx="${tx - nx}" cy="${ty - ny}" r="3.2" fill="#3b1f8f"/>` : ''}`;
+  }
+  function draw(g, b, dt) {
+    const target = VG.dirs(b), k = 1 - Math.exp(-dt * 8);
+    b.doms.forEach((d, i) => { const s = shown[d.id]; if (!s) shown[d.id] = { v: target[i], s: 0 }; else { s.v = nrm(slerp(s.v, target[i], k)); } shown[d.id].s = Math.min(1, shown[d.id].s + dt * 4); });
+    const c = VG.EL[b.c], items = [], o = proj([0, 0, 0]), cr = .4 * SC * o.f;
+    items.push({ z: 0, svg: `<circle cx="${o.x}" cy="${o.y}" r="${cr}" fill="url(#vsA-${b.c})" stroke="${darken(c.c, .55)}" stroke-width="1.5"/><text x="${o.x}" y="${o.y + 7}" font-size="${b.c.length > 1 ? 19 : 22}" font-weight="800" text-anchor="middle" fill="${['H', 'Be', 'B', 'S', 'Si', 'F'].includes(b.c) ? '#1a2230' : '#fff'}">${b.c}</text>` });
+    const v = b.doms.map(d => shown[d.id].v);
+    b.doms.forEach((d, i) => { const s = shown[d.id].s, u = v[i];
+      if (d.lp) { const p0 = proj(mul(u, .2)), p1 = proj(mul(u, .9 * s)), r = rotV(mul(u, .55)); items.push({ z: Math.min(r[2], .02) - .05, svg: lobe(p0, p1, 25 * p1.f * (.4 + .6 * s), 'url(#vsLp)', s > .7) }); return; }
+      const L = (.4 + VG.RAD[d.at] + .38) * s, pa = proj(mul(u, L)), pm = proj(mul(u, L * .5)), e = VG.EL[d.at], ar = VG.RAD[d.at] * SC * pa.f;
+      if (view.clouds) { const p1 = proj(mul(u, .78 * s)); items.push({ z: rotV(mul(u, .45))[2] - .3, svg: lobe(o, p1, 22 * p1.f, 'url(#vsCl)', false) }); }
+      const p0 = proj(mul(u, .3)), pe = proj(mul(u, Math.max(.3, L - VG.RAD[d.at] * .8))), dx = pa.x - o.x, dy = pa.y - o.y, l = Math.hypot(dx, dy) || 1, nx = -dy / l, ny = dx / l, sp = 6.5 * pm.f, offs = d.order === 1 ? [0] : d.order === 2 ? [-sp, sp] : [-sp * 1.6, 0, sp * 1.6];
+      const bond = offs.map(q => `<line x1="${p0.x + nx * q}" y1="${p0.y + ny * q}" x2="${pe.x + nx * q}" y2="${pe.y + ny * q}" stroke="#0a1420" stroke-width="${(d.order === 1 ? 11 : 7) * pm.f}" stroke-linecap="round"/>
+        <line x1="${p0.x + nx * q}" y1="${p0.y + ny * q}" x2="${pm.x + nx * q}" y2="${pm.y + ny * q}" stroke="${lighten(c.c, .25)}" stroke-width="${(d.order === 1 ? 7 : 4.2) * pm.f}" stroke-linecap="round"/>
+        <line x1="${pm.x + nx * q}" y1="${pm.y + ny * q}" x2="${pe.x + nx * q}" y2="${pe.y + ny * q}" stroke="${lighten(e.c, .1)}" stroke-width="${(d.order === 1 ? 7 : 4.2) * pm.f}" stroke-linecap="round"/>`).join('');
+      items.push({ z: pm.z - .02, svg: bond });
+      items.push({ z: pa.z, svg: `<circle cx="${pa.x}" cy="${pa.y}" r="${ar}" fill="url(#vsA-${d.at})" stroke="${darken(e.c, .55)}" stroke-width="1.2"/><text x="${pa.x}" y="${pa.y + 5}" font-size="${d.at.length > 1 ? 13 : 15}" font-weight="800" text-anchor="middle" fill="${['H', 'F', 'S'].includes(d.at) ? '#1a2230' : '#fff'}">${d.at}</text>` });
+    });
+    items.sort((a, b2) => a.z - b2.z);
+    let arcs = '';
+    if (view.angles) VG.arcs(b, v).forEach((A, n) => {
+      const a = v[A.i], c2 = v[A.j], pts = []; for (let t = 0; t <= 1.0001; t += 1 / 18) { const p = proj(mul(slerp(a, c2, t), .5 + n * .07)); pts.push(`${p.x.toFixed(1)},${p.y.toFixed(1)}`); }
+      const m = proj(mul(slerp(a, c2, .5), .66 + n * .1));
+      arcs += `<polyline points="${pts.join(' ')}" fill="none" stroke="#ffd27a" stroke-width="2.4" stroke-dasharray="5 4"/><text x="${m.x}" y="${m.y + 6}" font-size="17" font-weight="800" text-anchor="middle" fill="#ffd27a" stroke="#0d1b2c" stroke-width="5" paint-order="stroke">${A.t}</text>`; });
+    const a = VG.analyze(b);
+    const fc = Math.abs(a.fc) === 1 && a.B ? `<g transform="translate(${o.x + cr * .85} ${o.y - cr * .85})"><circle r="13" fill="#ffd27a" stroke="#0d1b2c" stroke-width="2"/><text y="5" font-size="14" font-weight="800" text-anchor="middle" fill="#0d1b2c">${a.fc > 0 ? '+' : '−'}${Math.abs(a.fc) > 1 ? Math.abs(a.fc) : ''}</text></g>` : '';
+    g.innerHTML = items.map(x => x.svg).join('') + arcs + fc;
+  }
+
+  /* ── the info card (right side of the stage) ── */
+  const WHY = {
+    'Tetrahedral': 'Four domains spread as far apart as they can: the corners of a tetrahedron, 109.5° apart.',
+    'Trigonal pyramidal': 'You can’t see the lone pair in the shape, but it still takes a corner of the tetrahedron. It pushes harder than a bond, squeezing the bonds to about 107°.',
+    'Bent4': 'Two lone pairs push even harder than one, squeezing the bonds to about 104.5°.',
+    'Bent3': 'One lone pair on a flat, three-domain arrangement squeezes the bond angle just below 120°.',
+    'Linear2': 'Two domains get as far apart as possible: opposite sides, 180°. A double or triple bond still counts as one domain.',
+    'Trigonal planar': 'Three domains spread out flat, 120° apart.',
+    'Trigonal planarX': 'The double bond holds more electrons and pushes a little harder: about 122° next to it and 116° between the single bonds.',
+    'Trigonal bipyramidal': 'Five domains: three around the middle (equatorial, 120° apart) and two straight up and down (axial, 90° from the middle ones).',
+    'Seesaw': 'The lone pair takes an equatorial spot, where only two domains are 90° away instead of three. It pushes the bonds back: about 102° and 173°.',
+    'T-shaped': 'Two lone pairs take equatorial spots, leaving a T. The bonds bend slightly away from them (about 87.5°).',
+    'Linear5': 'Three lone pairs fill the middle ring, so the two bonds point straight up and down: 180°.',
+    'Octahedral': 'Six domains point to the corners of an octahedron, all 90° apart.',
+    'Square pyramidal': 'One lone pair takes a corner. The four bonds around the base tilt away from it (about 85° from the top bond).',
+    'Square planar': 'Two lone pairs sit opposite each other, 180° apart, to stay out of each other’s way. That leaves a flat square.',
+    'Linear (two atoms)': 'With only one bonded atom, the molecule is a straight line. There’s no bond angle yet.'
+  };
+  function whyText(a, b) {
+    const k = a.shape === 'Bent' ? 'Bent' + a.D : a.shape === 'Linear' ? 'Linear' + (a.D === 2 ? 2 : a.D === 5 ? 5 : 2) : a.shape;
+    if (a.shape === 'Trigonal planar' && b.doms.filter(d => !d.lp && d.order > 1).length === 1) return WHY['Trigonal planarX'];
+    if (a.shape === 'Linear' && a.D > 2 && a.D !== 5) return 'The lone pairs spread around the middle, leaving the two bonds in a straight line, 180° apart.';
+    return WHY[k] || '';
+  }
+  function orbitals(a) {
+    if (a.D < 2) return '';
+    const p = a.D <= 4 ? 4 - a.D : 0, box = (t, lab, cls = '') => `<span class="vs-ob ${cls}"><i>${t}</i><small>${lab}</small></span>`, hy = a.hyb;
+    let s = ''; for (let i = 0; i < a.L; i++) s += box('↑↓', hy, 'lp'); for (let i = 0; i < a.B; i++) s += box('↑', hy);
+    let rest = ''; for (let i = 0; i < Math.max(p, a.pi); i++) rest += box(i < a.pi ? '↑' : '', i < p ? 'p' : 'd', i < a.pi ? 'pi' : 'empty');
+    return `<div class="vs-orb"><div class="vs-obs">${s}${rest ? `<span class="vs-gap"></span>${rest}` : ''}</div>
+      <p>${a.D} ${hy} hybrid orbitals, one per electron domain${a.L ? ' (lone pairs ↑↓, bonds ↑)' : ''}.${a.pi ? ` The ${a.pi} π bond${a.pi > 1 ? 's use' : ' uses'} the leftover ${p >= a.pi ? 'p' : 'p/d'} orbital${a.pi > 1 ? 's' : ''}.` : p ? ` ${p} unhybridized p orbital${p > 1 ? 's stay' : ' stays'} empty.` : ''}${a.D >= 5 ? ' <span class="muted">(Courses use sp³d/sp³d² as a model; newer theory explains expanded octets without d orbitals.)</span>' : ''}</p></div>`;
+  }
+  function card(b) {
+    const a = VG.analyze(b), v = VG.dirs(b), arcs = VG.arcs(b, v), pol = VG.polarity(b, v), c = a.el;
+    const ideal = { 3: 120, 4: 109.5, 2: 180 }[a.D];
+    const angTxt = a.B < 2 ? '—' : arcs.length ? arcs.map(x => (Math.abs(x.deg - Math.round(x.deg / 30) * 30) < .3 || Math.abs(x.deg - 109.47) < .3 ? '' : '≈') + x.t).join(', ') + (ideal && arcs.some(x => Math.abs(x.deg - ideal) > .5) && a.L ? ` <span class="muted">(ideal ${ideal}°)</span>` : '') : '180°';
+    const oct = c.p === 2 ? (a.around === 8 ? 'octet ✓' : a.around < 8 ? 'incomplete octet' : '') : a.around > 8 ? 'expanded octet' : a.around === 8 ? 'octet ✓' : 'incomplete octet';
+    const row = (l, val, cls = '') => `<div class="vs-r ${cls}"><span>${l}</span><b>${val}</b></div>`;
+    return `<div class="vs-card"><div class="vs-hd"><div class="vs-f">${a.B ? a.formula : b.c}</div><div class="muted">${a.name ? a.name : a.B ? 'model' : c.n + ' · ' + c.v + ' valence electrons'}</div></div>
+      ${a.B ? `${row('Electron domains', `${a.D} <span class="muted">(${a.B} bond${a.B === 1 ? '' : 's'}, ${a.L} lone pair${a.L === 1 ? '' : 's'})</span>`)}
+      ${row('VSEPR type', a.axe)}${row('Electron geometry', a.egeom)}${row('Molecular shape', a.shape, 'hi')}${row('Bond angle', angTxt)}
+      ${row('Hybridization', a.hyb)}${row('Bonds', `${a.sigma} σ, ${a.pi} π`)}
+      ${pol ? row('Polarity', pol.polar ? 'Polar' : 'Nonpolar', pol.polar ? 'pol' : '') : ''}
+      <p class="vs-why">${whyText(a, b)}${pol && !pol.polar && pol.polarBond && a.B > 1 ? ' The polar bonds point in balanced directions, so their dipoles cancel.' : ''}</p>
+      ${orbitals(a)}
+      <div class="vs-e"><span>${a.around} electrons around ${b.c}${oct ? ' · ' + oct : ''}</span><span class="${a.fc ? 'warn' : ''}">formal charge ${a.fc > 0 ? '+' + a.fc : a.fc}</span></div>`
+      : `<p class="vs-why">Add bonds and lone pairs with the buttons. ${cap(c.n)} has <b>${c.v} valence electron${c.v > 1 ? 's' : ''}</b>${c.p === 2 ? ' and, in period 2, room for at most 4 electron domains (an octet)' : ' and, in period ' + c.p + ', room for up to 6 electron domains'}.</p>`}</div>`;
+  }
+  const cap = s => s[0].toUpperCase() + s.slice(1);
+
+  /* ── the builder: stage + controls in the side panel ── */
+  function builder(R, goal, viewOnly) {
+    const st = R.st; if (!st.b) st.b = { c: 'C', doms: [] };
+    K.setBg(bg());
+    const g = sv('g', {}, K.layer), fo = sv('foreignObject', { x: 640, y: 14, width: 346, height: 592 }, K.layer);
+    const hit = sv('rect', { x: 0, y: 0, width: 640, height: 620, fill: 'transparent', style: 'cursor:grab' }, K.layer); K.layer.insertBefore(hit, g);
+    let lx = 0, ly = 0;
+    K.press(hit, { down: s => { lx = s.x; ly = s.y; hit.style.cursor = 'grabbing'; }, move: s => { view.yaw += (s.x - lx) * .011; view.pitch = clamp(view.pitch + (s.y - ly) * .011, -1.45, 1.45); lx = s.x; ly = s.y; view.dragAt = performance.now(); }, up: () => { hit.style.cursor = 'grab'; } });
+    let dirty = true;
+    const refresh = () => { fo.innerHTML = `<div xmlns="http://www.w3.org/1999/xhtml" class="vs-fo">${card(st.b)}</div>`; if (!viewOnly) { ctl(); check(); } };
+    K.loop(dt => { if (!g.isConnected) return false; if (view.spin && performance.now() - view.dragAt > 3500) view.yaw += dt * .35; draw(g, st.b, dt); if (dirty) { dirty = false; refresh(); } });
+    const changed = () => { dirty = true; SND.tone(520 + st.b.doms.length * 70, .05, 'sine', .05); };
+
+    const box = viewOnly ? null : LabUI.html(''), qbox = viewOnly || !goal ? null : LabUI.html(''); if (box) box.className = 'vs-ctl';
+    function ctl() {
+      const b = st.b, a = VG.analyze(b);
+      box.innerHTML = `<div class="vs-lab">Central atom</div>
+        <div class="vs-els">${VG.CENTRAL.map(e => `<button class="vs-el ${e === b.c ? 'on' : ''}" data-el="${e}" title="${VG.EL[e].n}: ${VG.EL[e].v} valence electrons"><b>${e}</b><small>${VG.EL[e].v}e⁻</small></button>`).join('')}</div>
+        <div class="vs-lab">Add to ${b.c}</div>
+        <div class="vs-add"><span>Single bond</span>${VG.OUTER[1].map(x => `<button class="btn sm" data-add="${x}|1">${x}</button>`).join('')}</div>
+        <div class="vs-add"><span>Double bond</span>${VG.OUTER[2].map(x => `<button class="btn sm" data-add="${x}|2">=${x}</button>`).join('')}</div>
+        <div class="vs-add"><span>Triple bond</span>${VG.OUTER[3].map(x => `<button class="btn sm" data-add="${x}|3">≡${x}</button>`).join('')}</div>
+        <div class="vs-add"><button class="btn sm vs-lpb" data-add="lp">＋ Lone pair <span aria-hidden="true">••</span></button></div>
+        <div class="vs-lab">Around ${b.c}${b.doms.length ? ' · click one to remove it' : ''}</div>
+        <div class="vs-list">${b.doms.length ? b.doms.map(d => `<button class="vs-dom ${d.lp ? 'lp' : ''}" data-rm="${d.id}" title="Remove">${d.lp ? '•• lone pair' : (d.order === 1 ? '–' : d.order === 2 ? '=' : '≡') + d.at} <span aria-hidden="true">×</span></button>`).join('') + '<button class="btn sm ghost" data-clr="1">Clear</button>' : '<span class="small muted">Nothing yet</span>'}</div>
+        <div class="vs-tog"><label><input type="checkbox" data-tog="angles" ${view.angles ? 'checked' : ''}> Angles</label><label><input type="checkbox" data-tog="clouds" ${view.clouds ? 'checked' : ''}> Bond electron clouds</label><label><input type="checkbox" data-tog="spin" ${view.spin ? 'checked' : ''}> Spin</label></div>
+        ${goal ? `<div class="vs-goal" id="vsGoal"></div>` : ''}`;
+      $$('[data-el]', box).forEach(x => x.onclick = () => { if (x.dataset.el === b.c) return; const keep = { c: x.dataset.el, doms: [] }; let ok = true;
+        for (const d of b.doms) { if (VG.canAdd(keep, d)) { ok = false; break; } keep.doms.push(d); }
+        if (!ok) { keep.doms = []; K.msg(`${cap(VG.EL[x.dataset.el].n)} can’t hold those bonds and lone pairs, so the model was cleared.`, '', 3600); }
+        st.b = keep; changed(); });
+      $$('[data-add]', box).forEach(x => x.onclick = () => { const [at, o] = x.dataset.add.split('|'), dom = at === 'lp' ? { id: ++nid, lp: true } : { id: ++nid, at, order: +o };
+        const why = VG.canAdd(b, dom); if (why) { SND.nope(); K.msg(why, 'bad', 5200); return; } b.doms.push(dom); changed(); });
+      $$('[data-rm]', box).forEach(x => x.onclick = () => { b.doms = b.doms.filter(d => d.id !== +x.dataset.rm); changed(); });
+      $$('[data-clr]', box).forEach(x => x.onclick = () => { b.doms = []; changed(); });
+      $$('[data-tog]', box).forEach(x => x.onchange = () => { view[x.dataset.tog] = x.checked; dirty = true; });
+      void a;
+    }
+    /* challenge: tick off each part of the target, then ask the question once the molecule is right */
+    let asked = false;
+    function check() {
+      if (!goal) return; const el = $('#vsGoal', box); if (!el) return; const b = st.b, a = VG.analyze(b);
+      const cnt = {}; b.doms.forEach(d => { if (!d.lp) cnt[d.at + d.order] = (cnt[d.at + d.order] || 0) + 1; });
+      const want = goal.bonds, bondsOk = Object.keys(want).every(k => cnt[k] === want[k]) && Object.keys(cnt).every(k => want[k]);
+      const items = [[b.c === goal.c, `Central atom: <b>${goal.c}</b>`], [bondsOk, goal.bondTxt], [b.c === goal.c && a.L === goal.lp, goal.tellLP ? `<b>${goal.lp}</b> lone pair${goal.lp === 1 ? '' : 's'}` : `Lone pairs: enough for a formal charge of 0`]];
+      el.innerHTML = `<div class="vs-lab">Challenge: build ${goal.f}</div>${items.map(([ok, t]) => `<div class="vs-ck ${ok ? 'ok' : ''}"><span>${ok ? '✓' : '○'}</span><span>${t}</span></div>`).join('')}
+        ${b.c === goal.c && bondsOk && a.L !== goal.lp && !goal.tellLP ? `<p class="small muted" style="margin:4px 0 0">${goal.c} has ${VG.EL[goal.c].v} valence electrons and shares ${b.doms.filter(d => !d.lp).reduce((s, d) => s + d.order, 0)} in bonds. ${a.fc > 0 ? 'Its formal charge is +' + a.fc + ', so it needs more lone pairs.' : 'Its formal charge is ' + a.fc + ', so it has too many lone pairs.'}</p>` : ''}`;
+      /* the question appears once, the first time the molecule is right, and stays put while students keep exploring */
+      if (items.every(x => x[0]) && !asked) { asked = true; st.made = (st.made || []).concat([goal.f]); SND.ok(); K.msg(`That’s ${goal.f}${a.name ? ', ' + a.name : ''}!`, 'ok', 2600); K.sparkle({ x: CX, y: CY }, 30); ask(); }
+    }
+    function ask() {
+      const q = goal.q, ord = q.a.map((_, i) => i).sort(() => Math.random() - .5);
+      qbox.innerHTML = `<div class="quiz vs-qz"><div class="q">${q.q}</div><div class="opts">${ord.map(i => `<button class="opt" data-qa="${i}">${q.a[i]}</button>`).join('')}</div><div class="exp" id="vsExp"></div></div>`;
+      qbox.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      $$('[data-qa]', qbox).forEach(x => x.onclick = () => { const i = +x.dataset.qa;
+        if (i === q.c) { x.classList.add('right'); $$('[data-qa]', qbox).forEach(y => y.disabled = true); $('#vsExp', qbox).innerHTML = `<b>Correct.</b> ${q.e}`; SND.ok(); R.next(2600); }
+        else { x.classList.add('wrong'); x.disabled = true; R.mistake('Wrong answer: ' + goal.f, q.e); K.msg(q.hint || 'Not quite. Look at the model and the info card again.', 'bad', 3800); } });
+    }
+    refresh();
+    return { refresh: () => { dirty = true; } };
+  }
+
+  /* ── challenges ── */
+  const C = (id, name, title, goal, html, hint) => ({ id, name, title, html, hint, goal });
+  const steps = [
+    C('ch4', 'Methane, CH₄', 'Build methane, CH₄', { c: 'C', f: 'CH₄', bonds: { H1: 4 }, bondTxt: 'Four single bonds to <b>H</b>', lp: 0, tellLP: true,
+      q: { q: 'What is the H–C–H bond angle in methane?', a: ['109.5°', '90°', '120°', '180°'], c: 0, e: 'Four electron domains point to the corners of a tetrahedron, 109.5° apart. A flat square (90°) would push them closer together.' } },
+      'Pick <b>C</b> as the central atom and add <b>four single bonds to H</b>. Carbon has 4 valence electrons and shares one in each bond.<br><br>VSEPR idea: electron domains (bonds and lone pairs) <b>repel each other</b> and spread out as far as they can.',
+      'Turn the model. Does it look flat? Read the bond angle on the card.'),
+    C('nh3', 'Ammonia, NH₃', 'Build ammonia, NH₃', { c: 'N', f: 'NH₃', bonds: { H1: 3 }, bondTxt: 'Three single bonds to <b>H</b>', lp: 1, tellLP: false,
+      q: { q: 'Ammonia’s molecular shape is…', a: ['Trigonal pyramidal', 'Tetrahedral', 'Trigonal planar', 'T-shaped'], c: 0, e: 'Four electron domains make a tetrahedral electron geometry, but the shape only counts atoms. With one corner taken by a lone pair, the atoms form a pyramid.', hint: 'The shape names where the atoms are, not the lone pairs.' } },
+      'Switch the central atom to <b>N</b> and add <b>three bonds to H</b>. Nitrogen has 5 valence electrons and only shares 3, so <b>add lone pairs</b> until its formal charge is 0.<br><br>Watch the bond angle when the lone pair appears.',
+      'Nitrogen keeps 2 of its 5 electrons as one lone pair.'),
+    C('h2o', 'Water, H₂O', 'Build water, H₂O', { c: 'O', f: 'H₂O', bonds: { H1: 2 }, bondTxt: 'Two single bonds to <b>H</b>', lp: 2, tellLP: false,
+      q: { q: 'Why is water’s bond angle (104.5°) smaller than ammonia’s (107°)?', a: ['Water has two lone pairs, and lone pairs push harder than bonds', 'Oxygen atoms are smaller than nitrogen atoms', 'Water has fewer electron domains', 'Hydrogen atoms attract each other'], c: 0, e: 'Both have 4 electron domains. Lone pairs spread out more than bonding pairs (repulsion: lone pair–lone pair > lone pair–bond > bond–bond), so two lone pairs squeeze the bonds more than one.' } },
+      'Build water with <b>O</b> as the central atom: two bonds to H, plus enough lone pairs for a formal charge of 0.<br><br>Compare the angle with methane (109.5°) and ammonia (107°).',
+      'Oxygen has 6 valence electrons and shares 2 of them.'),
+    C('co2', 'Carbon dioxide, CO₂', 'Build carbon dioxide, CO₂', { c: 'C', f: 'CO₂', bonds: { O2: 2 }, bondTxt: 'Two <b>double</b> bonds to <b>O</b>', lp: 0, tellLP: true,
+      q: { q: 'How many electron domains are around the carbon in CO₂?', a: ['2', '4', '3', '6'], c: 0, e: 'Each double bond counts as ONE electron domain, even though it has 4 electrons. Two domains sit opposite each other: linear, 180°.' } },
+      'Back to <b>C</b>. Add <b>two double bonds to O</b> (the =O button).<br><br>A double bond has more electrons, but all of them sit between the same two atoms.',
+      'Count domains, not electrons.'),
+    C('bf3', 'Boron trifluoride, BF₃', 'Build boron trifluoride, BF₃', { c: 'B', f: 'BF₃', bonds: { F1: 3 }, bondTxt: 'Three single bonds to <b>F</b>', lp: 0, tellLP: true,
+      q: { q: 'What is the hybridization of boron in BF₃?', a: ['sp²', 'sp³', 'sp', 'sp³d'], c: 0, e: 'Three electron domains need three hybrid orbitals: one 2s and two 2p mix to make three sp² orbitals in a flat triangle. One 2p orbital is left over, empty.' } },
+      'Pick <b>B</b> and add <b>three bonds to F</b>. Boron has only 3 valence electrons, so it ends up with just 6 around it: an <b>incomplete octet</b>.<br><br>Look at the orbital boxes on the card: one box per electron domain.',
+      'One hybrid orbital for each electron domain.'),
+    C('hcn', 'Hydrogen cyanide, HCN', 'Build hydrogen cyanide, HCN', { c: 'C', f: 'HCN', bonds: { H1: 1, N3: 1 }, bondTxt: 'One bond to <b>H</b> and one <b>triple</b> bond to <b>N</b>', lp: 0, tellLP: true,
+      q: { q: 'How many σ and π bonds are in HCN?', a: ['2 σ and 2 π', '4 σ and 0 π', '3 σ and 1 π', '1 σ and 3 π'], c: 0, e: 'Every bond has exactly one σ bond (made by hybrid orbitals). A triple bond adds two π bonds, which use carbon’s two leftover unhybridized p orbitals.' } },
+      'Pick <b>C</b>, add <b>one single bond to H</b> and <b>one triple bond to N</b>.<br><br>Orbitals: σ bonds point straight between atoms and use hybrid orbitals. π bonds come from side-by-side p orbitals.',
+      'Each bond between two atoms has one σ. The extra bonds in a double or triple are π.'),
+    C('pcl5', 'Phosphorus pentachloride, PCl₅', 'Build PCl₅', { c: 'P', f: 'PCl₅', bonds: { Cl1: 5 }, bondTxt: 'Five single bonds to <b>Cl</b>', lp: 0, tellLP: true,
+      q: { q: 'Which bond angles does PCl₅ have?', a: ['90°, 120° and 180°', 'Only 90°', 'Only 109.5°', 'Only 120°'], c: 0, e: 'Trigonal bipyramidal: the three equatorial bonds are 120° apart, the two axial bonds are 90° from them and 180° from each other.' } },
+      'Phosphorus is in <b>period 3</b>, so it can hold more than an octet (an <b>expanded octet</b>). Pick <b>P</b> and add <b>five bonds to Cl</b>.<br><br>Turn the model to see the middle ring and the two bonds on top and bottom.',
+      'Look at it from the side, then from the top.'),
+    C('sf4', 'Sulfur tetrafluoride, SF₄', 'Build SF₄', { c: 'S', f: 'SF₄', bonds: { F1: 4 }, bondTxt: 'Four single bonds to <b>F</b>', lp: 1, tellLP: false,
+      q: { q: 'In SF₄, where does the lone pair sit, and why?', a: ['In the equatorial ring, where it has fewer neighbors at 90°', 'On the top (axial), because it’s farthest from the fluorines', 'In the center, next to sulfur', 'Anywhere: all five positions are the same'], c: 0, e: 'An equatorial spot has only two neighbors at 90°; an axial spot has three. Lone pairs need the most room, so they go equatorial. The result is a seesaw.' } },
+      'Pick <b>S</b> (6 valence electrons), add <b>four bonds to F</b>, then add lone pairs until the formal charge is 0.<br><br>Five domains again, but one is a lone pair. Where does it go?',
+      'Sulfur shares 4 electrons and keeps 2 as a lone pair.'),
+    C('xef4', 'Xenon tetrafluoride, XeF₄', 'Build XeF₄', { c: 'Xe', f: 'XeF₄', bonds: { F1: 4 }, bondTxt: 'Four single bonds to <b>F</b>', lp: 2, tellLP: false,
+      q: { q: 'What is the molecular shape of XeF₄?', a: ['Square planar', 'Tetrahedral', 'Seesaw', 'Square pyramidal'], c: 0, e: 'Six electron domains make an octahedron. The two lone pairs sit opposite each other (180° apart), so the four fluorines form a flat square.' } },
+      'Even a noble gas can bond! Pick <b>Xe</b> (8 valence electrons), add <b>four bonds to F</b>, and add lone pairs for a formal charge of 0.',
+      'Xenon shares 4 and keeps 4 electrons: two lone pairs.'),
+    C('clf3', 'Predict: ClF₃', 'Predict and test: ClF₃', { c: 'Cl', f: 'ClF₃', bonds: { F1: 3 }, bondTxt: 'Three single bonds to <b>F</b>', lp: 2, tellLP: false,
+      q: { q: 'ClF₃ is…', a: ['T-shaped', 'Trigonal planar', 'Trigonal pyramidal', 'Seesaw'], c: 0, e: 'Chlorine has 3 bonds and 2 lone pairs: 5 domains (trigonal bipyramidal). Both lone pairs take equatorial spots, which leaves a T shape.', hint: 'Count bonds AND lone pairs first, then use the info card.' } },
+      'Your turn to predict. <b>Before you build it</b>, decide how many lone pairs chlorine (7 valence electrons) has with three F atoms, and guess the shape.<br><br>Then build it and answer.',
+      'Chlorine shares 3 of its 7 electrons. The other 4 make lone pairs.')
+  ];
+  const S = {}; steps.forEach(s => { S[s.id] = R => { R.st.b = { c: R.st.b ? R.st.b.c : 'C', doms: [] }; builder(R, s.goal); }; });
+
+  const Lab = makeLab({
+    noSetup: true, defs: DEFS(), bg,
+    fresh: () => ({ b: { c: 'C', doms: [] }, made: [] }),
+    steps, S,
+    finale(R) { builder(R, null, true); },
+    finaleMsg: 'All ten molecules built. Now check your thinking.',
+    verdicts: [['Shape expert', 'You built every molecule and showed you can predict shapes from electron domains.'], ['Almost there', 'Nice work. Look over the questions you missed below.'], ['Practice again', 'Run the challenges once more and read the info card for each molecule.']], reviewLabel: 'Review these',
+    summary: R => `You built ${(R.st.made || []).length} molecules: ${[...new Set(R.st.made || [])].join(', ')}.`,
+    quiz: [
+      { q: 'What is the main idea of VSEPR theory?', a: ['Electron domains around a central atom repel each other and spread as far apart as possible', 'Atoms always form four bonds', 'Molecules are always flat', 'Bonds attract each other and bunch together'], c: 0, e: 'Valence Shell Electron Pair Repulsion: electron domains get as far apart as they can, and that sets the shape.' },
+      { q: 'A central atom has 4 electron domains: 2 bonds and 2 lone pairs. What is the molecular shape?', a: ['Bent', 'Tetrahedral', 'Linear', 'Trigonal planar'], c: 0, e: 'The electron geometry is tetrahedral, but only two corners have atoms, so the shape is bent (like water).' },
+      { q: 'Which counts as ONE electron domain?', a: ['A single, double or triple bond, or a lone pair', 'Only a single bond', 'Each pair of electrons in a bond', 'Only a lone pair'], c: 0, e: 'Any bond to one atom (single, double or triple) and any lone pair each count as one domain.' },
+      { q: 'CO₂ has two polar C=O bonds, but the molecule is nonpolar. Why?', a: ['The molecule is linear, so the two bond dipoles point opposite ways and cancel', 'Carbon and oxygen have the same electronegativity', 'Double bonds are never polar', 'CO₂ has lone pairs on carbon'], c: 0, e: 'Polarity depends on shape: equal dipoles in opposite directions add up to zero.' },
+      { q: 'What is the hybridization of a central atom with 5 electron domains?', a: ['sp³d', 'sp³', 'sp²', 'sp³d²'], c: 0, e: 'One hybrid orbital per domain: s + p + p + p + d = five sp³d orbitals (trigonal bipyramidal).' },
+      { q: 'Rank the repulsions from strongest to weakest.', a: ['Lone pair–lone pair > lone pair–bond > bond–bond', 'Bond–bond > lone pair–bond > lone pair–lone pair', 'They are all equal', 'Lone pair–bond > bond–bond > lone pair–lone pair'], c: 0, e: 'Lone pairs are held by only one nucleus, so they spread out wider and push hardest. That is why lone pairs shrink bond angles.' }
+    ],
+    meta: { id: 'vsepr', short: 'VSEPR Shapes', title: 'VSEPR: Molecular Shapes', courses: ['hs-chem'], time: '25–30 min',
+      summary: 'Build molecules in 3D: pick a central atom, add bonds and lone pairs, and watch electron domains push the shape, bond angles and hybridization around.',
+      objective: 'Predict molecular shape, bond angles, hybridization and polarity from the number of bonding and lone-pair electron domains around a central atom.',
+      materials: ['A computer or tablet', 'Optional: a molecular model kit to compare'],
+      safety: ['No safety gear needed. This is a modeling activity.'],
+      ngss: [['HS-PS1-1', 'Use the periodic table as a model to predict the relative properties of elements based on the patterns of electrons in the outermost energy level of atoms.'], ['HS-PS1-3', 'Plan and conduct an investigation to gather evidence to compare the structure of substances at the bulk scale to infer the strength of electrical forces between particles.']],
+      thumb: big => labThumb('vsepr', big) }
+  });
+  return Lab;
+})();
+
 /* ═══════════ Science Showdown: team quiz board for the projector ═══════════
    Teams take turns picking a tile. A wrong answer lets the next team steal for half the points.
    One hidden tile is a Lab Bonus (double points, no steal). Answer order is shuffled every time.
@@ -4699,7 +5147,7 @@ const Zombies = {
    SITE_KEY. Students join with it (no account), run the labs, and each finished lab is posted to the sign-up Apps Script,
    which saves it in the "educator-space.com · Lab results" tab. Teachers read back only their own students' results.
    LAB_ORDER is the bit order inside codes: only ever ADD new labs at the end, never reorder. */
-const LAB_ORDER = ['dna-strawberry', 'titration', 'flame', 'pendulum', 'ohm', 'mass', 'erosion', 'onion', 'heart'];
+const LAB_ORDER = ['dna-strawberry', 'titration', 'flame', 'pendulum', 'ohm', 'mass', 'erosion', 'onion', 'heart', 'vsepr'];
 /* GAME_ORDER is also append-only. A code with games = the usual 13 signed characters + a short tail holding a bitmask
    (labs in bits 0–11, games from bit 12). The 13-character core is version 2 and carries a 10-bit check of the tail, so the
    tail can't be edited. Only the core is sent with results, so the Apps Script needs no change. */
