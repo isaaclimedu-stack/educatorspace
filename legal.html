@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Terms &amp; Privacy</title>
+<meta name="description" content="Terms of Service, Privacy Policy and Community Guidelines for Comma, Scholar Hub and Educator Space.">
+<style>
+:root { --bg: #f4f6fa; --surface: #fff; --ink: #172033; --muted: #5d6779; --line: #e2e6ee; --sunk: #f0f3f8; --accent: #1d3e9e; --accent-soft: #e8edfa; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #0f131a; --surface: #161b25; --ink: #e7ebf2; --muted: #9ba5b6; --line: #283041; --sunk: #1b2130; --accent: #93b1ff; --accent-soft: #1e2a47; } }
+:root[data-theme="dark"] { --bg: #0f131a; --surface: #161b25; --ink: #e7ebf2; --muted: #9ba5b6; --line: #283041; --sunk: #1b2130; --accent: #93b1ff; --accent-soft: #1e2a47; }
+* { box-sizing: border-box; }
+html { scroll-padding-top: 132px; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; -webkit-text-size-adjust: 100%; }
+a { color: var(--accent); text-underline-offset: 2px; }
+.wrap { max-width: 1040px; margin: 0 auto; padding: 0 16px; }
+
+/* top bar */
+.bar { position: sticky; top: 0; z-index: 5; background: var(--surface); border-bottom: 1px solid var(--line); }
+.bar .wrap { display: flex; align-items: center; gap: 12px; min-height: 56px; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 16px; color: var(--ink); text-decoration: none; margin-right: auto; min-width: 0; }
+.mark { width: 28px; height: 28px; border-radius: 8px; background: var(--accent); color: var(--surface); display: grid; place-items: center; font-size: 15px; font-weight: 800; flex: none; }
+.back { font-size: 14px; font-weight: 600; text-decoration: none; white-space: nowrap; padding: 7px 12px; border-radius: 8px; border: 1px solid var(--line); color: var(--ink); }
+.back:hover { border-color: var(--accent); color: var(--accent); }
+
+/* tabs */
+.tabs { background: var(--surface); border-bottom: 1px solid var(--line); position: sticky; top: 56px; z-index: 4; }
+.tabs .wrap { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+.tabs .wrap::-webkit-scrollbar { display: none; }
+.tab { appearance: none; border: 0; background: none; font: inherit; font-size: 15px; font-weight: 600; color: var(--muted); padding: 13px 14px 11px; border-bottom: 3px solid transparent; cursor: pointer; white-space: nowrap; text-decoration: none; }
+.tab:hover { color: var(--ink); }
+.tab[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* page head */
+.head { padding: 30px 0 6px; }
+.head h1 { margin: 0; font-size: clamp(26px, 4vw, 34px); line-height: 1.2; letter-spacing: -.01em; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 0; }
+.chip { font-size: 13px; color: var(--muted); background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 3px 11px; }
+
+/* layout */
+.doc { display: none; }
+.doc.on { display: block; }
+.grid { display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 32px; align-items: start; padding: 20px 0 64px; }
+.toc { position: sticky; top: 132px; font-size: 14px; }
+.toc b { display: block; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px 12px; }
+.toc ol { list-style: none; margin: 0; padding: 0; border-left: 2px solid var(--line); }
+.toc a { display: block; padding: 5px 12px; margin-left: -2px; border-left: 2px solid transparent; color: var(--muted); text-decoration: none; line-height: 1.4; }
+.toc a:hover { color: var(--ink); }
+.toc a.cur { color: var(--accent); border-left-color: var(--accent); font-weight: 600; }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 8px 30px 18px; }
+.short { background: var(--accent-soft); border-radius: 14px; padding: 18px 22px; margin: 0 0 18px; }
+.short h2 { margin: 0 0 8px; font-size: 15px; letter-spacing: .02em; }
+.short ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 7px; }
+.short li { position: relative; padding-left: 26px; font-size: 15px; line-height: 1.5; }
+.short li::before { content: ""; position: absolute; left: 2px; top: 5px; width: 14px; height: 14px; border-radius: 50%; background: var(--accent); -webkit-mask: radial-gradient(circle, #000 0 3px, transparent 3.5px), linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; opacity: .9; }
+.card h3 { font-size: 18px; line-height: 1.35; margin: 0; padding: 22px 0 6px; border-top: 1px solid var(--line); }
+.card h3:first-child { border-top: 0; }
+.card p, .card li { font-size: 15.5px; }
+.card p { margin: 8px 0; }
+.card ul { padding-left: 20px; margin: 8px 0 12px; }
+.card li { margin: 5px 0; }
+.card li::marker { color: var(--muted); }
+.tw { overflow-x: auto; margin: 12px 0 16px; border: 1px solid var(--line); border-radius: 12px; }
+table { width: 100%; border-collapse: collapse; font-size: 14.5px; min-width: 560px; }
+th, td { text-align: left; vertical-align: top; padding: 10px 14px; border-bottom: 1px solid var(--line); line-height: 1.5; }
+tr:last-child td { border-bottom: 0; }
+th { font-size: 12.5px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); background: var(--sunk); }
+td:first-child { font-weight: 600; }
+th:nth-child(1) { width: 24%; } th:nth-child(2) { width: 42%; }
+.foot { color: var(--muted); font-size: 13.5px; margin: 18px 4px 0; }
+
+.mtoc { display: none; }
+@media (max-width: 860px) {
+  .grid { grid-template-columns: minmax(0, 1fr); gap: 14px; padding-top: 14px; }
+  .toc { display: none; }
+  .mtoc { display: block; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 0 16px; }
+  .mtoc summary { cursor: pointer; font-weight: 600; font-size: 14.5px; padding: 12px 0; }
+  .mtoc ol { margin: 0 0 12px; padding-left: 20px; font-size: 14.5px; }
+  .mtoc li { margin: 4px 0; }
+  .card { padding: 4px 18px 14px; }
+  .short { padding: 16px 18px; }
+  html { scroll-padding-top: 116px; }
+  .mtoc { margin-bottom: 14px; }
+  .tab { padding: 12px 10px 10px; font-size: 14.5px; }
+  .tab .lg { display: none; }
+  .back .lg { display: none; }
+  .brand { font-size: 15px; }
+}
+@media print {
+  .bar, .tabs, .toc, .mtoc { display: none !important; }
+  .doc { display: block !important; page-break-before: always; }
+  .grid { display: block; padding: 0; }
+  .card, .short { border: 0; padding: 0; background: none; }
+  body { background: #fff; color: #000; }
+}
+</style>
+</head>
+<body>
+<header class="bar"><div class="wrap">
+  <a class="brand" id="brand" href="/"><span class="mark" id="mark" aria-hidden="true">C</span><span id="brandName">Comma</span></a>
+  <a class="back" id="back" href="/">← Back to site</a>
+</div></header>
+<nav class="tabs" aria-label="Documents"><div class="wrap" role="tablist">
+  <a class="tab" role="tab" href="#terms" data-doc="terms">Terms<span class="lg"> of Service</span></a>
+  <a class="tab" role="tab" href="#privacy" data-doc="privacy">Privacy<span class="lg"> Policy</span></a>
+  <a class="tab" role="tab" href="#guidelines" data-doc="guidelines"><span class="lg">Community </span>Guidelines</a>
+</div></nav>
+
+<main class="wrap">
+  <!-- TERMS -->
+  <section class="doc" id="terms" aria-labelledby="h-terms">
+    <div class="head"><h1 id="h-terms">Terms of Service</h1>
+      <div class="chips"><span class="chip">Effective October 29, 2026</span><span class="chip">Applies to Comma, Scholar Hub &amp; Educator Space</span></div></div>
+    <div class="grid">
+      <aside class="toc" aria-label="On this page"></aside>
+      <div>
+        <details class="mtoc"><summary>On this page</summary></details>
+        <div class="short"><h2>In short</h2><ul>
+          <li>Our sites offer free practice materials for studying and teaching. They are not official exams.</li>
+          <li>Sign up with your real name and keep your access code private.</li>
+          <li>Our questions and answer keys belong to us, so please don’t copy or share them.</li>
+          <li>We may remove access if these rules are broken.</li></ul></div>
+        <article class="card"><p>By signing up for or using the Services, you agree to these Terms, our Privacy Policy and our Community Guidelines. If you don’t agree, please don’t use the Services.</p>
+
+    <h3 id="terms-1">1. Who can use the Services</h3>
+    <ul>
+      <li><b>Comma</b> is for teachers and people preparing for teacher certification exams.</li>
+      <li><b>Scholar Hub</b> is for students and their teachers.</li>
+      <li><b>Educator Space</b> is for teachers. Students take part only through a class code their teacher gives them; they do not create an account.</li>
+      <li>If you are <b>under 14</b>, you may use the Services only with permission from a parent or guardian, or as part of a class your teacher runs. If the law where you live sets a different age (for example, 13 in the United States), that age applies instead.</li>
+      <li>Teachers who invite students are responsible for making sure their use of the Services follows their school’s rules.</li>
+    </ul>
+
+    <h3 id="terms-2">2. Your account and access code</h3>
+    <ul>
+      <li>When you sign up, give your real name and an email address you control. Teacher accounts are approved by us and may be declined.</li>
+      <li>We email you a personal access code (or teacher code). Keep it private. Don’t share it, sell it or post it. You are responsible for what happens under your code.</li>
+      <li>Teacher codes unlock answer keys and teacher tools. Never give a teacher code to a student.</li>
+      <li>Tell us right away at <a href="mailto:admin@comma-ltd.com">admin@comma-ltd.com</a> if you think someone else has your code.</li>
+    </ul>
+
+    <h3 id="terms-3">3. Practice only — not official</h3>
+    <p>Our questions, tests, labs and score estimates are original practice materials. They are <b>not</b> official exams and do not predict or guarantee any real score or certification result. AP® is a trademark registered by the College Board, and NGSS is a registered trademark of WestEd; neither is affiliated with, or endorses, the Services. Other names of exams and organizations belong to their owners.</p>
+
+    <h3 id="terms-4">4. Our content</h3>
+    <p>The questions, explanations, labs, games, designs and code on the Services belong to Comma. You may use them for your own study and, if you are a teacher, with your own classes. You may not copy, republish, sell or share them in bulk (including answer keys), or use them to build a competing product or to train software or AI systems, without our written permission.</p>
+
+    <h3 id="terms-5">5. Your content</h3>
+    <p>Anything you send us (for example, test answers, lab results, class names or feedback) stays yours. You give us permission to store and use it only to run the Services for you and your class, to fix problems and to improve the Services. Feedback and suggestions you send may be used freely without any obligation to you.</p>
+
+    <h3 id="terms-6">6. Rules you agree to follow</h3>
+    <p>You agree to follow our <a href="#guidelines">Community Guidelines</a>. In particular, you won’t try to break into, overload, copy or interfere with the Services, get around access codes or class codes, or use the Services to cheat on a real exam.</p>
+
+    <h3 id="terms-7">7. Free service, changes and ending access</h3>
+    <ul>
+      <li>The Services are currently free. We may add, change or remove features at any time.</li>
+      <li>We may suspend or remove access, decline a sign-up or close a class code if these Terms or the Community Guidelines are broken, or to protect students, other users or the Services.</li>
+      <li>You can stop using the Services at any time and ask us to delete your information (see the Privacy Policy).</li>
+    </ul>
+
+    <h3 id="terms-8">8. No warranty</h3>
+    <p>We work hard to make our materials accurate and the websites reliable, but the Services are provided “as is” and “as available”. We don’t promise they will always be available, free of errors or right for a particular purpose. Content may contain mistakes; please tell us if you find one.</p>
+
+    <h3 id="terms-9">9. Limit of liability</h3>
+    <p>To the extent the law allows, Comma is not liable for indirect or consequential losses, lost data, or exam results, arising from your use of the free Services. Nothing in these Terms limits liability that cannot be limited by law, including liability for intentional misconduct or gross negligence.</p>
+
+    <h3 id="terms-10">10. Law and disputes</h3>
+    <p>These Terms are governed by the laws of the Republic of Korea. If there is a dispute, please contact us first so we can try to resolve it. If we can’t, it will be handled by the competent court in Seoul, unless the law where you live gives you the right to bring it elsewhere.</p>
+
+    <h3 id="terms-11">11. Changes to these Terms</h3>
+    <p>We may update these Terms. We’ll change the version date above, and for important changes we’ll tell you on the website or by email. If you keep using the Services after a change, you accept the new Terms.</p></article>
+        <p class="foot">Questions? Email <a href="mailto:admin@comma-ltd.com">admin@comma-ltd.com</a>.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRIVACY -->
+  <section class="doc" id="privacy" aria-labelledby="h-privacy">
+    <div class="head"><h1 id="h-privacy">Privacy Policy</h1>
+      <div class="chips"><span class="chip">Effective October 29, 2026</span><span class="chip">Applies to Comma, Scholar Hub &amp; Educator Space</span></div></div>
+    <div class="grid">
+      <aside class="toc" aria-label="On this page"></aside>
+      <div>
+        <details class="mtoc"><summary>On this page</summary></details>
+        <div class="short"><h2>In short</h2><ul>
+          <li>We collect only your name, email and the details you choose to give us.</li>
+          <li>No ads, no tracking and no analytics. We never sell your information.</li>
+          <li>Your information is stored with Google, and our websites are hosted on GitHub.</li>
+          <li>Email us at any time to see, correct or delete your information.</li></ul></div>
+        <article class="card"><h3 id="privacy-1">1. What we collect</h3>
+    <div class="tw"><table>
+      <tr><th>When</th><th>What</th><th>Why</th></tr>
+      <tr><td>You sign up</td><td>Name, email, and what you choose to add: school or organization, subject you teach, class code, your teacher’s email. Whether you agreed to these rules and when.</td><td>To approve your sign-up, send your access code and keep a record of your agreement.</td></tr>
+      <tr><td>You opt in to news</td><td>That you said yes, when, and the exact wording you agreed to.</td><td>To send product news. This is optional and you can unsubscribe anytime.</td></tr>
+      <tr><td>A teacher makes a class code or test (Educator Space, Scholar Hub)</td><td>Teacher email, class name, which labs, games or tests are included, open/close dates.</td><td>To open and close class codes and tests.</td></tr>
+      <tr><td>A student finishes a lab or game (Educator Space)</td><td>The name, email and class period the student types in, the lab, mistakes, quiz score, time taken, stars and topics to review.</td><td>So the student’s teacher can see the results.</td></tr>
+      <tr><td>You use the website</td><td>Your progress, settings and sign-in are saved in your own browser (local storage) on your device.</td><td>So you stay signed in and keep your progress. This stays on your device; clearing your browser data removes it.</td></tr>
+      <tr><td>Any visit</td><td>Technical information such as your IP address, which our hosting and font providers receive automatically.</td><td>To deliver the web pages. We don’t use it to identify or track you.</td></tr>
+    </table></div>
+    <p>We don’t ask for, and you shouldn’t send us, sensitive information such as ID numbers, health information or passwords for other services.</p>
+
+    <h3 id="privacy-2">2. How we use it</h3>
+    <ul>
+      <li>To approve sign-ups, send access codes and monthly code updates, and check whether access is still active.</li>
+      <li>To show teachers the results of students in their own classes.</li>
+      <li>To answer your questions, keep the Services safe and fix problems.</li>
+      <li>To send product news, only if you opted in.</li>
+    </ul>
+    <p>We never sell or rent your information, and we don’t use it for advertising.</p>
+
+    <h3 id="privacy-3">3. Who we share it with</h3>
+    <p>We use a few service providers that process information on our behalf:</p>
+    <ul>
+      <li><b>Google</b> (Google Workspace: Apps Script, Sheets and Gmail) stores sign-ups and results and sends our emails.</li>
+      <li><b>GitHub</b> (GitHub Pages) hosts the websites.</li>
+      <li><b>Google Fonts</b> provides the fonts some pages use.</li>
+    </ul>
+    <p>These providers may store information on servers outside your country, including in the United States. Apart from them, we share information only with a student’s own teacher (for that teacher’s class results), when the law requires it, or to protect someone’s safety.</p>
+
+    <h3 id="privacy-4">4. How long we keep it</h3>
+    <p>We keep sign-up information while your account is active. Student lab and game results are kept for the teacher who owns the class code, and we delete them when the teacher or the student asks. If you ask us to delete your information, we’ll do so within 30 days, except for a short record we may need to keep to respect your request (for example, so a removed email stays blocked) or to meet a legal obligation.</p>
+
+    <h3 id="privacy-5">5. Children and students</h3>
+    <p>Students under 14 should use the Services only with a parent’s or guardian’s permission, or through their teacher. Students on Educator Space don’t create accounts; they type a name to send results to their teacher, and we recommend using a first name and last initial. Teachers who use the Services with students are responsible for having any permission their school or local law requires. If a parent believes their child gave us information without permission, email us and we’ll delete it.</p>
+
+    <h3 id="privacy-6">6. Your choices and rights</h3>
+    <ul>
+      <li><b>See, correct or delete</b> your information: email <a href="mailto:admin@comma-ltd.com">admin@comma-ltd.com</a> from the address you signed up with.</li>
+      <li><b>Unsubscribe</b> from product news using the link in any email, or by emailing us. You’ll still receive your access codes.</li>
+      <li><b>Withdraw your agreement</b> at any time by asking us to delete your account; you won’t be able to use the parts of the Services that need a code after that.</li>
+      <li>Depending on where you live (for example, Korea, the EU, the UK or California), you may have further rights under local privacy law. We’ll respond to any such request within the time the law requires.</li>
+    </ul>
+
+    <h3 id="privacy-7">7. Security</h3>
+    <p>Information is stored in access-controlled Google accounts, and the websites are served over secure connections (HTTPS). No system is perfectly secure; if we learn of a breach that affects you, we’ll tell you as the law requires.</p>
+
+    <h3 id="privacy-8">8. Contact and changes</h3>
+    <p>The person responsible for privacy is the Comma administrator, reachable at <a href="mailto:admin@comma-ltd.com">admin@comma-ltd.com</a>. We may update this policy; we’ll change the version date above and tell you about important changes.</p></article>
+        <p class="foot">Questions? Email <a href="mailto:admin@comma-ltd.com">admin@comma-ltd.com</a>.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- GUIDELINES -->
+  <section class="doc" id="guidelines" aria-labelledby="h-guidelines">
+    <div class="head"><h1 id="h-guidelines">Community Guidelines</h1>
+      <div class="chips"><span class="chip">Effective October 29, 2026</span><span class="chip">Applies to Comma, Scholar Hub &amp; Educator Space</span></div></div>
+    <div class="grid">
+      <aside class="toc" aria-label="On this page"></aside>
+      <div>
+        <details class="mtoc"><summary>On this page</summary></details>
+        <div class="short"><h2>In short</h2><ul>
+          <li>Be honest. Use your own name, and use practice to learn, never to cheat.</li>
+          <li>Keep access codes, teacher codes and answer keys private.</li>
+          <li>Be kind to others and protect students’ information.</li>
+          <li>Don’t try to break, copy or get around the websites.</li></ul></div>
+        <article class="card"><p>Comma, Scholar Hub and Educator Space are places to learn and teach. These guidelines keep them fair, safe and useful for everyone.</p>
+
+    <h3 id="guidelines-1">Be honest</h3>
+    <ul>
+      <li>Sign up with your real name and your own email address. Don’t pretend to be someone else, and don’t ask for a teacher account unless you are a teacher.</li>
+      <li>Use practice materials to learn. Don’t use them to cheat on a real test, quiz or exam, and don’t submit work that isn’t your own.</li>
+    </ul>
+
+    <h3 id="guidelines-2">Keep codes and answers private</h3>
+    <ul>
+      <li>Your access code is just for you. Don’t share, post or sell it.</li>
+      <li>Teachers: don’t share teacher codes or answer keys with students, and share class codes only with your own students.</li>
+      <li>Students: don’t share test answers or class codes outside your class.</li>
+    </ul>
+
+    <h3 id="guidelines-3">Respect others</h3>
+    <ul>
+      <li>Be kind in anything you type that others may see, including names and class names. No bullying, harassment, hate, threats or inappropriate language.</li>
+      <li>Only enter your own name when sending results. Never enter another person’s name or email as a joke or to get them in trouble.</li>
+      <li>Teachers: protect your students’ information and use their results only to support their learning.</li>
+    </ul>
+
+    <h3 id="guidelines-4">Respect the Services</h3>
+    <ul>
+      <li>Don’t try to hack, overload, scrape or copy the websites or their question banks, or get around codes, sign-up approval or closed tests.</li>
+      <li>Don’t send spam, fake sign-ups or automated requests.</li>
+      <li>Don’t copy or republish our questions and explanations elsewhere.</li>
+    </ul>
+
+    <h3 id="guidelines-5">Speak up</h3>
+    <p>If you see a mistake in a question, a problem on the website, or someone breaking these guidelines, email <a href="mailto:admin@comma-ltd.com">admin@comma-ltd.com</a>. We read every message.</p>
+
+    <h3 id="guidelines-6">What happens if the guidelines are broken</h3>
+    <p>Depending on what happened, we may give a warning, close a class code, reset or remove a code, or block an email address from the Services.</p></article>
+        <p class="foot">Questions? Email <a href="mailto:admin@comma-ltd.com">admin@comma-ltd.com</a>.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+(() => {
+  /* brand the page for whichever site it is served from */
+  const host = location.hostname.replace(/^www\./, '');
+  const SITE = /scholarlab/.test(host) ? { name: 'Scholar Hub', mark: 'S', accent: '#14306b', dark: '#9db8ff', soft: '#e7ecf7', url: 'https://scholarlab.net' }
+    : /educator-space/.test(host) ? { name: 'Educator Space', mark: 'E', accent: '#1a73d9', dark: '#7fb6ff', soft: '#e6f0fc', url: 'https://educator-space.com' }
+    : { name: 'Comma', mark: 'C', accent: '#1d3e9e', dark: '#93b1ff', soft: '#e8edfa', url: 'https://www.comma-ltd.com' };
+  const dark = matchMedia('(prefers-color-scheme: dark)').matches && document.documentElement.dataset.theme !== 'light';
+  if (!dark) { document.documentElement.style.setProperty('--accent', SITE.accent); document.documentElement.style.setProperty('--accent-soft', SITE.soft); }
+  else document.documentElement.style.setProperty('--accent', SITE.dark);
+  document.getElementById('brandName').textContent = SITE.name; document.getElementById('mark').textContent = SITE.mark;
+  document.getElementById('back').innerHTML = '← Back<span class="lg"> to ' + SITE.name + '</span>';
+  const home = /^(localhost|127\.|file)/.test(host) || !host ? SITE.url : '/';
+  document.getElementById('brand').href = home; document.getElementById('back').href = home;
+
+  /* contents lists */
+  const docs = [...document.querySelectorAll('.doc')];
+  docs.forEach(d => {
+    const hs = [...d.querySelectorAll('.card h3')];
+    const items = hs.map(h => `<li><a href="#${h.id}" data-h="${h.id}">${h.textContent.replace(/^\d+\.\s*/, '')}</a></li>`).join('');
+    d.querySelector('.toc').innerHTML = '<b>On this page</b><ol>' + items + '</ol>';
+    d.querySelector('.mtoc').insertAdjacentHTML('beforeend', '<ol>' + items + '</ol>');
+  });
+  document.querySelectorAll('.mtoc a').forEach(a => a.addEventListener('click', () => a.closest('details').open = false));
+
+  /* tabs: #terms, #privacy, #guidelines (or a section inside one, like #privacy-3) */
+  const tabs = [...document.querySelectorAll('.tab')];
+  let cur = null;
+  function show(fromHash) {
+    const h = decodeURIComponent(location.hash.slice(1)), key = (h.split('-')[0]) || 'terms';
+    const doc = docs.find(d => d.id === key) || docs[0];
+    if (doc !== cur) {
+      docs.forEach(d => d.classList.toggle('on', d === doc));
+      tabs.forEach(t => t.setAttribute('aria-selected', String(t.dataset.doc === doc.id)));
+      document.title = doc.querySelector('h1').textContent + ' · ' + SITE.name;
+      cur = doc;
+    }
+    const sec = h && h !== doc.id && document.getElementById(h);
+    if (sec) sec.scrollIntoView(); else if (fromHash) window.scrollTo(0, 0);
+    spy();
+  }
+  /* highlight the section being read */
+  function spy() {
+    if (!cur) return; const hs = [...cur.querySelectorAll('.card h3')]; let on = hs[0];
+    for (const h of hs) if (h.getBoundingClientRect().top < 170) on = h;
+    cur.querySelectorAll('.toc a').forEach(a => a.classList.toggle('cur', on && a.dataset.h === on.id));
+  }
+  addEventListener('hashchange', () => show(true));
+  addEventListener('scroll', spy, { passive: true });
+  show(false);
+})();
+</script>
+</body>
+</html>
