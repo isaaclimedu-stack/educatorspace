@@ -206,6 +206,23 @@ table.rec td { padding: 10px; border-bottom: 1px solid var(--line); font-variant
 .sheet ol.steps li.done::before { content: "✓"; background: var(--ok); border-color: var(--ok); color: #fff; }
 .sheet ol.steps li.now { background: var(--accent-soft); color: var(--ink); font-weight: 650; }
 .sheet ol.steps li.now::before { border-color: var(--accent); color: var(--accent); }
+/* fit-to-screen labs (VSEPR, and any lab in full screen): stage and lab sheet share one screen; the sheet scrolls on its own */
+.lab-top #kFs span { font-size: 13px; }
+body:has(.lab.fit) { margin: 0; }
+.lab.fit { height: 100vh; height: 100dvh; min-height: 0; grid-template-rows: auto minmax(0, 1fr); overflow: hidden; }
+.lab.fit .lab-top { padding-block: 6px; }
+.lab.fit .lab-body { min-height: 0; padding-block: 10px; align-items: stretch; }
+.lab.fit .lab-body > div:first-child { min-height: 0; justify-items: center; align-content: start; }
+.lab.fit .stage { width: min(100%, calc((100vh - 84px) * 1000 / 620)); width: min(100%, calc((100dvh - 84px) * 1000 / 620)); }
+.lab.fit .sheet { min-height: 0; overflow-y: auto; align-content: start; overscroll-behavior: contain; }
+.lab.fit .sheet .cur { padding: 12px 14px; gap: 8px; }
+.lab.fit .sheet .cur .instr { font-size: 13.5px; line-height: 1.45; }
+.lab.fit .sheet .cur .instr h3 { font-size: 16px; }
+.lab.fit .sheet ol.steps { display: flex; flex-wrap: wrap; gap: 5px; padding: 10px 14px 14px; max-height: none; }
+.lab.fit .sheet ol.steps li { display: block; padding: 0; font-size: 0; background: none; }
+.lab.fit .sheet ol.steps li::before { display: grid; font-size: 11.5px; }
+.lab.fit .sheet ol.steps li.now::before { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+@media (max-width: 1100px) { .lab.fit { height: auto; min-height: 100%; overflow: visible; } .lab.fit .lab-body { align-items: start; } .lab.fit .stage { width: 100%; } .lab.fit .sheet { overflow: visible; } }
 .meter { display: grid; gap: 5px; }
 .meter .lab-l { display: flex; justify-content: space-between; font-size: 12.5px; font-weight: 600; }
 .meter .bar { position: relative; height: 14px; border-radius: 7px; background: var(--panel-2); border: 1px solid var(--line); overflow: hidden; }
@@ -243,8 +260,8 @@ table.rec td { padding: 10px; border-bottom: 1px solid var(--line); font-variant
 .vs-add > span { font-size: 12.5px; font-weight: 650; color: var(--muted); min-width: 84px; }
 .vs-add > span + span { min-width: 0; margin-left: 6px; }
 .vs-add .btn.sm { padding: 5px 9px; min-width: 38px; justify-content: center; }
-.vs-add .vs-lpb { border-color: color-mix(in srgb, #8f6bff 60%, var(--line)); }
-.vs-add .vs-lpb span { color: #8f6bff; letter-spacing: .1em; }
+.vs-add .vs-lpb { color: #8f6bff; }
+.vs-add .vs-lpb span { font-size: 17px; line-height: 1; letter-spacing: .14em; margin-right: -.14em; color: inherit; min-width: 0; }
 .vs-list { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; min-height: 28px; }
 .vs-dom { font: inherit; font-size: 13px; font-weight: 650; padding: 4px 9px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel-2); color: var(--ink); cursor: pointer; }
 .vs-dom.lp { background: color-mix(in srgb, #8f6bff 16%, var(--panel)); border-color: color-mix(in srgb, #8f6bff 45%, var(--line)); }
@@ -968,7 +985,7 @@ function pageHome(m) {
       <div class="row">${dna ? `<button class="btn primary" data-lab="${dna.id}" data-course="hs-bio">${ico('play')}Start ${esc(dna.short)}</button>` : ''}<button class="btn" data-go2="games-hs">${ico('trophy')}Browse games</button></div></div>
     <div class="pic">${dna && dna.thumb ? dna.thumb(true) : ''}</div></section>
     <section class="sec"><div class="sec-h"><h2>Courses</h2><span class="muted small">New labs appear here as they're added.</span></div>
-      <div class="grid">${COURSES.map(c => { const n = labsFor(c.id).length; return `<a class="card" href="${HP}${c.id}" data-go2="${c.id}"><div class="ic">${ico(c.ic)}</div><span class="eyebrow">${c.band}</span><h3>${c.name}</h3><div class="meta"><span class="chip ${n ? 'acc' : ''}">${n ? n + (n === 1 ? ' lab' : ' labs') : 'Labs coming soon'}</span></div></a>`; }).join('')}</div></section>
+      <div class="grid">${COURSES.map(c => { const n = labsFor(c.id).length, gn = GAMES.filter(g => g.course === c.id).length; return `<a class="card" href="${HP}${c.id}" data-go2="${c.id}"><div class="ic">${ico(c.ic)}</div><span class="eyebrow">${c.band}</span><h3>${c.name}</h3><div class="meta"><span class="chip ${n ? 'acc' : ''}">${n ? n + (n === 1 ? ' lab' : ' labs') : 'Labs coming soon'}</span>${gn ? `<span class="chip">${gn} interactive</span>` : ''}</div></a>`; }).join('')}</div></section>
     <section class="sec"><div class="sec-h"><h2>Games</h2><span class="muted small">Separate games for high school and middle school.</span></div>
       <div class="gm-cols">${['hs', 'ms'].map(b => `<div class="gm-col"><div class="sec-h"><h3>${GBAND[b].name}</h3><a href="${HP}games-${b}" data-go2="games-${b}" class="small">See all</a></div>${GAMES.filter(g => g.band === b).map(g => `<a class="card gm-mini" href="${HP}${g.id}" data-go2="${g.id}"><span class="thumb">${gameThumb(g.id)}</span><span><b>${esc(g.title)}</b><span class="small muted">${esc(g.tag)}</span></span></a>`).join('')}</div>`).join('')}</div></section>
     <section class="sec"><div class="sec-h"><h2>Recent lab runs</h2><a href="${HP}records" data-go2="records" class="small">See all records</a></div>
@@ -981,6 +998,8 @@ function pageCourse(m, c) {
   m.innerHTML = `<header style="display:grid;gap:6px"><span class="eyebrow">${c.band}</span><h1>${c.name}</h1></header>
     <section class="sec">${labs.length ? labs.map(l => labCard(l, c)).join('') : `<div class="empty"><b>No labs in ${esc(c.name)} yet.</b><span class="small">Labs for this course will show up here as they're added.</span></div>`}</section>`;
   bindLabButtons(m);
+  const ig = GAMES.filter(g => g.course === c.id);
+  if (ig.length) { m.insertAdjacentHTML('beforeend', `<section class="sec"><div class="sec-h"><h2>Interactive labs</h2><span class="muted small">Simulations and games for ${esc(c.name.toLowerCase())}. They open in this page or in their own tab.</span></div>${ig.map(gameCard).join('')}</section>`); bindGameCards(m); }
 }
 const fmtTime = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
 function recTable(recs) {
@@ -1053,17 +1072,19 @@ class Obj {
   remove() { this.g.remove(); }
 }
 
+IC.full = '<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>';
+IC.unfull = '<path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/>';
 const Kit = {
   live: false,
   mount(cfg) {
     this.unmount(); this.live = true; this.cfg = cfg; this.handlers = []; this.loops = []; this.ends = []; this.parts = []; this.stains = []; this.mistakes = []; this.t0 = performance.now(); this.paused = 0; this.frozen = false; this.goggleSplat = 0;
     const app = $('#app');
-    app.innerHTML = `<div class="lab"><header class="lab-top">
+    app.innerHTML = `<div class="lab${cfg.fit ? ' fit' : ''}"><header class="lab-top">
         <button class="btn sm" id="kExit">${ico('back')}Exit lab</button>
         <div class="ttl"><b>${esc(cfg.title)}</b><span class="small muted" id="kPhase"></span></div>
         <div class="stats"><div class="ppe" title="Safety gear">${(cfg.ppe ? ['goggles', 'coat', 'gloves'].filter(n => cfg.ppe.includes(n)) : ['goggles', 'coat', 'gloves']).map(n => n === 'gloves' ? 'glove' : n).map(n => `<span data-ppe="${n}">${ico(n)}</span>`).join('')}</div>
           <span class="chip" id="kMis">0 mistakes</span><span class="chip mono" id="kTime">0:00</span>
-          <button class="btn sm ghost" id="kSnd" aria-label="Sound">${ico(SND.on ? 'sound' : 'mute')}</button></div></header>
+          <button class="btn sm ghost" id="kFs" aria-label="Full screen" title="Full screen">${ico('full')}<span>Full screen</span></button><button class="btn sm ghost" id="kSnd" aria-label="Sound">${ico(SND.on ? 'sound' : 'mute')}</button></div></header>
       <div class="lab-body"><div style="display:grid;gap:10px;min-width:0">
           <div class="stage" id="kStage"><svg class="scene" id="kSvg" viewBox="0 0 1000 620" preserveAspectRatio="xMidYMid meet"><defs id="kDefs"></defs><g id="kBg"></g><g id="kLayer"></g><g id="kTop" pointer-events="none"></g></svg><canvas id="kCv" width="2000" height="1240"></canvas><div class="stage-msg" id="kMsg" style="opacity:0"></div></div>
           <p class="narrow-note small muted">This lab needs a computer with a mouse.</p></div>
@@ -1073,6 +1094,12 @@ const Kit = {
     this.defs.innerHTML = cfg.defs || '';
     $('#kExit').onclick = () => { if (cfg.onExit) cfg.onExit(); else this.exit(); };
     $('#kSnd').onclick = () => { SND.on = !SND.on; LS.set('sound', SND.on); $('#kSnd').innerHTML = ico(SND.on ? 'sound' : 'mute'); if (!SND.on) SND.pourStop(); };
+    /* full screen: the whole page goes full screen so pop-ups still show; the lab then fits one screen */
+    const fsEl = document.documentElement, fsB = $('#kFs'), isFs = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
+    if (!(fsEl.requestFullscreen || fsEl.webkitRequestFullscreen)) fsB.style.display = 'none';
+    this._fs = () => { const on = isFs(), lab = $('.lab'); if (lab) lab.classList.toggle('fit', on || !!cfg.fit); if (fsB.isConnected) { fsB.innerHTML = ico(on ? 'unfull' : 'full') + `<span>${on ? 'Exit full screen' : 'Full screen'}</span>`; fsB.setAttribute('aria-label', on ? 'Exit full screen' : 'Full screen'); fsB.title = on ? 'Exit full screen (Esc)' : 'Full screen'; } };
+    fsB.onclick = () => { try { if (isFs()) (document.exitFullscreen || document.webkitExitFullscreen).call(document); else { const pr = (fsEl.requestFullscreen || fsEl.webkitRequestFullscreen).call(fsEl); if (pr && pr.catch) pr.catch(() => {}); } } catch (e) {} };
+    document.addEventListener('fullscreenchange', this._fs); document.addEventListener('webkitfullscreenchange', this._fs); this._fs();
     this.svg.addEventListener('contextmenu', e => e.preventDefault());
     let last = performance.now();
     const frame = now => { if (!this.live) return; const dt = Math.min(.05, (now - last) / 1000); last = now;
@@ -1081,7 +1108,9 @@ const Kit = {
       requestAnimationFrame(frame); };
     requestAnimationFrame(frame);
   },
-  unmount() { if (!this.live) return; this.live = false; this.clear(); SND.pourStop(); },
+  unmount() { if (!this.live) return; this.live = false; this.clear(); SND.pourStop();
+    if (this._fs) { document.removeEventListener('fullscreenchange', this._fs); document.removeEventListener('webkitfullscreenchange', this._fs); this._fs = null; }
+    try { if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {}); } catch (e) {} },
   exit() { this.unmount(); go(this.cfg.back || 'home'); },
   secs() { return Math.floor((performance.now() - this.t0 - this.paused) / 1000); },
   phase(t) { $('#kPhase').textContent = t; },
@@ -1986,7 +2015,7 @@ function makeLab(L) {
   R.runStep = i => { K.clear(); R._adv = false; K.phase(L.noSetup ? 'Part 1 of 2 · Build and explore' : 'Part 3 of 4 · Procedure'); R.i = i; R.snap = JSON.stringify(R.st); K.setBg(L.bg ? L.bg() : BG.bench()); R.sheet(); L.S[steps[i].id](R); };
   function start(r) {
     R.run = r; R.st = L.fresh(); R.i = 0;
-    K.mount({ title: L.meta.title, defs: DNA_DEFS + (L.defs || ''), back: r.back, onExit: confirmExit, ppe: L.ppe ? L.ppe.need : [] });
+    K.mount({ title: L.meta.title, defs: DNA_DEFS + (L.defs || ''), back: r.back, onExit: confirmExit, ppe: L.ppe ? L.ppe.need : [], fit: !!L.fit });
     if (L.noSetup) R.runStep(0); else LabParts.ppe(K, L.ppe, () => LabParts.gather(K, L.gather, () => R.runStep(0)));
   }
   function confirmExit() {
@@ -3815,7 +3844,7 @@ const VseprLab = (() => {
   function lobe(p0, p1, w, fill, dots) {
     const dx = p1.x - p0.x, dy = p1.y - p0.y, l = Math.hypot(dx, dy);
     if (l < w * .5) return `<circle cx="${p1.x}" cy="${p1.y}" r="${w * .95}" fill="${fill}"/>${dots ? `<circle cx="${p1.x - 5}" cy="${p1.y}" r="3.2" fill="#3b1f8f"/><circle cx="${p1.x + 5}" cy="${p1.y}" r="3.2" fill="#3b1f8f"/>` : ''}`;
-    const a = Math.atan2(dy, dx) * 180 / Math.PI, cx = p0.x + dx * .58, cy = p0.y + dy * .58, rx = Math.max(l * .58, w * .8);
+    const a = Math.atan2(dy, dx) * 180 / Math.PI, cx = p0.x + dx * .58, cy = p0.y + dy * .58, rx = Math.max(l * .58, w);
     const tx = p0.x + dx * .78, ty = p0.y + dy * .78, nx = -dy / l * 5.5, ny = dx / l * 5.5;
     return `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${w}" transform="rotate(${a} ${cx} ${cy})" fill="${fill}"/>${dots ? `<circle cx="${tx + nx}" cy="${ty + ny}" r="3.2" fill="#3b1f8f"/><circle cx="${tx - nx}" cy="${ty - ny}" r="3.2" fill="#3b1f8f"/>` : ''}`;
   }
@@ -3826,9 +3855,9 @@ const VseprLab = (() => {
     items.push({ z: 0, svg: `<circle cx="${o.x}" cy="${o.y}" r="${cr}" fill="url(#vsA-${b.c})" stroke="${darken(c.c, .55)}" stroke-width="1.5"/><text x="${o.x}" y="${o.y + 7}" font-size="${b.c.length > 1 ? 19 : 22}" font-weight="800" text-anchor="middle" fill="${['H', 'Be', 'B', 'S', 'Si', 'F'].includes(b.c) ? '#1a2230' : '#fff'}">${b.c}</text>` });
     const v = b.doms.map(d => shown[d.id].v);
     b.doms.forEach((d, i) => { const s = shown[d.id].s, u = v[i];
-      if (d.lp) { const p0 = proj(mul(u, .2)), p1 = proj(mul(u, .9 * s)), r = rotV(mul(u, .55)); items.push({ z: Math.min(r[2], .02) - .05, svg: lobe(p0, p1, 25 * p1.f * (.4 + .6 * s), 'url(#vsLp)', s > .7) }); return; }
+      if (d.lp) { const p0 = proj(mul(u, .2)), p1 = proj(mul(u, .9 * s)), r = rotV(mul(u, .55)); items.push({ z: r[2] - .12, svg: lobe(p0, p1, 25 * p1.f * (.4 + .6 * s), 'url(#vsLp)', s > .7) }); return; }
       const L = (.4 + VG.RAD[d.at] + .38) * s, pa = proj(mul(u, L)), pm = proj(mul(u, L * .5)), e = VG.EL[d.at], ar = VG.RAD[d.at] * SC * pa.f;
-      if (view.clouds) { const p1 = proj(mul(u, .78 * s)); items.push({ z: rotV(mul(u, .45))[2] - .3, svg: lobe(o, p1, 22 * p1.f, 'url(#vsCl)', false) }); }
+      if (view.clouds) { const p1 = proj(mul(u, .78 * s)); items.push({ z: rotV(mul(u, .45))[2] - .12, svg: lobe(o, p1, 22 * p1.f, 'url(#vsCl)', false) }); }
       const p0 = proj(mul(u, .3)), pe = proj(mul(u, Math.max(.3, L - VG.RAD[d.at] * .8))), dx = pa.x - o.x, dy = pa.y - o.y, l = Math.hypot(dx, dy) || 1, nx = -dy / l, ny = dx / l, sp = 6.5 * pm.f, offs = d.order === 1 ? [0] : d.order === 2 ? [-sp, sp] : [-sp * 1.6, 0, sp * 1.6];
       const bond = offs.map(q => `<line x1="${p0.x + nx * q}" y1="${p0.y + ny * q}" x2="${pe.x + nx * q}" y2="${pe.y + ny * q}" stroke="#0a1420" stroke-width="${(d.order === 1 ? 11 : 7) * pm.f}" stroke-linecap="round"/>
         <line x1="${p0.x + nx * q}" y1="${p0.y + ny * q}" x2="${pm.x + nx * q}" y2="${pm.y + ny * q}" stroke="${lighten(c.c, .25)}" stroke-width="${(d.order === 1 ? 7 : 4.2) * pm.f}" stroke-linecap="round"/>
@@ -3901,7 +3930,7 @@ const VseprLab = (() => {
   function builder(R, goal, viewOnly) {
     const st = R.st; if (!st.b) st.b = { c: 'C', doms: [] };
     K.setBg(bg());
-    const g = sv('g', {}, K.layer), fo = sv('foreignObject', { x: 640, y: 14, width: 346, height: 592 }, K.layer);
+    const g = sv('g', { 'pointer-events': 'none' }, K.layer), fo = sv('foreignObject', { x: 640, y: 14, width: 346, height: 592 }, K.layer);
     const hit = sv('rect', { x: 0, y: 0, width: 640, height: 620, fill: 'transparent', style: 'cursor:grab' }, K.layer); K.layer.insertBefore(hit, g);
     let lx = 0, ly = 0;
     K.press(hit, { down: s => { lx = s.x; ly = s.y; hit.style.cursor = 'grabbing'; }, move: s => { view.yaw += (s.x - lx) * .011; view.pitch = clamp(view.pitch + (s.y - ly) * .011, -1.45, 1.45); lx = s.x; ly = s.y; view.dragAt = performance.now(); }, up: () => { hit.style.cursor = 'grab'; } });
@@ -3919,7 +3948,7 @@ const VseprLab = (() => {
         <div class="vs-add"><span>Single bond</span>${VG.OUTER[1].map(x => `<button class="btn sm" data-add="${x}|1">${x}</button>`).join('')}</div>
         <div class="vs-add"><span>Double bond</span>${VG.OUTER[2].map(x => `<button class="btn sm" data-add="${x}|2">=${x}</button>`).join('')}</div>
         <div class="vs-add"><span>Triple bond</span>${VG.OUTER[3].map(x => `<button class="btn sm" data-add="${x}|3">≡${x}</button>`).join('')}</div>
-        <div class="vs-add"><button class="btn sm vs-lpb" data-add="lp">＋ Lone pair <span aria-hidden="true">••</span></button></div>
+        <div class="vs-add"><span>Lone pair</span><button class="btn sm vs-lpb" data-add="lp" title="Add a lone pair" aria-label="Add a lone pair"><span aria-hidden="true">••</span></button></div>
         <div class="vs-lab">Around ${b.c}${b.doms.length ? ' · click one to remove it' : ''}</div>
         <div class="vs-list">${b.doms.length ? b.doms.map(d => `<button class="vs-dom ${d.lp ? 'lp' : ''}" data-rm="${d.id}" title="Remove">${d.lp ? '•• lone pair' : (d.order === 1 ? '–' : d.order === 2 ? '=' : '≡') + d.at} <span aria-hidden="true">×</span></button>`).join('') + '<button class="btn sm ghost" data-clr="1">Clear</button>' : '<span class="small muted">Nothing yet</span>'}</div>
         <div class="vs-tog"><label><input type="checkbox" data-tog="angles" ${view.angles ? 'checked' : ''}> Angles</label><label><input type="checkbox" data-tog="clouds" ${view.clouds ? 'checked' : ''}> Bond electron clouds</label><label><input type="checkbox" data-tog="spin" ${view.spin ? 'checked' : ''}> Spin</label></div>
@@ -4006,7 +4035,7 @@ const VseprLab = (() => {
   const S = {}; steps.forEach(s => { S[s.id] = R => { R.st.b = { c: R.st.b ? R.st.b.c : 'C', doms: [] }; builder(R, s.goal); }; });
 
   const Lab = makeLab({
-    noSetup: true, defs: DEFS(), bg,
+    noSetup: true, fit: true, defs: DEFS(), bg,
     fresh: () => ({ b: { c: 'C', doms: [] }, made: [] }),
     steps, S,
     finale(R) { builder(R, null, true); },
@@ -5151,7 +5180,7 @@ const LAB_ORDER = ['dna-strawberry', 'titration', 'flame', 'pendulum', 'ohm', 'm
 /* GAME_ORDER is also append-only. A code with games = the usual 13 signed characters + a short tail holding a bitmask
    (labs in bits 0–11, games from bit 12). The 13-character core is version 2 and carries a 10-bit check of the tail, so the
    tail can't be edited. Only the core is sent with results, so the Apps Script needs no change. */
-const GAME_ORDER = ['game', 'blaster', 'g-match', 'g-names', 'g-bomb', 'g-contaminated', 'g-gene', 'g-race', 'g-sort', 'g-launch', 'g-hazard', 'zombies', 'g-mitosis'];
+const GAME_ORDER = ['game', 'blaster', 'g-match', 'g-names', 'g-bomb', 'g-contaminated', 'g-gene', 'g-race', 'g-sort', 'g-launch', 'g-hazard', 'zombies', 'g-mitosis', 'g-elwars', 'g-atom'];
 const gameTitle = id => (GAMES.find(g => g.id === id) || {}).title || id;
 const extHash = async ext => parseInt((await sha256hex('x|' + SITE_KEY + '|' + ext)).slice(0, 3), 16) & 1023;
 const OPT = { hints: 1, blaster: 2, repeat: 4 };
@@ -5598,7 +5627,7 @@ const GAMES = [
   { id: 'g-names', band: 'hs', title: 'Nomenclature Rush', tag: 'Chemistry · beat the clock', time: '5 min', blurb: 'Name the compound (or write the formula) before the flask fizzes over. Ionic, transition metals, polyatomics, molecular and acids.', page: m => Names.page(m), stop: () => Names.stop() },
   { id: 'g-bomb', band: 'hs', title: 'Bomb Squad', tag: 'Chemistry · defuse it', time: '5 min', blurb: 'Every right answer about strong acids, strong bases or polyatomic ions earns a tool. Collect five to defuse the bomb before the fuse runs out.', page: m => Bomb.page(m), stop: () => Bomb.stop() },
   { id: 'g-contaminated', band: 'hs', title: 'Contaminated', tag: 'Whole class · biology', time: '30–45 min', blurb: 'A hidden-saboteur lab game. Students do real biology tasks for scan results and vote out the saboteurs.', ext: 'games/contaminated/index.html' },
-  { id: 'g-gene', band: 'hs', title: 'Gene Detectives', tag: 'Solo or teams · genetics', time: '25–40 min', blurb: 'A CSI genetics case: blood typing, base pairing, gel electrophoresis and Punnett squares rule out suspects.', ext: 'games/gene-detectives/index.html' },
+  { id: 'g-gene', band: 'hs', title: 'Gene Detectives', tag: 'Solo or teams · genetics', time: '25–40 min', blurb: 'A CSI genetics case: blood typing, base pairing, gel electrophoresis and Punnett squares rule out suspects.', ext: 'games/gene-detectives/index.html' }, { id: 'g-elwars', band: 'hs', course: 'hs-chem', title: 'Element Wars', tag: 'Chemistry · periodic trends', time: '15–25 min', blurb: 'Draft a team of elements with hidden stats, then battle through challenges like “lose an electron most easily.” Win rounds with atomic radius, ionization energy, electronegativity and metallic character, and earn bonus points by explaining why.', ext: 'games/element-wars/index.html' }, { id: 'g-atom', band: 'hs', course: 'hs-chem', title: 'Build an Atom', tag: 'Chemistry lab · atomic structure', time: '20–40 min', blurb: 'Build any of the 118 elements from protons, neutrons and electrons. See s, p, d and f orbitals in 3D, follow the filling order, read electron configurations, spot exceptions, explore the periodic table by group and discovery country, and predict trends before revealing them.', ext: 'games/build-an-atom/index.html' },
   { id: 'g-mitosis', band: 'hs', title: 'Cell//Divide', tag: 'Retro arcade · biology', time: '10–15 min', blurb: 'Take control of mitosis in an 8-bit arcade game: copy the DNA, coil and line up the chromosomes, split the sisters and pinch the cell in two, while hunting down cell-cycle errors.', page: m => CellDiv.page(m), stop: () => CellDiv.stop() },
   { id: 'g-race', band: 'ms', title: 'Rocket Race', tag: 'Teams · projector', time: '20–30 min', blurb: 'Teams race rockets from Earth to Neptune. Pick a small, medium or big booster, answer the question, and blast off.', page: m => Race.page(m), stop: () => Race.stop() },
   { id: 'g-sort', band: 'ms', title: 'Sort Storm', tag: 'Arcade · sorting', time: '3–5 min', blurb: 'Cards rain down from the clouds. Click the right bucket before they splash: rock types, food webs, changes, states of matter and more.', page: m => Sort.page(m), stop: () => Sort.stop() },
@@ -5655,6 +5684,8 @@ function gameThumb(id) {
     'g-names': `<path d="M178,40 h44 M184,40 v60 l-46,92 q-6,14 10,14 h104 q16,0 10,-14 l-46,-92 v-60" fill="rgba(255,255,255,.1)" stroke="#cfe0f2" stroke-width="4"/><path d="M152,160 h96 l14,30 q4,10 -8,10 h-108 q-12,0 -8,-10z" fill="#10b8b0"/>${[[170, 150, 8], [200, 140, 11], [228, 152, 7], [196, 116, 6], [214, 96, 9]].map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="#9cfff0" opacity=".85"/>`).join('')}<text x="70" y="90" font-size="26" font-weight="800" fill="#ffd27a" font-family="sans-serif">FeCl<tspan font-size="16" dy="6">3</tspan></text><text x="262" y="70" font-size="15" font-weight="700" fill="#cfe0f2" font-family="sans-serif">iron(III)</text><text x="270" y="90" font-size="15" font-weight="700" fill="#cfe0f2" font-family="sans-serif">chloride</text>`,
     'g-bomb': `${bombArt(200, 136, .62, 30, 3, false)}`,
     'g-contaminated': `${[[60, 50], [160, 50], [260, 50], [60, 140], [160, 140], [260, 140]].map(([x, y], i) => `<rect x="${x}" y="${y}" width="86" height="64" rx="10" fill="#17212d" stroke="${i === 4 ? '#9cff57' : '#33455a'}" stroke-width="3"/>`).join('')}<circle cx="345" cy="120" r="34" fill="#ff8a3d"/><text x="345" y="133" font-size="36" text-anchor="middle" font-family="sans-serif" font-weight="900" fill="#2a1300">!</text>`,
+'g-elwars': `${st}${[[-1, 'Li', '#ff4fa8'], [0, 'Cs', '#ff4fa8'], [1, 'F', '#ffb02e']].map(([k, a, c]) => `<g transform="translate(${200 + k * 96} ${126 + Math.abs(k) * 8}) rotate(${k * 9})"><rect x="-44" y="-62" width="88" height="124" rx="12" fill="#15133a" stroke="${c}" stroke-width="3"/><text y="4" font-size="38" font-weight="800" fill="${c}" text-anchor="middle" font-family="sans-serif">${a}</text>${[0, 1, 2].map(i => `<rect x="-30" y="${20 + i * 11}" width="${[52, 30, 42][(i + k + 3) % 3]}" height="5" rx="2" fill="${c}" opacity=".7"/>`).join('')}</g>`).join('')}<text x="200" y="34" font-size="15" font-weight="800" fill="#ffd25e" text-anchor="middle" font-family="sans-serif" letter-spacing="3">VS</text>`,
+    'g-atom': `${st}<ellipse cx="200" cy="74" rx="34" ry="52" fill="#ff9a3c" opacity=".85"/><ellipse cx="200" cy="170" rx="34" ry="52" fill="#3fa4ff" opacity=".85"/><ellipse cx="200" cy="122" rx="120" ry="30" fill="none" stroke="#5fd4ff" stroke-opacity=".5" stroke-width="2" stroke-dasharray="4 6"/>${[[-7, -5, '#ff5a6e'], [6, -4, '#a3abcf'], [0, 6, '#ff5a6e'], [-6, 6, '#a3abcf'], [7, 5, '#ff5a6e']].map(([x, y, c]) => `<circle cx="${200 + x}" cy="${122 + y}" r="7" fill="${c}"/>`).join('')}${[['#ff4fa8', 'S', 60], ['#ffb02e', 'P', 110], ['#3ad687', 'D', 290], ['#3f9dff', 'F', 340]].map(([c, t, x]) => `<circle cx="${x}" cy="212" r="14" fill="${c}"/><text x="${x}" y="217" font-size="14" font-weight="800" fill="#fff" text-anchor="middle" font-family="sans-serif">${t}</text>`).join('')}`,
     'g-gene': `${Array.from({ length: 11 }, (_, i) => { const y = 26 + i * 18, a = i / 11 * Math.PI * 2.2, x1 = 130 + Math.sin(a) * 40, x2 = 130 - Math.sin(a) * 40; return `<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="${i % 2 ? '#3ee6c4' : '#f472b6'}" stroke-width="4"/><circle cx="${x1}" cy="${y}" r="5" fill="#e8eef9"/><circle cx="${x2}" cy="${y}" r="5" fill="#9fb0cf"/>`; }).join('')}<circle cx="268" cy="108" r="54" fill="rgba(255,255,255,.08)" stroke="#ffd23f" stroke-width="9"/><line x1="306" y1="148" x2="350" y2="196" stroke="#ffd23f" stroke-width="14" stroke-linecap="round"/>`,
     'g-mitosis': `<rect width="400" height="240" fill="#050912"/>${Array.from({ length: 40 }, (_, i) => `<rect x="${(i * 53) % 400}" y="${(i * 37) % 240}" width="2" height="2" fill="#1f2a52"/>`).join('')}<g shape-rendering="crispEdges"><circle cx="150" cy="120" r="70" fill="#0d2130" stroke="#46e0b0" stroke-width="6"/><circle cx="250" cy="120" r="70" fill="#0d2130" stroke="#46e0b0" stroke-width="6"/><rect x="186" y="62" width="28" height="116" fill="#0d2130"/><circle cx="135" cy="120" r="30" fill="#0f2a3c" stroke="#9ae6ff" stroke-width="4"/><circle cx="265" cy="120" r="30" fill="#0f2a3c" stroke="#9ae6ff" stroke-width="4"/>${[[120, 106, '#ff4d6d'], [146, 112, '#4dd2ff'], [130, 134, '#ffd23f'], [252, 106, '#ff4d6d'], [276, 112, '#4dd2ff'], [262, 134, '#ffd23f']].map(([x, y, c]) => `<rect x="${x}" y="${y - 10}" width="5" height="20" fill="${c}"/><rect x="${x + 7}" y="${y - 10}" width="5" height="20" fill="${c}"/><rect x="${x + 4}" y="${y - 2}" width="4" height="4" fill="#fff"/>`).join('')}</g><text x="200" y="222" font-family="'Press Start 2P', monospace" font-size="20" fill="#ff4dd2" text-anchor="middle" stroke="#050912" stroke-width="2" paint-order="stroke">CELL//DIVIDE</text><text x="200" y="36" font-family="'Press Start 2P', monospace" font-size="10" fill="#7dff9a" text-anchor="middle">1UP · MITOSIS</text>`,
     'g-race': `${st}<circle cx="60" cy="190" r="40" fill="#2f8fe0"/><path d="M38,176 q14,-12 30,-2 q10,10 -4,18" fill="#47c26b"/><circle cx="330" cy="70" r="30" fill="#5a7cf0"/><circle cx="250" cy="150" r="20" fill="#e2733f"/><g transform="translate(170 120) rotate(50)">${rocketArt('#ffd27a')}</g><path d="M100,170 Q170,140 250,80" fill="none" stroke="#fff" stroke-dasharray="4 8" opacity=".4" stroke-width="3"/>`,

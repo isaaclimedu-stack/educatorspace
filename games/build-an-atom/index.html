@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Build an Atom</title>
+<meta name="description" content="A chemistry lab for building any atom: add protons, neutrons and electrons, see s, p, d and f orbitals in 3D, follow the filling order, read electron configurations, and predict periodic trends.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: a lab bench floating in deep space. Controls on the left, the atom on a large stage in the middle, its identity
+   card on the right; below, tabbed instruments (orbitals, periodic table, predictions, missions). Orbital lobes glow orange
+   for the + phase and blue for the − phase; subshells keep one color everywhere: s magenta, p amber, d green, f blue. */
+:root {
+  --void: #06050e; --deep: #0d0b20; --panel: #14123a; --panel2: #1c1a4a; --line: #2e2c63; --text: #eeedff; --muted: #a8a5d3;
+  --s: #ff4fa8; --p: #ffb02e; --d: #3ad687; --f: #3f9dff; --plus: #ff9a3c; --minus: #3fa4ff; --cyan: #5fd4ff;
+  --proton: #ff5a6e; --neutron: #a3abcf; --good: #5ef0a0; --bad: #ff6b7f; --gold: #ffd25e;
+  --display: "Chakra Petch", "Segoe UI", system-ui, sans-serif;
+  --body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+body { min-height: 100vh; color: var(--text); font: 15.5px/1.5 var(--body); background: radial-gradient(1100px 600px at 85% -10%, #2a1652 0%, transparent 60%), radial-gradient(900px 500px at -10% 110%, #0d3050 0%, transparent 60%), var(--void); background-attachment: fixed; }
+.wrap { max-width: 1320px; margin: 0 auto; padding-block: 14px 48px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 16px; }
+h1, h2, h3 { font-family: var(--display); margin: 0; line-height: 1.15; text-wrap: balance; }
+h2 { font-size: 1.35rem; }
+h3 { font-size: 1.05rem; }
+p { margin: 0; }
+.muted { color: var(--muted); }
+.small { font-size: .86rem; }
+.mono { font-family: var(--mono); }
+.eyebrow { font: 600 .72rem var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--cyan); }
+header.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.logo { display: flex; align-items: center; gap: 10px; font: 700 1.2rem var(--display); letter-spacing: .05em; text-transform: uppercase; }
+.logo .mark { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: radial-gradient(circle at 35% 35%, #ffd0a0, var(--plus) 45%, #7a2c00); box-shadow: 0 0 18px #ff9a3c88; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 38px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel2); color: var(--text); font: 600 .9rem var(--body); cursor: pointer; }
+.btn:hover:not(:disabled) { border-color: var(--cyan); }
+.btn.primary { background: linear-gradient(135deg, var(--plus), #ff5a8a); border-color: transparent; color: #1c0710; }
+.btn.on { border-color: var(--cyan); background: color-mix(in srgb, var(--cyan) 18%, var(--panel2)); }
+.btn:disabled { opacity: .4; cursor: default; }
+.btn.sm { min-height: 32px; padding: 0 10px; font-size: .82rem; }
+button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px solid var(--cyan); outline-offset: 2px; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.panel { background: color-mix(in srgb, var(--panel) 90%, transparent); border: 1px solid var(--line); border-radius: 16px; padding: 16px; min-width: 0; }
+select, input[type="search"] { background: var(--panel2); color: var(--text); border: 1px solid var(--line); border-radius: 8px; min-height: 36px; padding: 0 10px; font: inherit; }
+/* bench */
+.bench { display: grid; grid-template-columns: 250px minmax(0, 1fr) 320px; gap: 16px; align-items: start; }
+.ctl { display: grid; gap: 14px; }
+.part { display: grid; gap: 8px; padding: 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--deep); }
+.part .hd { display: flex; align-items: center; gap: 8px; justify-content: space-between; }
+.part .hd b { display: flex; align-items: center; gap: 8px; }
+.dot { width: 14px; height: 14px; border-radius: 50%; display: inline-block; flex: none; }
+.count { font: 700 1.6rem var(--mono); font-variant-numeric: tabular-nums; }
+.pm { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.pm .btn { min-height: 36px; padding: 0; font-family: var(--mono); }
+.check { display: flex; align-items: center; gap: 8px; font-size: .86rem; color: var(--muted); cursor: pointer; }
+.check input { accent-color: var(--cyan); width: 16px; height: 16px; }
+.stage { position: relative; height: 560px; border-radius: 18px; overflow: hidden; border: 1px solid var(--line); background: radial-gradient(circle at 50% 50%, #120f33 0%, #06050e 75%); touch-action: none; }
+.stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.stage .ov { position: absolute; pointer-events: none; }
+.ov.tl { left: 14px; top: 12px; display: grid; gap: 2px; }
+.ov.tr { right: 12px; top: 12px; pointer-events: auto; display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; max-width: 60%; }
+.ov.bl { left: 14px; bottom: 12px; display: flex; gap: 12px; flex-wrap: wrap; font: 600 .74rem var(--mono); color: var(--muted); }
+.ov.br { right: 14px; bottom: 12px; font: 600 .72rem var(--mono); color: var(--muted); text-align: right; max-width: 55%; }
+.iso { display: grid; grid-template-columns: auto auto; align-items: center; column-gap: 4px; line-height: 1; }
+.iso .nums { display: grid; font: 600 .9rem var(--mono); text-align: right; gap: 6px; color: var(--muted); }
+.iso .big { font: 700 3.2rem/1 var(--display); color: var(--text); text-shadow: 0 0 22px #5fd4ff55; }
+.iso .chg { align-self: start; font: 700 1.1rem var(--mono); color: var(--gold); }
+.ov .nm { font: 600 1rem var(--display); }
+.orbtag { font: 600 .82rem var(--mono); color: var(--plus); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; }
+.msg { border-left: 3px solid var(--cyan); padding: 8px 12px; background: var(--deep); border-radius: 0 10px 10px 0; font-size: .92rem; min-height: 44px; }
+.msg.exc { border-color: var(--gold); }
+/* identity */
+.id { display: grid; gap: 12px; }
+.tilebig { --c: var(--p); display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 14px; align-items: center; }
+.tilebig .sq { width: 92px; height: 92px; border-radius: 14px; border: 2px solid var(--c); background: color-mix(in srgb, var(--c) 18%, var(--deep)); display: grid; place-items: center; align-content: center; box-shadow: 0 0 24px color-mix(in srgb, var(--c) 35%, transparent); }
+.tilebig .sq small { font: 600 .74rem var(--mono); color: var(--muted); }
+.tilebig .sq b { font: 700 2.4rem/1 var(--display); color: var(--c); }
+.kv { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 12px; font-size: .88rem; }
+.kv dt { color: var(--muted); }
+.kv dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+.cfg { font: 600 .95rem/1.6 var(--mono); word-break: break-word; }
+.cfg .sub { white-space: nowrap; }
+table.shells { width: 100%; border-collapse: collapse; font-size: .85rem; }
+table.shells th, table.shells td { padding: 5px 6px; border-bottom: 1px solid var(--line); text-align: left; }
+table.shells td.n { font-family: var(--mono); text-align: right; font-variant-numeric: tabular-nums; }
+.cap { height: 6px; border-radius: 4px; background: #ffffff12; overflow: hidden; min-width: 50px; }
+.cap i { display: block; height: 100%; background: var(--cyan); }
+.callout { border: 1px solid color-mix(in srgb, var(--gold) 60%, transparent); background: color-mix(in srgb, var(--gold) 10%, var(--deep)); border-radius: 12px; padding: 10px 12px; font-size: .88rem; display: grid; gap: 4px; }
+.callout b { color: var(--gold); }
+/* tabs */
+.tabs { display: flex; gap: 6px; flex-wrap: wrap; border-bottom: 1px solid var(--line); padding-bottom: 8px; }
+.tabs button { background: none; border: 1px solid transparent; color: var(--muted); font: 600 .95rem var(--display); padding: 8px 14px; border-radius: 10px; cursor: pointer; letter-spacing: .02em; }
+.tabs button[aria-selected="true"] { color: var(--text); border-color: var(--line); background: var(--panel); }
+.tabp { display: grid; gap: 16px; }
+.two { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+/* orbital boxes */
+.boxes { display: flex; flex-wrap: wrap; gap: 14px 18px; }
+.sh { display: grid; gap: 4px; justify-items: center; }
+.sh .lab { font: 700 .85rem var(--mono); }
+.sh .bx { display: flex; gap: 3px; }
+.ob { width: 34px; height: 38px; border-radius: 6px; border: 1px solid var(--c); background: color-mix(in srgb, var(--c) 10%, var(--deep)); color: var(--text); font: 700 1rem var(--mono); cursor: pointer; display: grid; place-items: center; padding: 0; }
+.ob.sel { box-shadow: 0 0 0 2px var(--text), 0 0 16px var(--c); }
+.ob.new { animation: pop .9s ease; }
+.sh.next .ob { border-style: dashed; opacity: .55; }
+@keyframes pop { 0% { transform: scale(1.4); background: var(--c); } 100% { transform: scale(1); } }
+.mad svg { width: 100%; max-width: 360px; height: auto; display: block; }
+.explore { display: grid; gap: 10px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font: 600 .8rem var(--mono); padding: 6px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel2); color: var(--text); cursor: pointer; }
+.chip.on { border-color: var(--c, var(--cyan)); background: color-mix(in srgb, var(--c, var(--cyan)) 22%, var(--panel2)); }
+.facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.fact { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; background: var(--deep); display: grid; gap: 2px; }
+.fact b { font: 700 1.3rem var(--mono); }
+/* periodic table */
+.pt-wrap { overflow-x: auto; padding-bottom: 4px; }
+.pt { display: grid; grid-template-columns: repeat(18, minmax(40px, 1fr)); grid-template-rows: repeat(7, auto) 12px repeat(2, auto); gap: 3px; min-width: 780px; }
+.el { --c: #444; aspect-ratio: 1 / 1.05; border-radius: 6px; border: 1px solid color-mix(in srgb, var(--c) 70%, transparent); background: color-mix(in srgb, var(--c) 26%, var(--deep)); color: var(--text); cursor: pointer; display: grid; align-content: center; justify-items: center; padding: 1px; font: inherit; line-height: 1.05; }
+.el b { font: 700 .95rem var(--display); }
+.el small { font: 600 .55rem var(--mono); color: var(--muted); }
+.el.dim { opacity: .18; }
+.el.cur { box-shadow: 0 0 0 2px var(--text); }
+.el:hover { filter: brightness(1.3); }
+.ph { display: grid; place-items: center; font: 600 .55rem var(--mono); color: var(--muted); border: 1px dashed var(--line); border-radius: 6px; }
+.lgd { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: .84rem; }
+.lgd span { display: flex; align-items: center; gap: 6px; }
+.lgd i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.pinfo { min-height: 24px; font-size: .9rem; }
+/* predict */
+.pq { display: grid; gap: 8px; }
+.pick2 { display: flex; gap: 8px; flex-wrap: wrap; }
+.pick2 .btn.ok { border-color: var(--good); background: color-mix(in srgb, var(--good) 18%, var(--panel2)); }
+.pick2 .btn.no { border-color: var(--bad); background: color-mix(in srgb, var(--bad) 16%, var(--panel2)); }
+.vs { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
+.vs .side { display: grid; gap: 8px; justify-items: center; text-align: center; }
+.vs svg { width: 100%; max-width: 260px; height: auto; }
+.bars { display: grid; gap: 6px; width: 100%; }
+.bars div { display: grid; grid-template-columns: 70px minmax(0, 1fr) 70px; gap: 8px; align-items: center; font: 600 .78rem var(--mono); }
+.bars .tr { height: 8px; border-radius: 5px; background: #ffffff12; overflow: hidden; }
+.bars .tr i { display: block; height: 100%; }
+.bars .v { text-align: right; font-variant-numeric: tabular-nums; }
+/* missions */
+.missions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.mis { border: 1px solid var(--line); border-radius: 12px; padding: 12px; background: var(--deep); display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 10px; align-items: start; }
+.mis .ck { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--line); display: grid; place-items: center; font-weight: 700; color: var(--void); }
+.mis.done { border-color: color-mix(in srgb, var(--good) 60%, transparent); }
+.mis.done .ck { background: var(--good); border-color: var(--good); }
+.mis details { margin-top: 4px; font-size: .84rem; color: var(--muted); }
+.mis summary { cursor: pointer; color: var(--cyan); }
+.prog { height: 10px; border-radius: 6px; background: #ffffff12; overflow: hidden; }
+.prog i { display: block; height: 100%; background: linear-gradient(90deg, var(--s), var(--p), var(--d), var(--f)); }
+.toast { position: fixed; left: 50%; bottom: max(20px, env(safe-area-inset-bottom, 0px)); transform: translateX(-50%) translateY(30px); opacity: 0; background: var(--panel2); border: 1px solid var(--good); padding: 10px 16px; border-radius: 10px; transition: .25s; z-index: 30; pointer-events: none; }
+.toast.on { opacity: 1; transform: translateX(-50%); }
+@media (max-width: 1180px) { .bench { grid-template-columns: 230px minmax(0, 1fr); } .bench .id { grid-column: 1 / -1; grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 820px) {
+  .bench, .two, .vs { grid-template-columns: minmax(0, 1fr); }
+  .bench .id { grid-template-columns: minmax(0, 1fr); }
+  .stage { height: 420px; order: -1; }
+  .ctl { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+  .missions, .facts { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="logo"><span class="mark" aria-hidden="true"></span>Build an Atom</div>
+    <div class="row"><span class="small muted">Jump to</span><select id="jump" aria-label="Jump to an element"></select></div>
+  </header>
+
+  <section class="bench">
+    <div class="ctl">
+      <div class="part"><div class="hd"><b><span class="dot" style="background:var(--proton)"></span>Protons</b><span class="count" id="cP">0</span></div>
+        <div class="pm"><button class="btn" data-d="P,-10" aria-label="Remove 10 protons">−10</button><button class="btn" data-d="P,-1" aria-label="Remove a proton">−1</button><button class="btn" data-d="P,1" aria-label="Add a proton">+1</button><button class="btn" data-d="P,10" aria-label="Add 10 protons">+10</button></div>
+        <span class="small muted">Protons set the atomic number, so they decide which element this is.</span></div>
+      <div class="part"><div class="hd"><b><span class="dot" style="background:var(--neutron)"></span>Neutrons</b><span class="count" id="cN">0</span></div>
+        <div class="pm"><button class="btn" data-d="N,-10" aria-label="Remove 10 neutrons">−10</button><button class="btn" data-d="N,-1" aria-label="Remove a neutron">−1</button><button class="btn" data-d="N,1" aria-label="Add a neutron">+1</button><button class="btn" data-d="N,10" aria-label="Add 10 neutrons">+10</button></div>
+        <label class="check" for="autoN"><input type="checkbox" id="autoN" checked> Use the most common isotope</label></div>
+      <div class="part"><div class="hd"><b><span class="dot" style="background:var(--cyan);box-shadow:0 0 8px var(--cyan)"></span>Electrons</b><span class="count" id="cE">0</span></div>
+        <div class="pm"><button class="btn" data-d="E,-10" aria-label="Remove 10 electrons">−10</button><button class="btn" data-d="E,-1" aria-label="Remove an electron">−1</button><button class="btn" data-d="E,1" aria-label="Add an electron">+1</button><button class="btn" data-d="E,10" aria-label="Add 10 electrons">+10</button></div>
+        <label class="check" for="autoE"><input type="checkbox" id="autoE" checked> Keep the atom neutral</label>
+        <span class="small muted">Turn this off to make ions.</span></div>
+      <div class="row"><button class="btn sm" id="reset">Start over with hydrogen</button></div>
+    </div>
+
+    <div style="display:grid;gap:10px;min-width:0">
+      <div class="stage" id="stage">
+        <canvas id="gl" aria-label="3D model of the atom" role="img"></canvas>
+        <canvas id="bohr" aria-label="Enhanced Bohr diagram of the atom" role="img" hidden></canvas>
+        <div class="ov tl"><div class="iso"><div class="nums"><span id="oA">1</span><span id="oZ">1</span></div><div style="display:flex;align-items:start"><span class="big" id="oS">H</span><span class="chg" id="oC"></span></div></div><span class="nm" id="oN">Hydrogen</span><span class="orbtag" id="oOrb"></span></div>
+        <div class="ov tr">
+          <button class="btn sm on" id="vCloud" aria-pressed="true">3D orbitals</button><button class="btn sm" id="vBohr" aria-pressed="false">Bohr+</button>
+          <button class="btn sm" id="vSpin" aria-pressed="true">Rotate</button><button class="btn sm" id="vShell" aria-pressed="false">Shells</button><button class="btn sm" id="vHome">Reset view</button>
+        </div>
+        <div class="ov bl legend"><span><i style="background:var(--s)"></i>s</span><span><i style="background:var(--p)"></i>p</span><span><i style="background:var(--d)"></i>d</span><span><i style="background:var(--f)"></i>f</span><span><i style="background:var(--plus)"></i>+ phase</span><span><i style="background:var(--minus)"></i>− phase</span></div>
+        <div class="ov br" id="oNote">Drag to rotate · scroll to zoom · nucleus enlarged about 10,000×</div>
+      </div>
+      <div class="msg" id="msg" role="status" aria-live="polite"></div>
+    </div>
+
+    <aside class="id" id="idPanel"></aside>
+  </section>
+
+  <nav class="tabs" role="tablist" aria-label="Lab instruments">
+    <button role="tab" id="t-orb" aria-selected="true" aria-controls="p-orb">Orbitals &amp; filling</button>
+    <button role="tab" id="t-pt" aria-selected="false" aria-controls="p-pt">Periodic table</button>
+    <button role="tab" id="t-pred" aria-selected="false" aria-controls="p-pred">Predict &amp; reveal</button>
+    <button role="tab" id="t-mis" aria-selected="false" aria-controls="p-mis">Missions</button>
+  </nav>
+  <section class="tabp" id="p-orb" role="tabpanel" aria-labelledby="t-orb"></section>
+  <section class="tabp" id="p-pt" role="tabpanel" aria-labelledby="t-pt" hidden></section>
+  <section class="tabp" id="p-pred" role="tabpanel" aria-labelledby="t-pred" hidden></section>
+  <section class="tabp" id="p-mis" role="tabpanel" aria-labelledby="t-mis" hidden></section>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script src="../shared/elements.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function () {
+'use strict';
+const C = window.CHEM, $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const LS = { get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} } };
+const REDUCE = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const LCOL = ['#ff4fa8', '#ffb02e', '#3ad687', '#3f9dff'];
+const sup = C.sup, EL = C.ELEMENTS, L = C.L;
+const blockOf = e => e.group == null ? 'f' : (e.group <= 2 || e.Z === 2) ? 's' : e.group >= 13 ? 'p' : 'd';
+const BCOL = { s: LCOL[0], p: LCOL[1], d: LCOL[2], f: LCOL[3] };
+const ORB = [['s'], ['pₓ', 'p_y', 'p_z'], ['d_xy', 'd_yz', 'd_xz', 'd_x²−y²', 'd_z²'], ['f_z³', 'f_xz²', 'f_yz²', 'f_xyz', 'f_z(x²−y²)', 'f_x(x²−3y²)', 'f_y(3x²−y²)']];
+const orbName = (n, l, m) => n + ORB[l][m].replace('p_y', 'p<sub>y</sub>').replace('p_z', 'p<sub>z</sub>').replace(/_(.+)$/, '<sub>$1</sub>');
+const orbText = (n, l, m) => n + ORB[l][m].replace('_', '');
+function toast(t) { const e = $('#toast'); e.textContent = t; e.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => e.classList.remove('on'), 3000); }
+
+/* ═══ atom state ═══ */
+const commonN = Z => Math.max(0, Math.round(EL[Z - 1].mass) - Z);
+const A = { Z: 1, N: 0, E: 1, autoN: true, autoE: true, sel: null, newBox: null, view: 'cloud', spin: !REDUCE, shells: false, tab: 'orb', ptMode: 'block', ptCountry: '', viewedL: new Set() };
+const cfg = () => C.config(A.Z, A.E);
+const el = () => EL[A.Z - 1];
+function shellsOf(c) { const m = {}; c.forEach(s => { m[s.n] = (m[s.n] || 0) + s.e; }); return m; }
+function outer(c) { if (!c.length) return { n: 0, e: 0 }; const n = Math.max(...c.map(s => s.n)); return { n, e: c.filter(s => s.n === n && s.l <= 1).reduce((a, s) => a + s.e, 0) }; }
+const ANION = { 1: 'hydride', 7: 'nitride', 8: 'oxide', 9: 'fluoride', 15: 'phosphide', 16: 'sulfide', 17: 'chloride', 34: 'selenide', 35: 'bromide', 53: 'iodide' };
+function chargeStr(q) { return q === 0 ? '' : (Math.abs(q) > 1 ? Math.abs(q) : '') + (q > 0 ? '+' : '−'); }
+/* boxes for a subshell with k electrons: Hund's rule (spread out, then pair) */
+function boxes(l, k) { const m = 2 * l + 1, out = Array(m).fill(0); for (let i = 0; i < k; i++) out[i % m]++; return out; }
+
+/* ═══ changes ═══ */
+function change(kind, d) {
+  const before = cfg(), oldZ = A.Z;
+  if (kind === 'P') { A.Z = Math.max(1, Math.min(118, A.Z + d)); if (A.autoN) A.N = commonN(A.Z); if (A.autoE) A.E = A.Z; }
+  if (kind === 'N') { A.N = Math.max(0, Math.min(180, A.N + d)); A.autoN = false; }
+  if (kind === 'E') { A.E = Math.max(0, Math.min(118, Math.min(A.Z + 3, A.E + d))); if (A.E !== A.Z) A.autoE = false; }
+  A.E = Math.min(A.E, 118, A.Z + 3);
+  narrate(kind, d, before, oldZ);
+  pickDefaultOrbital();
+  update();
+}
+function load(Z) { const b = cfg(); A.Z = Z; A.N = commonN(Z); A.E = Z; A.autoN = true; A.autoE = true; narrate('load', 0, b, Z); pickDefaultOrbital(true); update(); }
+function pickDefaultOrbital(force) {
+  const c = cfg();
+  if (A.newBox) { A.sel = { n: A.newBox.n, l: A.newBox.l, m: A.newBox.m }; return; }
+  if (!force && A.sel && c.some(s => s.n === A.sel.n && s.l === A.sel.l)) return;
+  const last = c[c.length - 1]; A.sel = last ? { n: last.n, l: last.l, m: 0 } : { n: 1, l: 0, m: 0 };
+}
+function narrate(kind, d, before, oldZ) {
+  const after = cfg(), e = el(); A.newBox = null; let t = '', exc = false;
+  const bm = Object.fromEntries(before.map(s => [s.k, s.e])), am = Object.fromEntries(after.map(s => [s.k, s.e]));
+  const up = after.filter(s => s.e > (bm[s.k] || 0)), down = before.filter(s => s.e > (am[s.k] || 0));
+  if (kind === 'P' || kind === 'load') {
+    t = kind === 'load' ? `Loaded ${e.name}: ${A.Z} protons, ${A.N} neutrons and ${A.E} electrons.` : `${d > 0 ? 'Added' : 'Removed'} ${Math.abs(A.Z - oldZ) || ''} proton${Math.abs(A.Z - oldZ) === 1 ? '' : 's'}. Atomic number ${A.Z} makes this ${e.name}. The nucleus now pulls with a charge of +${A.Z}.`;
+    if (!A.autoE && kind === 'P') t += ' Electrons stayed the same, so the charge changed.';
+    if (C.EXC[A.Z] && A.E === A.Z) { exc = true; t += ` Exception: ${C.EXC_WHY[A.Z]}`; }
+  } else if (kind === 'N') t = `${A.N} neutrons makes this ${e.name}-${A.Z + A.N}. Neutrons add mass but no charge, so the element and its chemistry stay the same. Atoms of one element with different neutron counts are isotopes.`;
+  else if (kind === 'E') {
+    if (d > 0 && up.length === 1 && !down.length && Math.abs(d) === 1) {
+      const s = up[0], k = s.e, m = 2 * s.l + 1, bx = boxes(s.l, k), idx = (k - 1) % m;
+      A.newBox = { n: s.n, l: s.l, m: idx };
+      t = `Electron ${A.E} went into ${s.k}. `;
+      if (k === 1) t += `It starts a new subshell: by the n + l rule (${s.n} + ${s.l} = ${s.n + s.l}), ${s.k} is the lowest-energy subshell with room. `;
+      else if (k <= m) t += `Hund’s rule: electrons take an empty ${s.k} orbital before they pair up. `;
+      else t += `Every ${s.k} orbital already has one electron, so this one pairs up with opposite spin. The Pauli principle allows at most two per orbital. `;
+    } else if (d > 0 && down.length) { exc = true; t = `Adding that electron rearranged the configuration. ${C.EXC_WHY[A.Z] && A.E === A.Z ? C.EXC_WHY[A.Z] : 'Nearby subshells have almost the same energy, so electrons shift between them.'}`; }
+    else if (d < 0 && down.length) t = `Removed ${Math.abs(d) === 1 ? 'an electron' : Math.abs(d) + ' electrons'} from ${down.map(s => s.k).join(', ')}. Atoms lose electrons from the highest shell first${down.some(s => s.l === 0 && s.n >= 4) ? ', which is why 4s empties before 3d' : ''}.`;
+    else t = d > 0 ? `Added ${d} electrons.` : 'There are no electrons left to remove.';
+    const q = A.Z - A.E;
+    if (q !== 0) t += ` The atom now has ${Math.abs(q)} ${q > 0 ? 'more protons than electrons' : 'more electrons than protons'}, so it is an ion with a ${q > 0 ? '+' : '−'}${Math.abs(q)} charge.`;
+    else if (C.EXC[A.Z] && !exc) { exc = true; t += ` Exception: ${C.EXC_WHY[A.Z]}`; }
+  }
+  const m = $('#msg'); m.textContent = t; m.classList.toggle('exc', exc);
+}
+
+/* ═══ identity panel ═══ */
+function renderId() {
+  const e = el(), c = cfg(), q = A.Z - A.E, mass = A.Z + A.N, b = blockOf(e), sh = shellsOf(c), o = outer(c);
+  const nStd = commonN(A.Z), radio = A.Z === 43 || A.Z === 61 || A.Z >= 84;
+  let iso = radio ? `All isotopes of ${e.name.toLowerCase()} are radioactive.` : Math.abs(A.N - nStd) >= 3 ? `Unusual isotope. Nuclei this far from the usual ${nStd} neutrons are usually radioactive.` : A.N === nStd ? `This is the most common isotope.` : `A real isotope may exist here; the most common one has ${nStd} neutrons.`;
+  const ionName = q === 0 ? 'Neutral atom' : q > 0 ? `${e.name} ion (cation)` : `${ANION[A.Z] ? ANION[A.Z][0].toUpperCase() + ANION[A.Z].slice(1) + ' ion' : e.name + ' ion'} (anion)`;
+  const pred = C.aufbau(A.Z), isExc = !!C.EXC[A.Z] && A.E === A.Z;
+  const disc = e.year === 0 ? 'Known since ancient times' : `${e.year} · ${e.country}`;
+  $('#idPanel').innerHTML = `
+    <div class="panel" style="display:grid;gap:12px">
+      <div class="tilebig" style="--c:${BCOL[b]}"><div class="sq"><small>${A.Z}</small><b>${e.sym}</b><small>${e.mass}</small></div>
+        <div style="display:grid;gap:2px;min-width:0"><h2>${esc(e.name)}${q ? `<span class="mono" style="color:var(--gold)"> ${e.sym}${sup2(chargeStr(q))}</span>` : ''}</h2><span class="small muted">${esc(C.CAT[e.cat][0])} · ${b}-block</span><span class="small muted">Period ${e.period}${e.group ? ` · Group ${e.group}` : ' · f-block (no group number)'}</span></div></div>
+      <dl class="kv">
+        <dt>Charge</dt><dd>${A.Z} − ${A.E} = <b>${q > 0 ? '+' : q < 0 ? '−' : ''}${Math.abs(q)}</b> · ${esc(ionName)}</dd>
+        <dt>Mass number</dt><dd>${A.Z} + ${A.N} = <b>${mass}</b> (${esc(e.name.toLowerCase())}-${mass})</dd>
+        <dt>Isotope</dt><dd class="small">${esc(iso)}</dd>
+        <dt>Outer-shell electrons</dt><dd><b>${o.e}</b> in shell n = ${o.n}</dd>
+        <dt>Discovered</dt><dd class="small">${esc(disc)}</dd>
+      </dl>
+    </div>
+    <div class="panel" style="display:grid;gap:10px">
+      <span class="eyebrow">Electron configuration</span>
+      <div class="cfg">${c.length ? c.map(s => `<span class="sub" style="color:${LCOL[s.l]}">${s.k}${sup(s.e)}</span>`).join(' ') : '<span class="muted">No electrons</span>'}</div>
+      <div class="small"><span class="muted">Noble-gas notation:</span> <span class="mono">${c.length ? C.nobleFmt(A.Z, A.E) : '—'}</span></div>
+      ${isExc ? `<div class="callout"><b>Exception to the filling order</b><span>The filling order predicts <span class="mono">${esc(nobleOf(pred))}</span>, but ${esc(e.name.toLowerCase())} is actually <span class="mono">${esc(C.nobleFmt(A.Z))}</span>.</span><span>${esc(C.EXC_WHY[A.Z])}</span></div>` : ''}
+    </div>
+    <div class="panel" style="display:grid;gap:8px">
+      <span class="eyebrow">Shells (energy levels)</span>
+      <table class="shells"><thead><tr><th>Shell</th><th>Subshells</th><th style="text-align:right">e⁻</th><th>of 2n²</th></tr></thead><tbody>
+      ${Object.keys(sh).map(n => { const cap = 2 * n * n; return `<tr><td class="mono">n = ${n}</td><td class="mono small">${c.filter(s => s.n == n).map(s => `<span style="color:${LCOL[s.l]}">${s.k}${sup(s.e)}</span>`).join(' ')}</td><td class="n">${sh[n]}</td><td><div class="cap" title="${sh[n]} of ${cap}"><i style="width:${100 * sh[n] / cap}%"></i></div></td></tr>`; }).join('') || '<tr><td colspan="4" class="muted">Empty</td></tr>'}
+      </tbody></table>
+    </div>`;
+}
+function sup2(s) { return s.replace(/\d/g, d => sup(d)).replace('+', '⁺').replace('−', '⁻'); }
+function nobleOf(pred) { /* write the plain filling-order prediction in noble-gas form */
+  const tot = pred.reduce((a, s) => a + s.e, 0); for (const [z, sy] of [[86, 'Rn'], [54, 'Xe'], [36, 'Kr'], [18, 'Ar'], [10, 'Ne'], [2, 'He']]) if (z < tot) { const core = C.aufbau(z).length; return '[' + sy + '] ' + C.fmt(pred.slice(core).length ? pred.slice(core) : pred); } return C.fmt(pred);
+}
+
+/* ═══ orbitals tab ═══ */
+function renderOrbTab() {
+  const c = cfg(), cm = Object.fromEntries(c.map(s => [s.k, s.e]));
+  const nextSub = C.ORDER.find(([n, l]) => (cm[n + L[l]] || 0) < C.CAP(l));
+  const shown = C.ORDER.filter(([n, l]) => cm[n + L[l]] || (nextSub && nextSub[0] === n && nextSub[1] === l));
+  const boxHTML = shown.map(([n, l]) => { const k = cm[n + L[l]] || 0, bx = boxes(l, k), isNext = !k;
+    return `<div class="sh ${isNext ? 'next' : ''}" style="--c:${LCOL[l]}"><span class="lab" style="color:${LCOL[l]}">${n}${L[l]}${k ? sup(k) : ''}</span><div class="bx">${bx.map((v, m) => `<button class="ob ${A.sel && A.sel.n === n && A.sel.l === l && A.sel.m === m ? 'sel' : ''} ${A.newBox && A.newBox.n === n && A.newBox.l === l && A.newBox.m === m ? 'new' : ''}" style="--c:${LCOL[l]}" data-orb="${n},${l},${m}" aria-label="${orbText(n, l, m)} orbital, ${v} electron${v === 1 ? '' : 's'}">${v === 2 ? '↑↓' : v === 1 ? '↑' : ''}</button>`).join('')}</div>${isNext ? '<span class="small muted">next</span>' : ''}</div>`; }).join('');
+  const s = A.sel || { n: 1, l: 0, m: 0 }, occ = cm[s.n + L[s.l]] ? boxes(s.l, cm[s.n + L[s.l]])[s.m] : 0;
+  $('#p-orb').innerHTML = `<div class="two">
+    <div class="panel" style="display:grid;gap:14px">
+      <div style="display:grid;gap:4px"><span class="eyebrow">Orbital diagram · filling order</span><p class="small muted">Each box is one orbital. Arrows are electrons with opposite spins. Click any box to see that orbital in 3D. The dashed subshell is where the next electron will go.</p></div>
+      <div class="boxes">${boxHTML}</div>
+      <div class="facts">
+        <div class="fact"><span class="small muted">Aufbau</span><span class="small">Electrons fill the lowest-energy subshell first, in order of n + l (lower n breaks ties).</span></div>
+        <div class="fact"><span class="small muted">Pauli</span><span class="small">An orbital holds at most two electrons, and they must have opposite spins.</span></div>
+        <div class="fact"><span class="small muted">Hund</span><span class="small">Within a subshell, electrons spread out one per orbital before any pair up.</span></div>
+      </div>
+    </div>
+    <div style="display:grid;gap:16px">
+      <div class="panel mad" style="display:grid;gap:8px"><span class="eyebrow">Order of filling</span>${madelung(cm, nextSub)}<p class="small muted">Follow the diagonal arrows from the top: 1s, 2s, 2p, 3s, 3p, 4s, 3d, 4p, 5s… Click a subshell to view it.</p></div>
+      <div class="panel explore"><span class="eyebrow">Orbital explorer</span>
+        <div class="chips" aria-label="Shell">${[1, 2, 3, 4, 5, 6, 7].map(n => `<button class="chip ${s.n === n ? 'on' : ''}" data-xn="${n}">n = ${n}</button>`).join('')}</div>
+        <div class="chips" aria-label="Subshell">${[0, 1, 2, 3].map(l => `<button class="chip ${s.l === l ? 'on' : ''}" style="--c:${LCOL[l]}" data-xl="${l}" ${l >= s.n ? 'disabled title="Shell ' + s.n + ' has no ' + L[l] + ' subshell"' : ''}>${L[l]}</button>`).join('')}</div>
+        <div class="chips" aria-label="Orbital">${ORB[s.l].map((nm, m) => `<button class="chip ${s.m === m ? 'on' : ''}" style="--c:${LCOL[s.l]}" data-xm="${m}">${orbName(s.n, s.l, m)}</button>`).join('')}</div>
+        <p class="small"><b>${orbName(s.n, s.l, s.m)}</b> · ${occ ? `${occ} electron${occ > 1 ? 's' : ''} in this atom` : 'empty in this atom'} · ${s.n - s.l - 1} radial node${s.n - s.l - 1 === 1 ? '' : 's'} (n − l − 1) · ${s.l} angular node${s.l === 1 ? '' : 's'} (l)</p>
+        <p class="small muted">${['An s orbital is a sphere. Larger n means a bigger sphere, with nested inner shells of opposite phase.', 'A p orbital has two lobes of opposite phase on one axis, with a node at the nucleus. There are three, one per axis.', 'Four d orbitals look like four-leaf clovers; d<sub>z²</sub> is two lobes with a ring around the middle. There are five.', 'f orbitals have six or eight lobes, or lobes with rings. There are seven, so f subshells hold 14 electrons.'][s.l]}</p>
+      </div>
+    </div></div>`;
+  $$('[data-orb]').forEach(b => b.onclick = () => { const [n, l, m] = b.dataset.orb.split(',').map(Number); A.sel = { n, l, m }; A.newBox = null; A.viewedL.add(l); setView('cloud'); orbChanged(); });
+  $$('[data-xn]').forEach(b => b.onclick = () => { const n = +b.dataset.xn; A.sel = { n, l: Math.min(A.sel.l, n - 1), m: 0 }; A.newBox = null; orbChanged(); });
+  $$('[data-xl]').forEach(b => b.onclick = () => { A.sel = { n: A.sel.n, l: +b.dataset.xl, m: 0 }; A.newBox = null; A.viewedL.add(A.sel.l); setView('cloud'); orbChanged(); });
+  $$('[data-xm]').forEach(b => b.onclick = () => { A.sel = { ...A.sel, m: +b.dataset.xm }; A.newBox = null; A.viewedL.add(A.sel.l); setView('cloud'); orbChanged(); });
+  $$('[data-mad]').forEach(g => { g.onclick = () => { const [n, l] = g.dataset.mad.split(',').map(Number); A.sel = { n, l, m: 0 }; A.newBox = null; A.viewedL.add(l); setView('cloud'); orbChanged(); }; g.onkeydown = ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); g.onclick(); } }; });
+}
+function orbChanged() { renderOrbTab(); G.orbital(); G.home(); overlay(); checkMissions();
+  const r = stage.getBoundingClientRect(); if (r.bottom < 80 || r.top > innerHeight - 80) stage.scrollIntoView({ behavior: REDUCE ? 'auto' : 'smooth', block: 'center' }); }
+function madelung(cm, next) {
+  const cw = 64, ch = 40, x0 = 40, y0 = 26, pos = (n, l) => [x0 + l * cw, y0 + (n - 1) * ch];
+  let s = `<svg viewBox="0 0 ${x0 + 4 * cw + 10} ${y0 + 7 * ch + 10}" role="img" aria-label="Diagonal chart of the order subshells fill">`;
+  s += ['s', 'p', 'd', 'f'].map((t, l) => `<text x="${x0 + l * cw + 22}" y="16" fill="${LCOL[l]}" font-family="JetBrains Mono, monospace" font-size="12" font-weight="700" text-anchor="middle">${t}</text>`).join('');
+  for (let n = 1; n <= 7; n++) s += `<text x="14" y="${y0 + (n - 1) * ch + 20}" fill="#a8a5d3" font-family="JetBrains Mono, monospace" font-size="12">${n}</text>`;
+  /* diagonals: all subshells with the same n + l, drawn from upper right to lower left */
+  for (let nl = 1; nl <= 8; nl++) { const cells = C.ORDER.filter(([n, l]) => n + l === nl); if (cells.length < 1) continue; const [a1, b1] = pos(...cells[0]), [a2, b2] = pos(...cells[cells.length - 1]);
+    s += `<line x1="${a1 + 44 + 10}" y1="${b1 + 2 - 6}" x2="${a2 + 2}" y2="${b2 + 30}" stroke="#5fd4ff" stroke-opacity=".35" stroke-width="2" marker-end="url(#ah)"/>`; }
+  s += `<defs><marker id="ah" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10z" fill="#5fd4ff" fill-opacity=".6"/></marker></defs>`;
+  C.ORDER.forEach(([n, l], i) => { const [x, y] = pos(n, l), k = cm[n + L[l]] || 0, cap = C.CAP(l), isN = next && next[0] === n && next[1] === l, sel = A.sel && A.sel.n === n && A.sel.l === l;
+    s += `<g data-mad="${n},${l}" tabindex="0" role="button" aria-label="${n}${L[l]}, ${k} of ${cap} electrons" style="cursor:pointer"><rect x="${x}" y="${y}" width="44" height="28" rx="6" fill="${LCOL[l]}" fill-opacity="${k ? .18 + .55 * k / cap : .06}" stroke="${sel ? '#ffffff' : LCOL[l]}" stroke-width="${sel ? 2.5 : 1}" ${isN ? 'stroke-dasharray="4 3"' : ''}/><text x="${x + 22}" y="${y + 19}" fill="#eeedff" font-family="JetBrains Mono, monospace" font-size="12" font-weight="700" text-anchor="middle">${n}${L[l]}</text><text x="${x + 52}" y="${y + 12}" fill="#a8a5d3" font-family="JetBrains Mono, monospace" font-size="9">${i + 1}</text></g>`; });
+  return s + '</svg>';
+}
+
+/* ═══ periodic table tab ═══ */
+const ERA = [['Ancient times', '#ffd25e', e => e.year === 0 || e.year < 1700], ['1700s', '#ff9a3c', e => e.year >= 1700 && e.year < 1800], ['1800s', '#ff4fa8', e => e.year >= 1800 && e.year < 1900], ['1900–1949', '#3f9dff', e => e.year >= 1900 && e.year < 1950], ['1950 and later', '#3ad687', e => e.year >= 1950]];
+const STATE = { solid: ['Solid', '#a3abcf'], liquid: ['Liquid', '#3f9dff'], gas: ['Gas', '#ffb02e'], unknown: ['Unknown', '#4a4870'] };
+const COUNTRIES = [...new Set(EL.flatMap(e => e.country ? e.country.split(' & ').map(x => x.trim()) : []))].sort();
+const PT_MODES = {
+  block: { name: 'Block (s, p, d, f)', about: 'The block tells you which kind of subshell the last electron fills. The table’s shape comes from the subshell sizes: s holds 2, p 6, d 10 and f 14.', col: e => BCOL[blockOf(e)], legend: () => [['s-block', BCOL.s], ['p-block', BCOL.p], ['d-block', BCOL.d], ['f-block', BCOL.f]] },
+  cat: { name: 'Metals, nonmetals and families', about: 'Families share outer-electron arrangements, so they react alike: alkali metals all have one s electron, halogens are one electron short of a noble gas.', col: e => C.CAT[e.cat][1], legend: () => Object.values(C.CAT) },
+  period: { name: 'Period (row)', about: 'A period number equals the number of electron shells that hold electrons in the atom’s ground state.', col: e => `hsl(${(e.period - 1) * 48} 80% 62%)`, legend: () => [1, 2, 3, 4, 5, 6, 7].map(p => ['Period ' + p, `hsl(${(p - 1) * 48} 80% 62%)`]) },
+  group: { name: 'Group (column)', about: 'Elements in a group have the same number of outer-shell electrons in the same kind of subshell, so they behave alike.', col: e => e.group ? `hsl(${(e.group - 1) * 20} 75% 60%)` : '#4a4870', legend: () => [['Group 1', 'hsl(0 75% 60%)'], ['Group 9', 'hsl(160 75% 60%)'], ['Group 18', 'hsl(340 75% 60%)'], ['f-block, no group', '#4a4870']] },
+  state: { name: 'State at room temperature', about: 'At 25 °C only two elements are liquids: bromine and mercury. Eleven are gases. The heaviest elements have never been made in amounts large enough to test.', col: e => STATE[e.state][1], legend: () => Object.values(STATE) },
+  era: { name: 'When it was discovered', about: 'Metals like gold, copper and iron were known in ancient times. Most elements were discovered in the 1800s, and every element after uranium was made in a laboratory.', col: e => ERA.find(x => x[2](e))[1], legend: () => ERA.map(x => [x[0], x[1]]) },
+  country: { name: 'Where it was discovered', about: 'Pick a country to light up the elements credited to scientists working there. Shared or disputed discoveries count for both countries.', col: e => '#5fd4ff', legend: () => [] }
+};
+function renderPT() {
+  const M = PT_MODES[A.ptMode];
+  let cells = '';
+  for (const e of EL) {
+    const r = e.row >= 9 ? e.row : e.row, dim = A.ptMode === 'country' && A.ptCountry && !(e.country || '').split(' & ').includes(A.ptCountry);
+    cells += `<button class="el ${dim ? 'dim' : ''} ${e.Z === A.Z ? 'cur' : ''}" style="--c:${A.ptMode === 'country' && !A.ptCountry ? (e.country ? '#5fd4ff' : '#4a4870') : M.col(e)};grid-row:${r};grid-column:${e.col}" data-z="${e.Z}" aria-label="${e.Z} ${esc(e.name)}"><small>${e.Z}</small><b>${e.sym}</b></button>`;
+  }
+  cells += `<div class="ph" style="grid-row:6;grid-column:3">57–71</div><div class="ph" style="grid-row:7;grid-column:3">89–103</div>`;
+  const cc = A.ptMode === 'country' && A.ptCountry ? EL.filter(e => (e.country || '').split(' & ').includes(A.ptCountry)) : null;
+  $('#p-pt').innerHTML = `<div class="panel" style="display:grid;gap:12px">
+    <div class="row" style="justify-content:space-between"><div style="display:grid;gap:4px"><span class="eyebrow">Ways to group the elements</span><h2>${esc(M.name)}</h2></div>
+      <div class="row"><label class="small muted" for="ptMode">Color by</label><select id="ptMode">${Object.entries(PT_MODES).map(([k, v]) => `<option value="${k}" ${k === A.ptMode ? 'selected' : ''}>${esc(v.name)}</option>`).join('')}</select>
+      ${A.ptMode === 'country' ? `<select id="ptCountry" aria-label="Country"><option value="">Choose a country</option>${COUNTRIES.map(c => `<option ${c === A.ptCountry ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select>` : ''}</div></div>
+    <p class="small muted" style="max-width:80ch">${esc(M.about)}</p>
+    <div class="lgd">${M.legend().map(([n, c]) => `<span><i style="background:${c}"></i>${esc(n)}</span>`).join('')}</div>
+    <div class="pt-wrap"><div class="pt">${cells}</div></div>
+    <div class="pinfo" id="pinfo">${cc ? `<b>${cc.length} element${cc.length === 1 ? '' : 's'}</b> credited to ${esc(A.ptCountry)}: ${cc.map(e => `${e.sym} (${e.year})`).join(', ')}` : '<span class="muted">Point at an element for its story. Click to build it.</span>'}</div>
+  </div>`;
+  $('#ptMode').onchange = ev => { A.ptMode = ev.target.value; renderPT(); checkMissions(); };
+  if ($('#ptCountry')) $('#ptCountry').onchange = ev => { A.ptCountry = ev.target.value; renderPT(); checkMissions(); };
+  $$('.el').forEach(b => { const e = EL[b.dataset.z - 1];
+    const info = () => { if (cc) return; $('#pinfo').innerHTML = `<b>${e.Z} · ${esc(e.name)}</b> · ${esc(C.CAT[e.cat][0])} · ${blockOf(e)}-block · <span class="mono">${esc(C.nobleFmt(e.Z))}</span> · ${e.year === 0 ? 'known since ancient times' : `discovered ${e.year}, ${esc(e.country)}`}`; };
+    b.onmouseenter = info; b.onfocus = info; b.onclick = () => { load(e.Z); window.scrollTo({ top: 0, behavior: REDUCE ? 'auto' : 'smooth' }); }; });
+}
+
+/* ═══ predict & reveal ═══ */
+const ROSTER = EL.filter(e => e.radius != null && e.group !== 18);
+const P = { a: 'Na', b: 'Cl', g: {}, rev: false, score: 0, total: 0 };
+function newPair(useMine) {
+  const pick = () => ROSTER[Math.random() * ROSTER.length | 0];
+  let a = useMine && el().radius != null && el().group !== 18 ? el() : pick(), b;
+  const mode = Math.random();
+  for (let i = 0; i < 50; i++) { b = pick(); if (b === a) continue; if (mode < .4 ? b.group === a.group : mode < .8 ? b.period === a.period : true) break; }
+  P.a = a.sym; P.b = b.sym; P.g = {}; P.rev = false; renderPred();
+}
+function valenceZeff(e) { const c = C.config(e.Z), n = Math.max(...c.map(s => s.n)), l = Math.max(...c.filter(s => s.n === n).map(s => s.l)); return { ...C.zeff(e.Z, e.Z, n, l), n, l, core: c.filter(s => s.n < n).reduce((x, s) => x + s.e, 0), val: c.filter(s => s.n === n).reduce((x, s) => x + s.e, 0) }; }
+function predWhy(a, b, stat) {
+  const big = stat === 'radius' ? (a.radius > b.radius ? a : b) : (a.ie > b.ie ? a : b), sm = big === a ? b : a;
+  const za = valenceZeff(big), zb = valenceZeff(sm);
+  if (stat === 'ie') { const p = big.sym + '>' + sm.sym; const ex = { 'Be>B': 'boron’s single 2p electron sits higher in energy than beryllium’s filled 2s pair', 'Mg>Al': 'aluminium’s single 3p electron sits higher in energy than magnesium’s filled 3s pair', 'N>O': 'oxygen has one paired 2p electron, and repulsion in that pair makes it easier to remove', 'P>S': 'sulfur has one paired 3p electron, and repulsion in that pair makes it easier to remove', 'As>Se': 'selenium has one paired 4p electron that is easier to remove', 'Ga>Al': 'gallium’s filled 3d electrons shield poorly, so its 4p electron is held a little tighter' }[p]; if (ex) return `Exception! The simple trend predicts the opposite, but ${ex}.`; }
+  if (big.group === sm.group) return stat === 'radius' ? `Same group: ${big.name} has ${za.n} shells and ${sm.name} has ${zb.n}. The extra shell puts the outer electrons farther out, and the effective nuclear charge stays similar (${za.zeff.toFixed(2)} vs ${zb.zeff.toFixed(2)}).` : `Same group: ${big.name}’s outer electrons are in shell ${za.n}, closer to the nucleus than ${sm.name}’s shell ${zb.n}, so they take more energy to remove.`;
+  if (big.period === sm.period) return stat === 'radius' ? `Same period: both use shell ${za.n}, but ${sm.name} has more protons. Its outer electrons feel Zeff ≈ ${zb.zeff.toFixed(2)} vs ${za.zeff.toFixed(2)} for ${big.name}, so they are pulled in tighter.` : `Same period: both use shell ${za.n}, but ${big.name} has more protons and a higher effective nuclear charge (${za.zeff.toFixed(2)} vs ${zb.zeff.toFixed(2)}), so its outer electron is harder to remove.`;
+  return stat === 'radius' ? `${big.name} has its outer electrons in shell ${za.n} with Zeff ≈ ${za.zeff.toFixed(2)}; ${sm.name} uses shell ${zb.n} with Zeff ≈ ${zb.zeff.toFixed(2)}. More shells and a weaker pull both make an atom bigger.` : `${big.name}’s outer electrons are in shell ${za.n} with Zeff ≈ ${za.zeff.toFixed(2)}; ${sm.name}’s are in shell ${zb.n} with Zeff ≈ ${zb.zeff.toFixed(2)}. A closer shell and a stronger pull both raise ionization energy.`;
+}
+function shieldSVG(e, scale) {
+  const z = valenceZeff(e), R = 30 + 80 * e.radius / 300 * scale, shells = z.n;
+  let s = `<svg viewBox="0 0 240 240" role="img" aria-label="${esc(e.name)} drawn to relative size, with ${z.core} shielding core electrons">`;
+  s += `<circle cx="120" cy="120" r="${R}" fill="#5fd4ff" fill-opacity=".06" stroke="#5fd4ff" stroke-opacity=".5" stroke-dasharray="3 4"/>`;
+  for (let k = 1; k < shells; k++) s += `<circle cx="120" cy="120" r="${14 + (R - 14) * k / shells}" fill="none" stroke="#a8a5d3" stroke-opacity=".5" stroke-width="${2 + 2 * (C.config(e.Z).filter(x => x.n === k).reduce((a, x) => a + x.e, 0) / 8)}"/>`;
+  const v = z.val; for (let i = 0; i < v; i++) { const a = i / v * Math.PI * 2 - Math.PI / 2; s += `<circle cx="${120 + R * Math.cos(a)}" cy="${120 + R * Math.sin(a)}" r="4.5" fill="${LCOL[z.l]}"/>`; }
+  s += `<circle cx="120" cy="120" r="13" fill="#ff5a6e"/><text x="120" y="124" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="#1c0710">+${e.Z}</text></svg>`;
+  return s;
+}
+function renderPred() {
+  const a = C.BY_SYM[P.a], b = C.BY_SYM[P.b], qs = [['radius', 'Which atom is larger?'], ['ie', 'Which has the higher first ionization energy?']];
+  const ans = { radius: a.radius > b.radius ? a.sym : b.sym, ie: a.ie > b.ie ? a.sym : b.sym };
+  const ready = qs.every(([k]) => P.g[k]);
+  const side = e => { const z = valenceZeff(e); return `<div class="side"><h3>${esc(e.name)} <span class="mono muted">${e.sym}</span></h3>${P.rev ? shieldSVG(e, 1) : `<div style="height:180px;display:grid;place-items:center" class="muted small">Make your predictions to reveal</div>`}
+    <div class="bars">${P.rev ? `<div><span>Radius</span><span class="tr"><i style="width:${100 * e.radius / 300}%;background:var(--cyan)"></i></span><span class="v">${e.radius} pm</span></div>
+      <div><span>IE₁</span><span class="tr"><i style="width:${100 * e.ie / 2400}%;background:var(--plus)"></i></span><span class="v">${e.ie} kJ/mol</span></div>
+      <div><span>Shells</span><span class="tr"><i style="width:${100 * z.n / 7}%;background:var(--neutron)"></i></span><span class="v">${z.n}</span></div>
+      <div><span>Shielding</span><span class="tr"><i style="width:${100 * z.core / 54}%;background:var(--neutron)"></i></span><span class="v">${z.core} core e⁻</span></div>
+      <div><span>Zeff</span><span class="tr"><i style="width:${100 * z.zeff / 8}%;background:var(--proton)"></i></span><span class="v">${z.zeff.toFixed(2)}</span></div>` : ''}</div></div>`; };
+  $('#p-pred').innerHTML = `<div class="two">
+    <div class="panel" style="display:grid;gap:14px">
+      <div style="display:grid;gap:4px"><span class="eyebrow">Predict first, then reveal</span><h2>${esc(a.name)} vs ${esc(b.name)}</h2>
+        <p class="small muted">Use their places in the table: ${a.sym} is period ${a.period}, group ${a.group}; ${b.sym} is period ${b.period}, group ${b.group}. Think about shells (distance), protons (pull) and inner electrons (shielding).</p></div>
+      ${qs.map(([k, q]) => `<div class="pq"><b>${q}</b><div class="pick2">${[a, b].map(e => `<button class="btn ${P.rev ? (e.sym === ans[k] ? 'ok' : P.g[k] === e.sym ? 'no' : '') : P.g[k] === e.sym ? 'on' : ''}" data-g="${k},${e.sym}" ${P.rev ? 'disabled' : ''}>${esc(e.name)}</button>`).join('')}</div>${P.rev ? `<p class="small">${P.g[k] === ans[k] ? '<b style="color:var(--good)">Correct.</b> ' : '<b style="color:var(--bad)">Not this time.</b> '}${esc(predWhy(a, b, k))}</p>` : ''}</div>`).join('')}
+      <div class="row">${P.rev ? '<button class="btn primary" id="pNew">New pair</button>' : `<button class="btn primary" id="pRev" ${ready ? '' : 'disabled'}>Reveal the results</button>`}<button class="btn" id="pMine">Compare with my atom</button><span class="small muted">Score ${P.score} / ${P.total}</span></div>
+    </div>
+    <div class="panel"><div class="vs">${side(a)}${side(b)}</div>${P.rev ? '<p class="small muted" style="margin-top:10px">Drawn to relative size. Grey rings are inner (core) electrons that shield the outer electrons from the nucleus. Zeff is the effective nuclear charge from Slater’s rules: protons minus shielding.</p>' : ''}</div></div>`;
+  $$('[data-g]').forEach(btn => btn.onclick = () => { const [k, s] = btn.dataset.g.split(','); P.g[k] = s; renderPred(); });
+  if ($('#pRev')) $('#pRev').onclick = () => { P.rev = true; P.total += 2; P.score += qs.filter(([k]) => P.g[k] === ans[k]).length; if (qs.every(([k]) => P.g[k] === ans[k])) A.predPerfect = (A.predPerfect || 0) + 1; renderPred(); checkMissions(); };
+  if ($('#pNew')) $('#pNew').onclick = () => newPair(false);
+  $('#pMine').onclick = () => { if (el().radius == null || el().group === 18) { toast('Build a main-group element from periods 1–6 (not a noble gas) to compare it.'); return; } newPair(true); };
+}
+
+/* ═══ missions ═══ */
+const MIS = [
+  { t: 'Build a neutral carbon-12 atom.', h: 'Carbon is element 6. Carbon-12 has 6 + 6 = 12 particles in the nucleus.', ok: () => A.Z === 6 && A.N === 6 && A.E === 6 },
+  { t: 'Turn it into carbon-14, the isotope used in radiocarbon dating.', h: 'Keep 6 protons and add neutrons until the mass number is 14.', ok: () => A.Z === 6 && A.N === 8 },
+  { t: 'Make the sodium ion, Na⁺.', h: 'Sodium has 11 protons. Turn off “Keep the atom neutral” and remove one electron.', ok: () => A.Z === 11 && A.E === 10 },
+  { t: 'Make the oxide ion, O²⁻.', h: 'Oxygen has 8 protons. A 2− charge means two more electrons than protons.', ok: () => A.Z === 8 && A.E === 10 },
+  { t: 'Build the first element with an electron in a p orbital.', h: 'After 1s and 2s fill (4 electrons), the next electron goes into 2p.', ok: () => A.Z === 5 && A.E === 5 },
+  { t: 'Build the first element with an electron in a 3d orbital.', h: 'Look at the filling chart: 3d comes right after 4s.', ok: () => A.Z === 21 && A.E === 21 },
+  { t: 'Find an exception to the filling order in period 4.', h: 'Two elements in the first row of transition metals break the pattern. Watch the configuration panel.', ok: () => (A.Z === 24 || A.Z === 29) && A.E === A.Z },
+  { t: 'Build an atom whose third shell (n = 3) is completely full.', h: 'Shell 3 holds 2n² = 18 electrons: 3s² 3p⁶ 3d¹⁰.', ok: () => (shellsOf(cfg())[3] || 0) === 18 },
+  { t: 'Build an element with 5 outer-shell electrons in period 4.', h: 'Period 4 means the outer shell is n = 4. Five outer electrons is 4s² 4p³.', ok: () => A.Z === 33 && A.E === 33 },
+  { t: 'View a d orbital and an f orbital in 3D.', h: 'Use the orbital explorer, or click a d or f box in the orbital diagram.', ok: () => A.viewedL.has(2) && A.viewedL.has(3) },
+  { t: 'Find an element discovered in Sweden and build it.', h: 'In the periodic table tab, color by “Where it was discovered” and choose Sweden.', ok: () => (el().country || '').includes('Sweden') },
+  { t: 'Predict both trends correctly for a pair of atoms.', h: 'In Predict & reveal: more shells means bigger; more protons in the same shell means smaller and harder to ionize.', ok: () => (A.predPerfect || 0) > 0 }
+];
+let DONE = new Set(LS.get('es.atom.missions', []));
+function checkMissions() { if (!A.ready) return; let fresh = null; MIS.forEach((m, i) => { if (!DONE.has(i) && m.ok()) { DONE.add(i); fresh = m; } }); if (fresh) { LS.set('es.atom.missions', [...DONE]); toast('Mission complete: ' + fresh.t); } if (A.tab === 'mis') renderMis(); }
+function renderMis() {
+  $('#p-mis').innerHTML = `<div class="panel" style="display:grid;gap:14px">
+    <div class="row" style="justify-content:space-between"><div style="display:grid;gap:4px"><span class="eyebrow">Lab missions</span><h2>${DONE.size} of ${MIS.length} complete</h2></div><button class="btn sm" id="misReset">Clear my progress</button></div>
+    <div class="prog" aria-hidden="true"><i style="width:${100 * DONE.size / MIS.length}%"></i></div>
+    <div class="missions">${MIS.map((m, i) => `<div class="mis ${DONE.has(i) ? 'done' : ''}"><span class="ck" aria-label="${DONE.has(i) ? 'Done' : 'Not done'}">${DONE.has(i) ? '✓' : ''}</span><div><b>${i + 1}. ${esc(m.t)}</b><details><summary>Hint</summary>${esc(m.h)}</details></div></div>`).join('')}</div>
+  </div>`;
+  $('#misReset').onclick = () => { if ($('#misReset').dataset.sure) { DONE = new Set(); LS.set('es.atom.missions', []); renderMis(); } else { $('#misReset').dataset.sure = 1; $('#misReset').textContent = 'Click again to clear'; } };
+}
+
+/* ═══ tabs ═══ */
+const TABS = { orb: renderOrbTab, pt: renderPT, pred: renderPred, mis: renderMis };
+function setTab(k) { A.tab = k; $$('.tabs [role="tab"]').forEach(b => b.setAttribute('aria-selected', b.id === 't-' + k)); $$('.tabp').forEach(p => p.hidden = p.id !== 'p-' + k); TABS[k](); }
+$$('.tabs [role="tab"]').forEach(b => b.onclick = () => setTab(b.id.slice(2)));
+
+/* ═══ stage overlay + update ═══ */
+function overlay() {
+  const e = el(), q = A.Z - A.E;
+  $('#oA').textContent = A.Z + A.N; $('#oZ').textContent = A.Z; $('#oS').textContent = e.sym; $('#oC').textContent = chargeStr(q); $('#oN').textContent = `${e.name}-${A.Z + A.N}${q ? ' ion' : ''}`;
+  const s = A.sel, cm = Object.fromEntries(cfg().map(x => [x.k, x.e])), occ = s && cm[s.n + L[s.l]] ? boxes(s.l, cm[s.n + L[s.l]])[s.m] : 0;
+  $('#oOrb').innerHTML = A.view === 'cloud' && s ? `${orbName(s.n, s.l, s.m)} orbital · ${occ ? occ + ' e⁻' : 'empty'}` : '';
+  $('#cP').textContent = A.Z; $('#cN').textContent = A.N; $('#cE').textContent = A.E;
+  $('#autoN').checked = A.autoN; $('#autoE').checked = A.autoE; $('#jump').value = A.Z;
+}
+function update() { overlay(); renderId(); TABS[A.tab](); G.rebuild(); B.draw(); checkMissions(); }
+
+/* ═══ 3D stage (three.js) ═══ */
+const stage = $('#stage');
+const rn = n => 1.05 + 1.15 * n;
+/* real angular functions for each orbital, in chemistry axes (z up) */
+const ANG = [[() => 1], [(x, y, z) => x, (x, y, z) => y, (x, y, z) => z],
+  [(x, y, z) => x * y, (x, y, z) => y * z, (x, y, z) => x * z, (x, y, z) => x * x - y * y, (x, y, z) => 3 * z * z - 1],
+  [(x, y, z) => z * (5 * z * z - 3), (x, y, z) => x * (5 * z * z - 1), (x, y, z) => y * (5 * z * z - 1), (x, y, z) => x * y * z, (x, y, z) => z * (x * x - y * y), (x, y, z) => x * (x * x - 3 * y * y), (x, y, z) => y * (3 * x * x - y * y)]];
+const MAXA = ANG.map(fs => fs.map(f => { let m = 0; for (let i = 0; i < 6000; i++) { const u = 2 * Math.random() - 1, t = Math.random() * 6.2832, s = Math.sqrt(1 - u * u), v = Math.abs(f(s * Math.cos(t), s * Math.sin(t), u)); if (v > m) m = v; } return m || 1; }));
+const G = (function () {
+  if (!window.THREE) return { ok: false, rebuild() {}, orbital() {}, home() {}, resize() {} };
+  const T = THREE, cv = $('#gl');
+  const R = new T.WebGLRenderer({ canvas: cv, antialias: true, alpha: true }); R.setPixelRatio(Math.min(2, devicePixelRatio || 1));
+  const scene = new T.Scene(), cam = new T.PerspectiveCamera(42, 1, .05, 400);
+  scene.add(new T.AmbientLight(0xffffff, .55)); const key = new T.DirectionalLight(0xffffff, .9); key.position.set(4, 6, 8); scene.add(key); const rim = new T.PointLight(0x7f6bff, .8, 0); rim.position.set(-6, -4, -6); scene.add(rim);
+  const root = new T.Group(); scene.add(root);
+  /* background stars */
+  { const n = 900, p = new Float32Array(n * 3); for (let i = 0; i < n; i++) { const u = 2 * Math.random() - 1, t = Math.random() * 6.28, s = Math.sqrt(1 - u * u), r = 90 + Math.random() * 60; p.set([r * s * Math.cos(t), r * u, r * s * Math.sin(t)], i * 3); }
+    const g = new T.BufferGeometry(); g.setAttribute('position', new T.BufferAttribute(p, 3)); scene.add(new T.Points(g, new T.PointsMaterial({ color: 0xffffff, size: .35, transparent: true, opacity: .7 }))); }
+  const sprite = (() => { const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d'), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32); gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(.35, 'rgba(255,255,255,.55)'); gr.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = gr; g.fillRect(0, 0, 64, 64); return new T.CanvasTexture(c); })();
+  let nucleus = null, cloud = null, cloudData = null, lobes = new T.Group(), rings = new T.Group(); root.add(lobes); root.add(rings);
+  const rot = { x: .35, y: .6, d: 14, td: 14 };
+  const toThree = (x, y, z) => [x, z, -y];
+  function buildNucleus() {
+    if (nucleus) { root.remove(nucleus); nucleus.children.forEach(m => m.geometry.dispose()); }
+    nucleus = new T.Group(); root.add(nucleus);
+    const n = A.Z + A.N, r0 = .13, Rn = r0 * 1.15 * Math.cbrt(Math.max(1, n));
+    const geo = new T.SphereGeometry(r0, 18, 14);
+    const mp = new T.InstancedMesh(geo, new T.MeshPhongMaterial({ color: 0xff5a6e, emissive: 0x3a0610, shininess: 70 }), A.Z);
+    const mn = new T.InstancedMesh(geo, new T.MeshPhongMaterial({ color: 0xa3abcf, emissive: 0x10131f, shininess: 70 }), Math.max(1, A.N));
+    mn.count = A.N; const m4 = new T.Matrix4(); let ip = 0, inn = 0;
+    /* interleave protons and neutrons on a golden spiral filling a ball */
+    const total = A.Z + A.N;
+    for (let i = 0; i < total; i++) { const rr = n === 1 ? 0 : Rn * Math.cbrt((i + .5) / total), u = 1 - 2 * (i + .5) / total, s = Math.sqrt(1 - u * u), t = i * 2.39996;
+      m4.makeTranslation(rr * s * Math.cos(t), rr * u, rr * s * Math.sin(t));
+      const isP = Math.floor((i + 1) * A.Z / total) > Math.floor(i * A.Z / total);
+      if (isP) mp.setMatrixAt(ip++, m4); else mn.setMatrixAt(inn++, m4); }
+    mp.count = ip; nucleus.add(mp); if (A.N) nucleus.add(mn);
+    return Rn;
+  }
+  /* electron clouds: points sampled from each occupied orbital's shape, re-sampled a little every frame */
+  function samplePoint(n, l, m, out, o) {
+    const f = ANG[l][m], mx = MAXA[l][m];
+    let x, y, z; for (let k = 0; k < 60; k++) { const u = 2 * Math.random() - 1, t = Math.random() * 6.2832, s = Math.sqrt(1 - u * u); x = s * Math.cos(t); y = s * Math.sin(t); z = u; const a = f(x, y, z) / mx; if (Math.random() < a * a) break; }
+    const r = rn(n) * (.35 + .9 * Math.pow(Math.random(), .7)) * (l ? .95 : .85);
+    const p = toThree(x * r, y * r, z * r); out[o] = p[0]; out[o + 1] = p[1]; out[o + 2] = p[2];
+  }
+  function buildCloud() {
+    if (cloud) { root.remove(cloud); cloud.geometry.dispose(); cloud = null; }
+    const c = cfg(); const orbs = [];
+    c.forEach(s => boxes(s.l, s.e).forEach((v, m) => { if (v) orbs.push({ n: s.n, l: s.l, m, v }); }));
+    const per = Math.max(60, Math.min(220, Math.floor(16000 / Math.max(1, A.E))));
+    const N = orbs.reduce((a, o) => a + o.v * per, 0); if (!N) { cloudData = null; return; }
+    const pos = new Float32Array(N * 3), col = new Float32Array(N * 3), own = new Uint16Array(N); let i = 0;
+    orbs.forEach((o, oi) => { const cc = new T.Color(LCOL[o.l]); for (let k = 0; k < o.v * per; k++, i++) { samplePoint(o.n, o.l, o.m, pos, i * 3); col[i * 3] = cc.r; col[i * 3 + 1] = cc.g; col[i * 3 + 2] = cc.b; own[i] = oi; } });
+    const g = new T.BufferGeometry(); g.setAttribute('position', new T.BufferAttribute(pos, 3)); g.setAttribute('color', new T.BufferAttribute(col, 3));
+    cloud = new T.Points(g, new T.PointsMaterial({ size: .16, map: sprite, vertexColors: true, transparent: true, opacity: .55, depthWrite: false, blending: T.AdditiveBlending }));
+    root.add(cloud); cloudData = { orbs, own, N };
+  }
+  function buildRings() {
+    rings.clear(); if (!A.shells) return;
+    const ns = Object.keys(shellsOf(cfg())).map(Number);
+    ns.forEach(n => { const pts = []; for (let i = 0; i <= 96; i++) { const a = i / 96 * 6.2832; pts.push(new T.Vector3(rn(n) * Math.cos(a), 0, rn(n) * Math.sin(a))); }
+      rings.add(new T.Line(new T.BufferGeometry().setFromPoints(pts), new T.LineBasicMaterial({ color: 0x5fd4ff, transparent: true, opacity: .35 }))); });
+  }
+  /* the selected orbital as a glowing surface: radius ∝ |angular function|, orange for +, blue for − */
+  function orbital() {
+    lobes.children.forEach(m => { m.geometry.dispose(); m.material.dispose(); }); lobes.clear();
+    const s = A.sel; if (!s || A.view !== 'cloud') { if (cloud) cloud.material.opacity = .55; return; }
+    const f = ANG[s.l][s.m], mx = MAXA[s.l][s.m], size = rn(s.n) * 1.05;
+    const make = (scale, flip, op) => {
+      const g = new T.SphereGeometry(1, 120, 90), p = g.attributes.position, colors = new Float32Array(p.count * 3), cP = new T.Color(0xff9a3c), cM = new T.Color(0x3fa4ff);
+      for (let i = 0; i < p.count; i++) { const vx = p.getX(i), vy = p.getY(i), vz = p.getZ(i); const val = f(vx, -vz, vy) / mx * (flip ? -1 : 1), r = (s.l === 0 ? 1 : Math.pow(Math.abs(val), 1.5)) * size * scale;
+        p.setXYZ(i, vx * r, vy * r, vz * r); const c = val >= 0 ? cP : cM; colors.set([c.r, c.g, c.b], i * 3); }
+      g.setAttribute('color', new T.BufferAttribute(colors, 3)); g.computeVertexNormals();
+      const mat = new T.MeshPhongMaterial({ vertexColors: true, transparent: true, opacity: op, shininess: 90, specular: 0x666666, emissive: 0x150a05, side: T.DoubleSide, depthWrite: false });
+      const mesh = new T.Mesh(g, mat); lobes.add(mesh);
+      const glow = new T.Mesh(g, new T.MeshBasicMaterial({ vertexColors: true, transparent: true, opacity: op * .25, side: T.BackSide, blending: T.AdditiveBlending, depthWrite: false })); glow.scale.setScalar(1.06); lobes.add(glow);
+    };
+    make(1, false, .42);
+    const nodes = s.n - s.l - 1; for (let k = 1; k <= nodes; k++) make(k / (nodes + 1) * .62, k % 2 === 1, .32); /* inner regions beyond each radial node flip phase */
+    if (cloud) cloud.material.opacity = .28;
+  }
+  function home() { const c = cfg(), maxN = c.length ? Math.max(...c.map(s => s.n)) : 1, need = Math.max(rn(maxN), A.sel ? rn(A.sel.n) * 1.1 : 0, 2.2); rot.td = need * 3.5; rot.x = .35; rot.y = .6; }
+  function rebuild() { buildNucleus(); buildCloud(); buildRings(); orbital(); home(); }
+  function resize() { const w = stage.clientWidth, h = stage.clientHeight; R.setSize(w, h, false); cam.aspect = w / h; cam.updateProjectionMatrix(); }
+  /* drag to rotate, wheel or pinch to zoom */
+  let drag = null; const pts = new Map();
+  cv.addEventListener('pointerdown', e => { cv.setPointerCapture(e.pointerId); pts.set(e.pointerId, [e.clientX, e.clientY]); drag = { x: e.clientX, y: e.clientY }; });
+  cv.addEventListener('pointermove', e => { if (!pts.has(e.pointerId)) return; const prev = pts.get(e.pointerId); pts.set(e.pointerId, [e.clientX, e.clientY]);
+    if (pts.size === 2) { const [a, b] = [...pts.values()]; const d = Math.hypot(a[0] - b[0], a[1] - b[1]); if (drag.pd) rot.td *= drag.pd / d; drag.pd = d; return; }
+    rot.y += (e.clientX - prev[0]) * .008; rot.x = Math.max(-1.5, Math.min(1.5, rot.x + (e.clientY - prev[1]) * .008)); });
+  const up = e => { pts.delete(e.pointerId); if (pts.size < 2 && drag) drag.pd = 0; };
+  cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+  cv.addEventListener('wheel', e => { e.preventDefault(); rot.td = Math.max(2, Math.min(60, rot.td * (1 + Math.sign(e.deltaY) * .1))); }, { passive: false });
+  let last = performance.now();
+  function frame(t) {
+    const dt = Math.min(.05, (t - last) / 1000); last = t;
+    if (!document.hidden && A.view === 'cloud') {
+      if (A.spin && !pts.size) rot.y += dt * .25;
+      rot.d += (rot.td - rot.d) * .12;
+      root.rotation.set(rot.x, rot.y, 0);
+      cam.position.set(0, 0, rot.d); cam.lookAt(0, 0, 0);
+      if (cloudData && !REDUCE) { /* electrons have no paths: re-sample a few positions each frame so the cloud shimmers */
+        const p = cloud.geometry.attributes.position, k = Math.max(20, cloudData.N * .03 | 0);
+        for (let j = 0; j < k; j++) { const i = Math.random() * cloudData.N | 0, o = cloudData.orbs[cloudData.own[i]]; samplePoint(o.n, o.l, o.m, p.array, i * 3); }
+        p.needsUpdate = true; }
+      if (nucleus && !REDUCE) nucleus.rotation.y += dt * .6;
+      R.render(scene, cam);
+    }
+    requestAnimationFrame(frame);
+  }
+  new ResizeObserver(resize).observe(stage); resize(); requestAnimationFrame(frame);
+  return { ok: true, rebuild, orbital, home, resize };
+})();
+
+/* ═══ Bohr+ (2D): shells as rings, electrons grouped and colored by subshell ═══ */
+const B = (function () {
+  const cv = $('#bohr'), g = cv.getContext('2d'); let t0 = performance.now();
+  function draw() {
+    if (A.view !== 'bohr') return;
+    const dpr = Math.min(2, devicePixelRatio || 1), w = stage.clientWidth, h = stage.clientHeight; if (cv.width !== w * dpr) { cv.width = w * dpr; cv.height = h * dpr; }
+    g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, w, h);
+    const c = cfg(), sh = shellsOf(c), ns = Object.keys(sh).map(Number), maxN = ns.length ? Math.max(...ns) : 1;
+    const cx = w / 2, cy = h / 2 + 10, nucR = 30, avail = Math.min(w * .5, h / 2) - 26, step = (avail - nucR - 8) / Math.max(1, maxN);
+    const tt = REDUCE ? 0 : (performance.now() - t0) / 1000;
+    g.lineWidth = 1;
+    for (let n = 1; n <= maxN; n++) {
+      const r = nucR + 8 + step * n; g.strokeStyle = 'rgba(95,212,255,.28)'; g.setLineDash([3, 5]); g.beginPath(); g.arc(cx, cy, r, 0, 6.2832); g.stroke(); g.setLineDash([]);
+      const subs = c.filter(s => s.n === n), tot = subs.reduce((a, s) => a + s.e, 0); let i = 0; const spin = tt * .35 / n;
+      subs.forEach(s => { for (let k = 0; k < s.e; k++, i++) { const a = -Math.PI / 2 + spin + i / Math.max(1, tot) * 6.2832; const x = cx + r * Math.cos(a), y = cy + r * Math.sin(a);
+        g.fillStyle = LCOL[s.l]; g.shadowColor = LCOL[s.l]; g.shadowBlur = 8; g.beginPath(); g.arc(x, y, Math.max(2.6, Math.min(5.5, step / 7)), 0, 6.2832); g.fill(); g.shadowBlur = 0; } });
+    }
+    /* shell labels in a column on the right, on a dark backing so the rings never collide with the text */
+    g.font = '600 11px "JetBrains Mono", monospace'; g.textAlign = 'left';
+    const lw = 150, lh = 34, lx = w - lw - 12, ly0 = Math.max(110, cy - maxN * lh / 2);
+    g.fillStyle = 'rgba(6,5,14,.72)'; g.fillRect(lx - 8, ly0 - 16, lw + 8, maxN * lh + 6);
+    for (let n = 1; n <= maxN; n++) { const y = ly0 + (n - 1) * lh; let x = lx; g.fillStyle = '#a8a5d3'; g.fillText(`n = ${n} · ${sh[n] || 0} of ${2 * n * n}`, x, y);
+      c.filter(s => s.n === n).forEach(s => { const txt = s.k + sup(s.e); g.fillStyle = LCOL[s.l]; g.fillText(txt, x, y + 14); x += g.measureText(txt).width + 6; }); }
+    const gr = g.createRadialGradient(cx - 8, cy - 8, 2, cx, cy, nucR); gr.addColorStop(0, '#ff9aa6'); gr.addColorStop(1, '#a3233a'); g.fillStyle = gr; g.beginPath(); g.arc(cx, cy, nucR, 0, 6.2832); g.fill();
+    g.fillStyle = '#fff'; g.textAlign = 'center'; g.font = '700 12px "JetBrains Mono", monospace'; g.fillText(`${A.Z} p⁺`, cx, cy - 2); g.fillStyle = '#e3e6f5'; g.font = '600 11px "JetBrains Mono", monospace'; g.fillText(`${A.N} n⁰`, cx, cy + 13);
+  }
+  function loop() { if (A.view === 'bohr' && !document.hidden) draw(); requestAnimationFrame(loop); }
+  if (!REDUCE) requestAnimationFrame(loop);
+  new ResizeObserver(() => draw()).observe(stage);
+  return { draw };
+})();
+
+/* ═══ wiring ═══ */
+function setView(v) {
+  if (v === 'cloud' && !G.ok) v = 'bohr';
+  const was = A.view; A.view = v; $('#gl').hidden = v !== 'cloud'; $('#bohr').hidden = v !== 'bohr';
+  $('#vCloud').classList.toggle('on', v === 'cloud'); $('#vBohr').classList.toggle('on', v === 'bohr'); $('#vCloud').setAttribute('aria-pressed', v === 'cloud'); $('#vBohr').setAttribute('aria-pressed', v === 'bohr');
+  $('#vSpin').hidden = $('#vShell').hidden = $('#vHome').hidden = v !== 'cloud';
+  $('#oNote').textContent = v === 'cloud' ? 'Drag to rotate · scroll to zoom · nucleus enlarged about 10,000×' : 'Enhanced Bohr model: rings are shells, dots are electrons colored by subshell';
+  if (was !== v) { G.orbital(); overlay(); if (v === 'bohr') B.draw(); }
+}
+$$('[data-d]').forEach(b => b.onclick = () => { const [k, d] = b.dataset.d.split(','); change(k, +d); });
+$('#autoN').onchange = ev => { A.autoN = ev.target.checked; if (A.autoN) { A.N = commonN(A.Z); update(); } };
+$('#autoE').onchange = ev => { A.autoE = ev.target.checked; if (A.autoE) { A.E = A.Z; pickDefaultOrbital(true); update(); } };
+$('#reset').onclick = () => load(1);
+$('#vCloud').onclick = () => setView('cloud'); $('#vBohr').onclick = () => setView('bohr');
+$('#vSpin').onclick = () => { A.spin = !A.spin; $('#vSpin').classList.toggle('on', A.spin); $('#vSpin').setAttribute('aria-pressed', A.spin); };
+$('#vShell').onclick = () => { A.shells = !A.shells; $('#vShell').classList.toggle('on', A.shells); $('#vShell').setAttribute('aria-pressed', A.shells); G.rebuild(); };
+$('#vHome').onclick = () => G.home();
+$('#vSpin').classList.toggle('on', A.spin); $('#vSpin').setAttribute('aria-pressed', A.spin);
+$('#jump').innerHTML = EL.map(e => `<option value="${e.Z}">${e.Z} · ${e.sym} · ${esc(e.name)}</option>`).join('');
+$('#jump').onchange = ev => load(+ev.target.value);
+if (!G.ok) { setView('bohr'); $('#vCloud').disabled = true; $('#vCloud').title = 'The 3D view could not load on this device'; }
+
+/* open on oxygen so the first view shows a p orbital with paired and unpaired electrons */
+A.Z = 8; A.N = 8; A.E = 8; A.sel = { n: 2, l: 1, m: 2 }; A.viewedL.add(1);
+$('#msg').textContent = 'This is oxygen: 8 protons, 8 neutrons, 8 electrons. Add or remove particles on the left, click any orbital box below to see its shape, or pick an element from the periodic table.';
+update();
+A.ready = true; /* missions count only what the student does, not the opening atom */
+})();
+</script>
+</body>
+</html>

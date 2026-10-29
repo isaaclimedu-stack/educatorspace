@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Element Wars</title>
+<meta name="description" content="A periodic trends battle game for high school chemistry: draft elements with hidden stats, win challenges by atomic radius, ionization energy, electronegativity and metallic character.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: a battle table in deep space. Element "cards" carry their block color (s magenta, p amber, d green, f blue)
+   the way the orbital blocks glow in the reference art; stats stay classified until a round is revealed. */
+:root {
+  --void: #07060f; --deep: #0e0c22; --panel: #15133a; --panel2: #1c1a48; --line: #2e2c62; --text: #eeedff; --muted: #a9a6d4;
+  --s: #ff4fa8; --p: #ffb02e; --d: #3ad687; --f: #3f9dff; --cyan: #5fd4ff; --good: #5ef0a0; --bad: #ff6b7f; --gold: #ffd25e;
+  --display: "Chakra Petch", "Segoe UI", system-ui, sans-serif;
+  --body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { min-height: 100vh; background: var(--void); color: var(--text); font: 16px/1.5 var(--body); }
+#sky { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+.wrap { position: relative; z-index: 1; max-width: 1120px; margin: 0 auto; padding-block: 18px 48px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 20px; }
+header.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.logo { display: flex; align-items: center; gap: 10px; background: none; border: 0; color: var(--text); cursor: pointer; padding: 0; font: 700 1.25rem var(--display); letter-spacing: .04em; text-transform: uppercase; }
+.logo .mark { width: 34px; height: 34px; border-radius: 8px; display: grid; place-items: center; background: linear-gradient(135deg, var(--s), var(--p)); color: #1a0716; font-size: 1rem; }
+.hud { display: flex; gap: 8px; flex-wrap: wrap; }
+.pill { font: 600 .8rem var(--mono); padding: 6px 12px; border-radius: 999px; background: var(--panel); border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+.pill b { color: var(--text); }
+h1, h2, h3 { font-family: var(--display); line-height: 1.15; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(2rem, 5vw, 3.4rem); letter-spacing: .01em; }
+h2 { font-size: 1.6rem; }
+h3 { font-size: 1.15rem; }
+p { margin: 0; }
+.muted { color: var(--muted); }
+.small { font-size: .88rem; }
+.eyebrow { font: 600 .74rem var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--cyan); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 18px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel2); color: var(--text); font: 600 .95rem var(--body); cursor: pointer; }
+.btn:hover { border-color: var(--cyan); }
+.btn.primary { background: linear-gradient(135deg, #ff4fa8, #ff8a3c); border-color: transparent; color: #1b0714; }
+.btn.primary:hover { filter: brightness(1.08); }
+.btn:disabled { opacity: .45; cursor: default; }
+button:focus-visible, .tile:focus-visible { outline: 3px solid var(--cyan); outline-offset: 2px; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.panel { background: color-mix(in srgb, var(--panel) 88%, transparent); border: 1px solid var(--line); border-radius: 16px; padding: 20px; }
+/* hero */
+.hero { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 28px; align-items: center; }
+.hero .lede { font-size: 1.1rem; color: var(--muted); max-width: 56ch; }
+.modes { display: grid; gap: 12px; }
+.mode { text-align: left; display: grid; gap: 4px; padding: 16px 18px; border-radius: 14px; border: 1px solid var(--line); background: var(--panel); color: var(--text); cursor: pointer; font: inherit; }
+.mode:hover { border-color: var(--p); }
+.mode b { font: 700 1.1rem var(--display); }
+.mode span { color: var(--muted); font-size: .92rem; }
+.fan { position: relative; height: 300px; }
+.fan .card { position: absolute; left: 50%; top: 50%; width: 150px; }
+/* element cards */
+.card { --c: var(--p); position: relative; border-radius: 14px; border: 2px solid color-mix(in srgb, var(--c) 70%, transparent); background: linear-gradient(170deg, color-mix(in srgb, var(--c) 22%, var(--panel)) 0%, var(--panel) 55%); padding: 12px; display: grid; gap: 6px; box-shadow: 0 0 22px color-mix(in srgb, var(--c) 28%, transparent); color: var(--text); text-align: left; font: inherit; }
+.card .z { font: 600 .8rem var(--mono); color: var(--muted); display: flex; justify-content: space-between; }
+.card .sym { font: 700 2.6rem/1 var(--display); color: var(--c); }
+.card .nm { font-weight: 700; }
+.card .blk { font: 600 .66rem var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--c); }
+.stats { display: grid; gap: 5px; margin-top: 4px; }
+.stat { display: grid; grid-template-columns: 34px minmax(0, 1fr) 54px; gap: 6px; align-items: center; font: 600 .72rem var(--mono); color: var(--muted); }
+.stat .bar { height: 6px; border-radius: 4px; background: #ffffff14; overflow: hidden; }
+.stat .bar i { display: block; height: 100%; background: var(--c); border-radius: 4px; transition: width .6s ease; }
+.stat .v { text-align: right; color: var(--text); font-variant-numeric: tabular-nums; }
+.stat.hot .v { color: var(--gold); }
+.classified { font: 600 .72rem var(--mono); letter-spacing: .14em; color: var(--muted); border: 1px dashed var(--line); border-radius: 8px; padding: 8px; text-align: center; }
+button.card { cursor: pointer; }
+button.card:hover:not(:disabled) { transform: translateY(-4px); }
+button.card { transition: transform .15s ease; }
+button.card:disabled { opacity: .35; cursor: default; }
+.card.win { box-shadow: 0 0 0 3px var(--good), 0 0 30px color-mix(in srgb, var(--good) 50%, transparent); }
+.card.lose { opacity: .7; }
+/* draft table */
+.draft { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 20px; align-items: start; }
+.ptable-wrap { overflow-x: auto; }
+.ptable { display: grid; grid-template-columns: repeat(8, minmax(52px, 1fr)); gap: 6px; min-width: 460px; position: relative; }
+.gh { font: 600 .68rem var(--mono); color: var(--muted); text-align: center; }
+.tile { --c: var(--p); aspect-ratio: 1; border-radius: 10px; border: 1px solid color-mix(in srgb, var(--c) 55%, transparent); background: color-mix(in srgb, var(--c) 14%, var(--panel)); color: var(--text); display: grid; place-items: center; align-content: center; gap: 0; cursor: pointer; font: inherit; padding: 2px; }
+.tile:hover:not(:disabled) { background: color-mix(in srgb, var(--c) 32%, var(--panel)); }
+.tile b { font: 700 1.2rem/1 var(--display); color: var(--c); }
+.tile small { font: 600 .6rem var(--mono); color: var(--muted); }
+.tile:disabled { cursor: default; opacity: .25; }
+.tile.mine { opacity: 1; box-shadow: 0 0 0 2px var(--good); }
+.tile.theirs { opacity: 1; box-shadow: 0 0 0 2px var(--bad); }
+.tile.empty { visibility: hidden; }
+.hints { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
+.hint { font-size: .85rem; color: var(--muted); border: 1px solid var(--line); border-radius: 10px; padding: 10px; }
+.hint b { color: var(--text); }
+.teamlist { display: grid; gap: 8px; }
+.teamlist .slot { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 10px; border: 1px dashed var(--line); min-height: 44px; }
+.teamlist .slot b { font: 700 1.2rem var(--display); color: var(--c, var(--muted)); width: 2.2em; }
+/* battle */
+.arena { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+.chall { text-align: center; display: grid; gap: 10px; justify-items: center; padding: 22px; border-radius: 18px; border: 1px solid var(--line); background: radial-gradient(circle at 50% 0%, #3a1f6e 0%, var(--panel) 70%); }
+.chall .ico { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; font: 700 1.6rem var(--display); background: #ffffff10; border: 1px solid var(--line); color: var(--gold); }
+.chall .rule { font: 600 .8rem var(--mono); color: var(--gold); letter-spacing: .06em; text-transform: uppercase; }
+.side { display: grid; gap: 10px; }
+.side h3 { display: flex; justify-content: space-between; align-items: baseline; }
+.side h3 span { font: 700 1.4rem var(--mono); }
+.hand { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 10px; }
+.slot-big { min-height: 200px; border: 1px dashed var(--line); border-radius: 14px; display: grid; place-items: center; color: var(--muted); font-size: .9rem; text-align: center; padding: 12px; }
+.verdict { display: grid; gap: 12px; }
+.verdict .why { font-size: 1rem; }
+.opts { display: grid; gap: 8px; }
+.opt { text-align: left; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel2); color: var(--text); cursor: pointer; font: inherit; }
+.opt:hover:not(:disabled) { border-color: var(--cyan); }
+.opt.ok { border-color: var(--good); background: color-mix(in srgb, var(--good) 16%, var(--panel2)); }
+.opt.no { border-color: var(--bad); background: color-mix(in srgb, var(--bad) 14%, var(--panel2)); }
+.opt:disabled { cursor: default; }
+.tag { display: inline-block; font: 600 .7rem var(--mono); letter-spacing: .1em; text-transform: uppercase; padding: 3px 8px; border-radius: 6px; }
+.tag.good { background: color-mix(in srgb, var(--good) 20%, transparent); color: var(--good); }
+.tag.bad { background: color-mix(in srgb, var(--bad) 20%, transparent); color: var(--bad); }
+.tag.gold { background: color-mix(in srgb, var(--gold) 20%, transparent); color: var(--gold); }
+.cover { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; background: rgba(7, 6, 15, .94); padding: 24px; text-align: center; }
+.cover .panel { max-width: 440px; display: grid; gap: 14px; }
+/* trials */
+.trial { display: grid; gap: 16px; max-width: 820px; }
+.qopts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.qopts .card { cursor: pointer; }
+.progress { height: 8px; border-radius: 6px; background: #ffffff12; overflow: hidden; }
+.progress i { display: block; height: 100%; background: linear-gradient(90deg, var(--s), var(--p)); }
+.review { display: grid; gap: 8px; }
+.review div { padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); font-size: .92rem; }
+table.cmp { border-collapse: collapse; width: 100%; font-size: .9rem; }
+table.cmp th, table.cmp td { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: left; }
+table.cmp td.n { font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; }
+.tbl { overflow-x: auto; }
+.toast { position: fixed; left: 50%; bottom: max(20px, env(safe-area-inset-bottom, 0px)); transform: translateX(-50%) translateY(30px); opacity: 0; background: var(--panel2); border: 1px solid var(--line); padding: 10px 16px; border-radius: 10px; transition: .25s; z-index: 30; }
+.toast.on { opacity: 1; transform: translateX(-50%); }
+@media (max-width: 900px) {
+  .hero, .draft, .arena { grid-template-columns: minmax(0, 1fr); }
+  .fan { display: none; }
+  .qopts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<canvas id="sky" aria-hidden="true"></canvas>
+<div class="wrap">
+  <header class="top">
+    <button class="logo" id="home" aria-label="Element Wars home"><span class="mark">Cs</span>Element Wars</button>
+    <div class="hud" id="hud"></div>
+  </header>
+  <main id="app"></main>
+</div>
+<div class="toast" id="toast" role="status"></div>
+<script src="../shared/elements.js"></script>
+<script>
+(function () {
+'use strict';
+const C = window.CHEM, $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const ROSTER = C.ELEMENTS.filter(e => e.radius != null);
+const IE_HI = Math.max(...ROSTER.map(e => e.ie)), IE_LO = Math.min(...ROSTER.map(e => e.ie));
+const metal = e => Math.round(100 * (IE_HI - e.ie) / (IE_HI - IE_LO));
+const block = e => e.group == null ? 'f' : (e.group <= 2 || e.Z === 2) ? 's' : e.group >= 13 ? 'p' : 'd';
+const BCOL = { s: 'var(--s)', p: 'var(--p)', d: 'var(--d)', f: 'var(--f)' };
+const rnd = n => Math.random() * n | 0, shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = rnd(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const BY = C.BY_SYM;
+
+/* ── stats and challenges ── */
+const STATS = {
+  radius: { short: 'RAD', name: 'Atomic radius', unit: 'pm', max: 300 },
+  ie: { short: 'IE', name: 'First ionization energy', unit: 'kJ/mol', max: 2400 },
+  en: { short: 'EN', name: 'Electronegativity', unit: '', max: 4 },
+  metal: { short: 'MET', name: 'Metallic character', unit: '/100', max: 100 }
+};
+const val = (e, s) => s === 'metal' ? metal(e) : e[s];
+const CH = [
+  { id: 'giver', name: 'Electron Giveaway', ico: 'e⁻', ask: 'Which of your elements loses an electron most easily?', stat: 'ie', best: 'min', rule: 'Lowest ionization energy wins' },
+  { id: 'fortress', name: 'Fortress', ico: '⛨', ask: 'Which of your elements holds on to its electrons the tightest?', stat: 'ie', best: 'max', rule: 'Highest ionization energy wins' },
+  { id: 'thief', name: 'Electron Thief', ico: 'δ−', ask: 'Which element pulls shared electrons toward itself hardest in a bond?', stat: 'en', best: 'max', rule: 'Highest electronegativity wins' },
+  { id: 'giant', name: 'Giant', ico: '◯', ask: 'Which of your atoms is the biggest?', stat: 'radius', best: 'max', rule: 'Largest atomic radius wins' },
+  { id: 'tiny', name: 'Tiny Titan', ico: '·', ask: 'Which of your atoms is the smallest?', stat: 'radius', best: 'min', rule: 'Smallest atomic radius wins' },
+  { id: 'metal', name: 'Metal Master', ico: 'M', ask: 'Which of your elements behaves most like a metal?', stat: 'metal', best: 'max', rule: 'Most metallic character wins' }
+];
+/* 1: a beats b, -1: b beats a, 0: tie. Missing electronegativity (He, Ne, Ar) can't score. */
+function cmp(a, b, ch) {
+  const va = val(a, ch.stat), vb = val(b, ch.stat);
+  if (va == null && vb == null) return 0; if (va == null) return -1; if (vb == null) return 1;
+  if (va === vb) return 0; return (ch.best === 'max' ? va > vb : va < vb) ? 1 : -1;
+}
+/* does this challenge reward "down and left" (big, metallic, low IE) or "up and right"? */
+const downLeft = ch => (ch.stat === 'radius' && ch.best === 'max') || (ch.stat === 'ie' && ch.best === 'min') || ch.stat === 'metal';
+
+/* ── explanations ── */
+const W = {
+  moreShells: 'It has more electron shells, so its valence electrons sit farther from the nucleus and are better shielded by the inner electrons.',
+  fewerShells: 'It has fewer electron shells, so its valence electrons sit closer to the nucleus with less shielding in between.',
+  moreProtons: 'It has more protons pulling on electrons in the same shell, so its effective nuclear charge is higher.',
+  fewerProtons: 'It has fewer protons pulling on electrons in the same shell, so its effective nuclear charge is lower.',
+  bothWays: 'It is both lower in the table and farther left, and both trends push the same way.',
+  bothWaysUp: 'It is both higher in the table and farther right, and both trends push the same way.',
+  compete: 'The two trends pull in opposite directions for this pair, so the measured values decide.',
+  sFull: 'Its outer electrons fill an s subshell, while the other element’s lone p electron is higher in energy and easier to remove.',
+  pHalf: 'Its p electrons are all unpaired. The other element has one paired p electron, and repulsion inside that pair makes it easier to remove.',
+  dShield: 'Its filled 3d electrons shield the nucleus poorly, so the valence electrons feel a stronger pull than you might expect.',
+  sFullLow: 'Its lone outer p electron is higher in energy than the other element’s filled s subshell, so it comes off more easily.',
+  pHalfLow: 'It has one paired p electron, and repulsion inside that pair makes it easier to remove than the other element’s unpaired p electrons.',
+  dShieldLow: 'The other element has filled 3d electrons that shield poorly, so that element holds its valence electrons a little tighter.',
+  xeEN: 'Xenon’s electronegativity is an estimate from its few known compounds. Noble gases don’t follow the usual electronegativity trend.',
+  nobleEN: 'Noble gases have no Pauling electronegativity because they almost never form bonds, so they can’t win this challenge.',
+  mass: 'It has a larger atomic mass, and heavier atoms are always bigger and stronger.',
+  neutrons: 'It has more neutrons, and neutrons push the electrons outward.',
+  octet: 'Elements closer to a noble gas always win every challenge.'
+};
+const EXC_IE = { 'Be>B': 'sFull', 'Mg>Al': 'sFull', 'N>O': 'pHalf', 'P>S': 'pHalf', 'As>Se': 'pHalf', 'Ga>Al': 'dShield' };
+/* the correct "why" for winner w over loser l in challenge ch */
+function whyKey(w, l, ch) {
+  if (ch.stat === 'en' && l.en == null) return 'nobleEN';
+  if (ch.stat === 'en' && (w.group === 18 || l.group === 18) && w.period === l.period) return 'xeEN';
+  if (ch.stat === 'ie' || ch.stat === 'metal') { const winHi = ch.stat === 'ie' && ch.best === 'max', hi = winHi ? w : l, lo = winHi ? l : w; const k = EXC_IE[hi.sym + '>' + lo.sym]; if (k) return winHi ? k : k + 'Low'; }
+  const dl = downLeft(ch);
+  if (w.group === l.group) { if ((w.period > l.period) === dl) return dl ? 'moreShells' : 'fewerShells'; return w.period > l.period ? 'dShield' : 'dShieldLow'; }
+  if (w.period === l.period) { const left = w.group < l.group; return left === dl ? (dl ? 'fewerProtons' : 'moreProtons') : 'compete'; }
+  const lower = w.period > l.period, left = w.group < l.group;
+  if (lower && left) return dl ? 'bothWays' : 'compete';
+  if (!lower && !left) return dl ? 'compete' : 'bothWaysUp';
+  return 'compete';
+}
+const DISTRACT = ['mass', 'neutrons', 'octet', 'moreShells', 'fewerShells', 'moreProtons', 'fewerProtons'];
+function whyQuestion(w, l, ch) {
+  const right = whyKey(w, l, ch);
+  const pool = shuffle(DISTRACT.filter(k => k !== right && !(right === 'compete' && false)));
+  /* keep contradictory-but-true statements out: never offer the opposite of a true fact as wrong only if it is actually false */
+  const wrong = pool.filter(k => !isAlsoTrue(k, w, l, ch)).slice(0, 3);
+  return { right, opts: shuffle([right, ...wrong]) };
+}
+function isAlsoTrue(k, w, l, ch) {
+  if (k === 'moreShells') return w.period > l.period && downLeft(ch);
+  if (k === 'fewerShells') return w.period < l.period && !downLeft(ch);
+  if (k === 'moreProtons') return w.Z > l.Z && w.period === l.period && !downLeft(ch);
+  if (k === 'fewerProtons') return w.Z < l.Z && w.period === l.period && downLeft(ch);
+  return false;
+}
+function fmtVal(e, s) { const v = val(e, s); if (v == null) return '—'; return s === 'en' ? v.toFixed(2) : String(v); }
+function explain(w, l, ch) {
+  const k = whyKey(w, l, ch), st = STATS[ch.stat];
+  const nums = `${w.name} ${fmtVal(w, ch.stat)} vs ${l.name} ${fmtVal(l, ch.stat)}${st.unit ? ' ' + st.unit : ''}.`;
+  const lead = k === 'compete' ? W.compete : k === 'nobleEN' ? W.nobleEN : `${w.name} wins. ${W[k]}`;
+  const exc = /^(sFull|pHalf|dShield)/.test(k) ? ' This is one of the classic exceptions to the simple trend.' : '';
+  return `${lead}${exc} ${st.name}: ${nums}`;
+}
+
+/* ── card markup ── */
+function cardHTML(e, o = {}) {
+  const b = block(e), c = BCOL[b];
+  const stats = o.reveal ? `<div class="stats">${Object.keys(STATS).map(s => { const v = val(e, s), pct = v == null ? 0 : Math.min(100, 100 * v / STATS[s].max); return `<div class="stat ${o.hot === s ? 'hot' : ''}"><span>${STATS[s].short}</span><span class="bar"><i style="width:${pct}%"></i></span><span class="v">${fmtVal(e, s)}</span></div>`; }).join('')}</div>` : (o.hide === false ? '' : '<div class="classified">STATS CLASSIFIED</div>');
+  const inner = `<span class="z"><span>${e.Z}</span><span>P${e.period} · G${e.group}</span></span><span class="sym">${e.sym}</span><span class="nm">${esc(e.name)}</span><span class="blk">${b}-block · ${esc(C.CAT[e.cat][0])}</span>${stats}`;
+  const st = `--c:${c};${o.style || ''}`;
+  return o.button ? `<button class="card ${o.cls || ''}" style="${st}" data-pick="${e.sym}" ${o.disabled ? 'disabled' : ''} aria-label="${esc(e.name)}">${inner}</button>` : `<div class="card ${o.cls || ''}" style="${st}">${inner}</div>`;
+}
+
+/* ── app state ── */
+const HAND = 5;
+let S = null;
+const app = () => $('#app');
+function toast(t) { const e = $('#toast'); e.textContent = t; e.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => e.classList.remove('on'), 2600); }
+function hud(html) { $('#hud').innerHTML = html || ''; }
+
+/* ═══ HOME ═══ */
+function home() {
+  S = null; hud('');
+  app().innerHTML = `<section class="hero">
+    <div style="display:grid;gap:18px">
+      <span class="eyebrow">AP Chemistry · periodic trends</span>
+      <h1>Every element is a fighter. <span style="color:var(--p)">Trends</span> decide who wins.</h1>
+      <p class="lede">Draft a team of elements with their stats hidden. Each round brings a challenge, such as “lose an electron most easily.” Pick the element the trends say will win, then explain why to earn a bonus point.</p>
+      <div class="modes">
+        <button class="mode" data-mode="cpu"><b>Battle the Rival</b><span>Draft 5 elements against a computer opponent, then fight 5 rounds.</span></button>
+        <button class="mode" data-mode="pvp"><b>Two-player battle</b><span>Pass one device back and forth. Picks stay hidden until both players lock in.</span></button>
+        <button class="mode" data-mode="trials"><b>Trend Trials</b><span>Ten quick questions like “Which loses an electron most easily?” with full explanations.</span></button>
+      </div>
+    </div>
+    <div class="fan" aria-hidden="true">${['Li', 'Na', 'K', 'Cs'].map((s, i) => cardHTML(BY[s], { reveal: i === 3, hot: 'ie', style: `transform:translate(-50%,-50%) translate(${(i - 1.5) * 70}px, ${Math.abs(i - 1.5) * 18}px) rotate(${(i - 1.5) * 8}deg);z-index:${i}` })).join('')}</div>
+  </section>`;
+  $$('[data-mode]').forEach(b => b.onclick = () => b.dataset.mode === 'trials' ? trials() : setup(b.dataset.mode));
+}
+
+/* ═══ BATTLE SETUP + DRAFT ═══ */
+function setup(mode) {
+  S = { mode, hints: false, turn: 0, players: [{ name: mode === 'cpu' ? 'You' : 'Player 1', hand: [], score: 0, bonus: 0 }, { name: mode === 'cpu' ? 'Rival' : 'Player 2', hand: [], score: 0, bonus: 0 }], taken: {}, round: 0, log: [] };
+  draft();
+}
+function draft() {
+  const P = S.players, me = S.turn, cols = [1, 2, 13, 14, 15, 16, 17, 18];
+  hud(`<span class="pill">Draft · <b>${P[0].hand.length + P[1].hand.length}/${HAND * 2}</b></span>`);
+  const done = P[0].hand.length === HAND && P[1].hand.length === HAND;
+  let cells = cols.map(c => `<div class="gh">${c}</div>`).join('');
+  for (let r = 1; r <= 6; r++) for (const c of cols) {
+    const e = ROSTER.find(x => x.period === r && x.group === c);
+    if (!e) { cells += '<div class="tile empty"></div>'; continue; }
+    const who = S.taken[e.sym];
+    cells += `<button class="tile ${who === 0 ? 'mine' : who === 1 ? 'theirs' : ''}" style="--c:${BCOL[block(e)]}" data-el="${e.sym}" ${who != null || done ? 'disabled' : ''} aria-label="${esc(e.name)}${who != null ? ', drafted by ' + esc(P[who].name) : ''}"><b>${e.sym}</b><small>${e.Z}</small></button>`;
+  }
+  const team = p => `<div class="teamlist">${Array.from({ length: HAND }, (_, i) => { const e = p.hand[i]; return `<div class="slot" style="${e ? '--c:' + BCOL[block(e)] : ''}"><b>${e ? e.sym : '·'}</b><span class="small ${e ? '' : 'muted'}">${e ? esc(e.name) : 'Empty slot'}</span></div>`; }).join('')}</div>`;
+  app().innerHTML = `<section style="display:grid;gap:16px">
+    <div style="display:grid;gap:6px"><span class="eyebrow">Draft phase</span><h2>${done ? 'Teams are set.' : `${esc(P[me].name)}, pick an element.`}</h2>
+      <p class="muted" style="max-width:70ch">Stats stay hidden. Choose a mix: big metals win some challenges, small nonmetals win others. Players take turns picking until each team has ${HAND}.</p></div>
+    <div class="draft">
+      <div class="panel" style="display:grid;gap:10px">
+        <div class="ptable-wrap"><div class="ptable">${cells}</div></div>
+        <div class="row"><button class="btn" id="hintBtn" aria-pressed="${S.hints}">${S.hints ? 'Hide' : 'Show'} trend hints</button><span class="small muted">Main-group elements, periods 1–6</span></div>
+        ${S.hints ? `<div class="hints">
+          <div class="hint"><b>Atomic radius</b> grows ↓ down a group and ← to the left.</div>
+          <div class="hint"><b>Ionization energy</b> grows ↑ up a group and → to the right.</div>
+          <div class="hint"><b>Electronegativity</b> grows ↑ and →. Fluorine is the champion. Noble gases have none.</div>
+          <div class="hint"><b>Metallic character</b> grows ↓ and ←, the same way as radius.</div></div>` : ''}
+      </div>
+      <div style="display:grid;gap:16px">
+        <div class="panel" style="display:grid;gap:10px"><h3 style="color:var(--good)">${esc(P[0].name)}</h3>${team(P[0])}</div>
+        <div class="panel" style="display:grid;gap:10px"><h3 style="color:var(--bad)">${esc(P[1].name)}</h3>${team(P[1])}</div>
+        ${done ? '<button class="btn primary" id="toBattle">Start the battle</button>' : ''}
+      </div>
+    </div></section>`;
+  $('#hintBtn').onclick = () => { S.hints = !S.hints; draft(); };
+  if (done) { $('#toBattle').onclick = () => { S.order = shuffle(CH.slice()).concat(shuffle(CH.slice())).slice(0, HAND); S.round = 0; S.turn = 0; battle(); }; return; }
+  $$('[data-el]').forEach(b => b.onclick = () => takePick(b.dataset.el));
+}
+function takePick(sym) {
+  const p = S.players[S.turn]; S.taken[sym] = S.turn; p.hand.push(BY[sym]);
+  S.turn = 1 - S.turn;
+  if (S.mode === 'cpu' && S.turn === 1 && S.players[1].hand.length < HAND) { cpuDraft(); S.turn = 0; }
+  draft();
+}
+function cpuDraft() {
+  const free = ROSTER.filter(e => S.taken[e.sym] == null), hand = S.players[1].hand;
+  /* the rival likes a spread: alternate between the left side (metals) and the upper right (nonmetals) */
+  const wantLeft = hand.filter(e => e.group <= 2).length <= hand.length / 2;
+  const pool = free.filter(e => wantLeft ? e.group <= 2 || e.period >= 5 : e.group >= 15 && e.period <= 3);
+  const pick = (pool.length ? pool : free)[rnd((pool.length ? pool : free).length)];
+  S.taken[pick.sym] = 1; hand.push(pick);
+}
+
+/* ═══ BATTLE ═══ */
+function battle() {
+  S.picks = [null, null]; S.phase = 'pick'; S.turn = 0; renderBattle();
+}
+function scoreHud() { const P = S.players; hud(`<span class="pill">Round <b>${S.round + 1}/${HAND}</b></span><span class="pill" style="color:var(--good)">${esc(P[0].name)} <b>${P[0].score + P[0].bonus}</b></span><span class="pill" style="color:var(--bad)">${esc(P[1].name)} <b>${P[1].score + P[1].bonus}</b></span>`); }
+function renderBattle() {
+  scoreHud();
+  const P = S.players, ch = S.order[S.round], rev = S.phase !== 'pick';
+  const sideHTML = (i) => {
+    const p = P[i], pk = S.picks[i];
+    const showHand = !rev && S.turn === i && (S.mode === 'pvp' || i === 0);
+    let body;
+    if (rev) body = cardHTML(pk, { reveal: true, hot: ch.stat, cls: S.res === 0 ? '' : (S.res === 1) === (i === 0) ? 'win' : 'lose' });
+    else if (pk) body = `<div class="slot-big">Locked in.<br>Hidden until both picks are in.</div>`;
+    else if (showHand) body = `<div class="hand">${p.hand.map(e => cardHTML(e, { button: true, disabled: p.used && p.used.has(e.sym) })).join('')}</div>`;
+    else body = `<div class="slot-big">${i === 1 && S.mode === 'cpu' ? 'The Rival is waiting for your pick.' : 'Waiting…'}</div>`;
+    const left = p.hand.filter(e => !(p.used && p.used.has(e.sym))).length;
+    return `<div class="side"><h3 style="color:var(${i ? '--bad' : '--good'})">${esc(p.name)} <span>${p.score + p.bonus}</span></h3><p class="small muted">${left} card${left === 1 ? '' : 's'} left${p.bonus ? ` · ${p.bonus} bonus point${p.bonus > 1 ? 's' : ''}` : ''}</p>${body}</div>`;
+  };
+  let center = `<div class="chall"><span class="eyebrow">Challenge ${S.round + 1}</span><div class="ico" aria-hidden="true">${ch.ico}</div><h2>${ch.name}</h2><p>${ch.ask}</p><span class="rule">${ch.rule}</span></div>`;
+  if (rev) {
+    const [a, b] = S.picks, w = S.res === -1 ? b : a, l = S.res === -1 ? a : b;
+    const head = S.res === 0 ? '<span class="tag gold">Tie</span>' : `<span class="tag good">${esc(P[S.res === 1 ? 0 : 1].name)} wins the round</span>`;
+    center += `<div class="panel verdict">${head}<p class="why">${S.res === 0 ? `Both picks score the same on ${STATS[ch.stat].name.toLowerCase()}.` : esc(explain(w, l, ch))}</p>
+      ${S.res !== 0 && S.phase === 'why' ? whyHTML(w, l, ch) : ''}
+      ${S.phase === 'next' || S.res === 0 ? `<button class="btn primary" id="next">${S.round + 1 < HAND ? 'Next challenge' : 'See final results'}</button>` : ''}</div>`;
+  }
+  app().innerHTML = `<section class="arena">${sideHTML(0)}<div style="display:grid;gap:14px">${center}</div>${sideHTML(1)}</section>`;
+  $$('[data-pick]').forEach(b => b.onclick = () => choose(b.dataset.pick));
+  if ($('#next')) $('#next').onclick = nextRound;
+  $$('[data-why]').forEach(b => b.onclick = () => answerWhy(b));
+}
+function whoAnswers() { return S.mode === 'cpu' ? 0 : (S.res === 1 ? 1 : 0); }
+function whyHTML(w, l, ch) {
+  if (!S.wq) S.wq = whyQuestion(w, l, ch);
+  const who = S.players[whoAnswers()];
+  return `<div style="display:grid;gap:8px"><span class="eyebrow">Bonus point · ${S.mode === 'cpu' ? 'your turn to explain' : esc(who.name) + ' explains'}</span><p><b>Why did ${esc(w.name)} beat ${esc(l.name)}?</b></p><div class="opts">${S.wq.opts.map(k => `<button class="opt" data-why="${k}">${esc(W[k])}</button>`).join('')}</div></div>`;
+}
+function answerWhy(btn) {
+  const k = btn.dataset.why, ok = k === S.wq.right;
+  $$('[data-why]').forEach(b => { b.disabled = true; if (b.dataset.why === S.wq.right) b.classList.add('ok'); else if (b === btn) b.classList.add('no'); });
+  if (ok) { S.players[whoAnswers()].bonus++; toast('Correct. +1 bonus point'); } else toast('Not quite. The highlighted answer is the reason.');
+  S.log[S.log.length - 1].why = ok;
+  setTimeout(() => { S.phase = 'next'; S.wq = null; renderBattle(); }, 1400);
+}
+function choose(sym) {
+  const i = S.turn, p = S.players[i]; S.picks[i] = BY[sym]; p.used = p.used || new Set(); p.used.add(sym);
+  if (S.mode === 'cpu') { cpuChoose(); return reveal(); }
+  if (i === 0) { S.turn = 1; cover(`Pass to ${S.players[1].name}`, `${S.players[0].name} has locked in a pick. ${S.players[1].name}, take the device and choose your element.`, renderBattle); return; }
+  reveal();
+}
+function cpuChoose() {
+  const p = S.players[1], ch = S.order[S.round], left = p.hand.filter(e => !(p.used && p.used.has(e.sym)));
+  let pick = left[rnd(left.length)];
+  if (Math.random() < .6) pick = left.slice().sort((a, b) => -cmp(a, b, ch))[0];
+  S.picks[1] = pick; p.used = p.used || new Set(); p.used.add(pick.sym);
+}
+function reveal() {
+  const ch = S.order[S.round], [a, b] = S.picks; S.res = cmp(a, b, ch);
+  if (S.res === 1) S.players[0].score++; else if (S.res === -1) S.players[1].score++;
+  S.log.push({ ch, a, b, res: S.res });
+  S.phase = S.res === 0 ? 'next' : 'why'; S.wq = null; renderBattle();
+}
+function nextRound() { S.round++; if (S.round >= HAND) return finish(); battle(); }
+function cover(title, msg, after) {
+  const d = document.createElement('div'); d.className = 'cover'; d.innerHTML = `<div class="panel"><h2>${esc(title)}</h2><p class="muted">${esc(msg)}</p><button class="btn primary" id="coverGo">I’m ready</button></div>`;
+  document.body.appendChild(d); const b = d.querySelector('#coverGo'); b.focus(); b.onclick = () => { d.remove(); after(); };
+}
+function finish() {
+  const P = S.players, t = P.map(p => p.score + p.bonus);
+  const head = t[0] === t[1] ? 'It’s a draw.' : `${esc(P[t[0] > t[1] ? 0 : 1].name)} ${S.mode === 'cpu' && t[0] < t[1] ? 'wins this time.' : 'wins!'}`;
+  hud('');
+  app().innerHTML = `<section style="display:grid;gap:18px;max-width:880px">
+    <div style="display:grid;gap:6px"><span class="eyebrow">Battle report</span><h1>${head}</h1>
+      <p class="muted">${esc(P[0].name)} ${t[0]} (${P[0].score} rounds + ${P[0].bonus} bonus) · ${esc(P[1].name)} ${t[1]} (${P[1].score} rounds + ${P[1].bonus} bonus)</p></div>
+    <div class="panel tbl"><table class="cmp"><thead><tr><th>Challenge</th><th>${esc(P[0].name)}</th><th>${esc(P[1].name)}</th><th>Result</th><th>Why answered</th></tr></thead><tbody>
+      ${S.log.map(r => `<tr><td>${r.ch.name}<br><span class="small muted">${r.ch.rule}</span></td><td>${r.a.sym} <span class="muted small">${fmtVal(r.a, r.ch.stat)}</span></td><td>${r.b.sym} <span class="muted small">${fmtVal(r.b, r.ch.stat)}</span></td><td>${r.res === 0 ? 'Tie' : esc(P[r.res === 1 ? 0 : 1].name)}</td><td>${r.why == null ? '—' : r.why ? '<span class="tag good">Right</span>' : '<span class="tag bad">Missed</span>'}</td></tr>`).join('')}
+    </tbody></table></div>
+    <div class="row"><button class="btn primary" id="again">Play again</button><button class="btn" id="toTrials">Try Trend Trials</button><button class="btn" id="toHome">Back to start</button></div></section>`;
+  $('#again').onclick = () => setup(S.mode); $('#toTrials').onclick = trials; $('#toHome').onclick = home;
+}
+
+/* ═══ TREND TRIALS ═══ */
+function makeTrials() {
+  const qs = [{ ch: CH[0], set: ['Li', 'Na', 'K', 'Cs'].map(s => BY[s]), fixed: true },
+    { ch: CH[1], set: ['B', 'C', 'N', 'O'].map(s => BY[s]), fixed: true },
+    { ch: CH[1], set: ['Li', 'Be', 'B'].map(s => BY[s]), fixed: true }];
+  const lines = [];
+  for (let g of [1, 2, 13, 14, 15, 16, 17]) lines.push(ROSTER.filter(e => e.group === g));
+  for (let p = 2; p <= 5; p++) lines.push(ROSTER.filter(e => e.period === p && e.group !== 18));
+  let guard = 0;
+  while (qs.length < 10 && guard++ < 400) {
+    const ch = CH[rnd(CH.length)], line = lines[rnd(lines.length)]; if (line.length < 4) continue;
+    const set = shuffle(line.slice()).slice(0, 4).sort((a, b) => a.Z - b.Z);
+    if (set.some(e => val(e, ch.stat) == null)) continue;
+    const vals = set.map(e => val(e, ch.stat)), best = ch.best === 'max' ? Math.max(...vals) : Math.min(...vals);
+    if (vals.filter(v => v === best).length > 1) continue;
+    const key = ch.id + set.map(e => e.sym).join(); if (qs.some(q => q.ch.id + q.set.map(e => e.sym).join() === key)) continue;
+    if (qs.filter(q => q.ch.id === ch.id).length >= 2) continue;
+    qs.push({ ch, set });
+  }
+  const first = qs.slice(0, 1), rest = shuffle(qs.slice(1));
+  return first.concat(rest).map(q => { const w = q.set.slice().sort((a, b) => -cmp(a, b, q.ch))[0]; return { ...q, answer: w }; });
+}
+function trialExplain(q) {
+  const w = q.answer, others = q.set.filter(e => e !== w), ch = q.ch, st = STATS[ch.stat];
+  const sameG = q.set.every(e => e.group === w.group), sameP = q.set.every(e => e.period === w.period);
+  let core;
+  const excO = others.find(o => /^(sFull|pHalf|dShield)/.test(whyKey(w, o, ch)));
+  if (excO) core = `Compared with ${excO.name}: ${W[whyKey(w, excO, ch)]} This pair is a classic exception to the simple trend, so ${w.name} comes out ahead.`;
+  else if (sameG) core = `These elements share group ${w.group}. ${downLeft(ch) ? `${w.name} is lowest, so it has the most shells: its valence electrons are farthest from the nucleus and most shielded.` : `${w.name} is highest, so it has the fewest shells: its valence electrons are closest to the nucleus and least shielded.`}`;
+  else if (sameP) core = `These elements share period ${w.period}, so their valence electrons are in the same shell. ${downLeft(ch) ? `${w.name} has the fewest protons, so it has the lowest effective nuclear charge.` : `${w.name} has the most protons, so it has the highest effective nuclear charge.`}`;
+  else core = W[whyKey(w, others[0], ch)];
+  return `${core}`;
+}
+function trials() {
+  S = { mode: 'trials', qs: makeTrials(), i: 0, score: 0, ans: [] };
+  renderTrial();
+}
+function renderTrial() {
+  const q = S.qs[S.i], a = S.ans[S.i];
+  hud(`<span class="pill">Question <b>${S.i + 1}/${S.qs.length}</b></span><span class="pill">Score <b>${S.score}</b></span>`);
+  const st = STATS[q.ch.stat];
+  app().innerHTML = `<section class="trial">
+    <div class="progress" aria-hidden="true"><i style="width:${100 * S.i / S.qs.length}%"></i></div>
+    <div style="display:grid;gap:6px"><span class="eyebrow">Trend Trials · ${st.name}</span><h2>${q.ch.id === 'giver' ? 'You need an element that loses an electron easily. Which would you choose?' : q.ch.ask.replace('of your elements', 'of these elements').replace('of your atoms', 'of these atoms')}</h2></div>
+    <div class="qopts">${q.set.map(e => cardHTML(e, { button: !a, reveal: !!a, hot: q.ch.stat, cls: a ? (e === q.answer ? 'win' : e.sym === a ? 'lose' : '') : '' })).join('')}</div>
+    ${a ? `<div class="panel" style="display:grid;gap:10px">${a === q.answer.sym ? '<span class="tag good">Correct</span>' : `<span class="tag bad">The answer is ${esc(q.answer.name)}</span>`}
+      <p>${esc(trialExplain(q))}</p>
+      <div class="tbl"><table class="cmp"><thead><tr><th>Element</th><th>Period</th><th>Group</th><th style="text-align:right">${st.name}${st.unit ? ' (' + st.unit + ')' : ''}</th></tr></thead><tbody>${q.set.map(e => `<tr><td>${e.sym} · ${esc(e.name)}</td><td>${e.period}</td><td>${e.group}</td><td class="n">${fmtVal(e, q.ch.stat)}</td></tr>`).join('')}</tbody></table></div>
+      <div class="row"><button class="btn primary" id="tNext">${S.i + 1 < S.qs.length ? 'Next question' : 'See my results'}</button></div></div>` : ''}
+  </section>`;
+  $$('[data-pick]').forEach(b => b.onclick = () => { S.ans[S.i] = b.dataset.pick; if (b.dataset.pick === q.answer.sym) S.score++; renderTrial(); });
+  if ($('#tNext')) $('#tNext').onclick = () => { S.i++; if (S.i >= S.qs.length) trialEnd(); else renderTrial(); };
+}
+function trialEnd() {
+  const n = S.qs.length, sc = S.score;
+  hud('');
+  app().innerHTML = `<section style="display:grid;gap:18px;max-width:820px">
+    <div style="display:grid;gap:6px"><span class="eyebrow">Trend Trials complete</span><h1>${sc} / ${n}</h1>
+    <p class="muted">${sc >= 9 ? 'Trend master. You can predict element behavior from position alone.' : sc >= 6 ? 'Solid. Look over the misses below, especially any exceptions.' : 'Keep practicing. Turn on trend hints in a battle and watch which way each arrow points.'}</p></div>
+    <div class="review">${S.qs.map((q, i) => `<div><b>${i + 1}. ${STATS[q.ch.stat].name}:</b> ${q.set.map(e => e.sym).join(', ')} → <b>${q.answer.sym}</b> ${S.ans[i] === q.answer.sym ? '<span class="tag good">Right</span>' : `<span class="tag bad">You chose ${S.ans[i]}</span>`}</div>`).join('')}</div>
+    <div class="row"><button class="btn primary" id="tAgain">New set of questions</button><button class="btn" id="tBattle">Battle the Rival</button><button class="btn" id="toHome">Back to start</button></div></section>`;
+  $('#tAgain').onclick = trials; $('#tBattle').onclick = () => setup('cpu'); $('#toHome').onclick = home;
+}
+
+/* ── starfield ── */
+function sky() {
+  const cv = $('#sky'), g = cv.getContext('2d'), dpr = Math.min(2, devicePixelRatio || 1);
+  const W2 = cv.width = innerWidth * dpr, H2 = cv.height = innerHeight * dpr; cv.style.width = innerWidth + 'px'; cv.style.height = innerHeight + 'px';
+  const gr = g.createRadialGradient(W2 * .8, H2 * .1, 0, W2 * .8, H2 * .1, W2 * .7); gr.addColorStop(0, '#2a1650'); gr.addColorStop(1, 'rgba(7,6,15,0)');
+  g.fillStyle = '#07060f'; g.fillRect(0, 0, W2, H2); g.fillStyle = gr; g.fillRect(0, 0, W2, H2);
+  const g2 = g.createRadialGradient(W2 * .1, H2 * .95, 0, W2 * .1, H2 * .95, W2 * .5); g2.addColorStop(0, '#0f2f4f'); g2.addColorStop(1, 'rgba(7,6,15,0)'); g.fillStyle = g2; g.fillRect(0, 0, W2, H2);
+  for (let i = 0; i < 260; i++) { g.globalAlpha = Math.random() * .7 + .15; g.fillStyle = '#fff'; g.beginPath(); g.arc(Math.random() * W2, Math.random() * H2, Math.random() * 1.2 * dpr, 0, 7); g.fill(); }
+  g.globalAlpha = 1;
+}
+addEventListener('resize', () => { clearTimeout(sky.t); sky.t = setTimeout(sky, 200); });
+$('#home').onclick = home;
+sky(); home();
+})();
+</script>
+</body>
+</html>
