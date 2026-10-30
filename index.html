@@ -297,6 +297,36 @@ body:has(.lab.fit) { margin: 0; }
 .vs-gap { width: 8px; }
 .vs-e { margin-top: auto; display: flex; justify-content: space-between; gap: 8px; font-size: 12px; color: #33475e; border-top: 1px solid #d5dfea; padding-top: 7px; flex-wrap: wrap; }
 .vs-e .warn { color: #c2410c; font-weight: 700; }
+/* ── Planet Strike + Helix Hero: controls in the lab sheet ── */
+.pl-ctl { display: grid; gap: 10px; }
+.pl-sl { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; align-items: center; }
+.pl-sl label { font-size: 13px; font-weight: 650; color: var(--muted); }
+.pl-sl b { font-family: var(--f-mono); font-size: 14px; }
+.pl-sl input { grid-column: 1 / -1; width: 100%; accent-color: var(--accent); }
+.pl-comp { font-size: 12.5px; color: var(--muted); background: var(--panel-2); border-radius: 8px; padding: 7px 9px; font-family: var(--f-mono); }
+.pl-comp b { color: var(--ink); }
+.pl-tog { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; }
+.pl-tog label { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
+.pl-goal { border: 1px solid var(--line); border-radius: 10px; padding: 9px 11px; display: grid; gap: 4px; background: var(--panel-2); }
+.pl-lab { font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; font-weight: 700; color: var(--accent); }
+.pl-ck { display: grid; grid-template-columns: 18px 1fr; gap: 6px; font-size: 13.5px; color: var(--muted); }
+.pl-ck.ok { color: var(--ok); }
+.pl-pred { display: grid; gap: 4px; }
+.pl-pred label { font-size: 13px; font-weight: 650; color: var(--muted); }
+.pl-pred input { width: 120px; font: inherit; font-family: var(--f-mono); padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); color: var(--ink); }
+.pl-qz { border-top: 1px solid var(--line); padding-top: 10px; }
+.hx-keys { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.hx-keys button { font: 800 18px var(--f-display); padding: 8px 0; border-radius: 10px; border: 2px solid var(--c); background: color-mix(in srgb, var(--c) 14%, var(--panel)); color: var(--ink); cursor: pointer; }
+.hx-keys button:hover { background: color-mix(in srgb, var(--c) 30%, var(--panel)); }
+.hx-keys button small { display: block; font: 600 10.5px var(--f-mono); color: var(--muted); }
+.hx-types { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.hx-types button { text-align: left; padding: 9px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); color: var(--ink); cursor: pointer; font: inherit; font-size: 13.5px; }
+.hx-types button:hover:not(:disabled) { border-color: var(--accent); }
+.hx-types button.right { border-color: var(--ok); background: var(--ok-soft); }
+.hx-types button.wrong { border-color: var(--bad); background: var(--bad-soft); }
+.hx-card { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: var(--panel-2); display: grid; gap: 6px; font-size: 13.5px; }
+.hx-card b.t { font-family: var(--f-display); font-size: 16px; }
+.hx-card .cost { color: var(--warn); }
 
 /* ── game ── */
 .game { display: grid; gap: 18px; }
@@ -1445,7 +1475,7 @@ const ASSIST = {
   otter: { name: 'Pippin', pal: { fur: '#a8754f', dark: '#7d5638', belly: '#f6e6cc', line: '#4a3426' } },
   sheep: { name: 'Puff', pal: { wool: '#fffdf8', face: '#f3dcc3', dark: '#5b4c45', line: '#5a4a42' } }
 };
-const ASSIST_BY_LAB = { 'dna-strawberry': 'otter', titration: 'sheep', flame: 'otter', pendulum: 'sheep', ohm: 'otter', mass: 'otter', erosion: 'sheep', onion: 'sheep', heart: 'otter' };
+const ASSIST_BY_LAB = { 'dna-strawberry': 'otter', titration: 'sheep', flame: 'otter', pendulum: 'sheep', ohm: 'otter', mass: 'otter', erosion: 'sheep', onion: 'sheep', heart: 'otter', projectile: 'sheep', helix: 'otter' };
 const assist = () => ASSIST_BY_LAB[(typeof APP !== 'undefined' && APP.curLab) || ''] || 'otter';
 const asstName = () => ASSIST[assist()].name;
 function pipFace(mood = 'happy', size = 64, kind = assist()) { return charFace(kind, mood, size); }
@@ -2116,6 +2146,22 @@ function labThumb(id, big) {
       <circle cx="128" cy="168" r="15" fill="#f4f4f4"/><circle cx="276" cy="166" r="15" fill="#f4f4f4"/><circle cx="214" cy="196" r="16" fill="#f4f4f4"/>
       <circle cx="200" cy="120" r="27" fill="#3b6fe0"/><circle cx="191" cy="110" r="8" fill="#fff" opacity=".35"/><text x="200" y="128" font-size="22" font-weight="800" fill="#fff" text-anchor="middle" font-family="sans-serif">N</text>
       <text x="318" y="98" font-size="20" font-weight="800" fill="#ffd27a" text-anchor="middle" font-family="sans-serif">107°</text>`,
+    projectile: `<circle cx="340" cy="40" r="16" fill="#f4e6c4" opacity=".85"/><circle cx="60" cy="30" r="1.5" fill="#fff"/><circle cx="150" cy="22" r="1.2" fill="#fff"/><circle cx="250" cy="48" r="1.4" fill="#fff"/>
+      <path d="M66,170 Q176,-6 300,128" fill="none" stroke="#8ff6ff" stroke-width="2.4" stroke-dasharray="2 8" stroke-opacity=".8"/>
+      ${[[100, 120], [134, 90], [168, 74], [202, 70]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="3.4" fill="#fff"/>`).join('')}
+      <line x1="202" y1="70" x2="232" y2="70" stroke="#ffb347" stroke-width="3"/><path d="M232,64 l8,6 l-8,6z" fill="#ffb347"/>
+      <circle cx="238" cy="84" r="20" fill="#8ff6ff" opacity=".25"/><circle cx="238" cy="84" r="9" fill="#e8fdff"/><circle cx="238" cy="84" r="12" fill="none" stroke="#c9b6ff" stroke-dasharray="3 3"/>
+      <g transform="translate(64 186)"><path d="M-24,0 L-16,-12 L16,-12 L24,0Z" fill="#2a3448" stroke="#5fd4ff" stroke-opacity=".5"/><g transform="rotate(-52)"><rect x="-4" y="-7" width="50" height="14" rx="4" fill="#3d4a66"/><rect x="20" y="-8" width="4" height="16" fill="#5fd4ff"/><rect x="32" y="-8" width="4" height="16" fill="#5fd4ff"/></g><circle r="8" fill="#5fd4ff"/></g>
+      <rect x="292" y="132" width="10" height="54" fill="#6b778c"/><rect x="344" y="132" width="10" height="54" fill="#6b778c"/><rect x="284" y="124" width="78" height="8" fill="#8d9ab0"/>
+      <rect x="306" y="100" width="34" height="24" rx="5" fill="rgba(140,240,255,.35)" stroke="#c9fbff"/>
+      <g transform="translate(323 186)"><rect x="-13" y="-30" width="26" height="24" rx="7" fill="#3b4458"/><circle cx="0" cy="-18" r="6.5" fill="#ff4d6d"/><line x1="0" y1="-30" x2="0" y2="-38" stroke="#9aa6bd" stroke-width="2"/><circle cx="0" cy="-39" r="2.6" fill="#ff4d6d"/></g>`,
+    helix: `<rect width="400" height="240" fill="#0b1230"/><circle cx="200" cy="110" r="110" fill="#18264f" opacity=".8"/>
+      ${Array.from({ length: 12 }, (_, i) => { const x = 40 + i * 29, a = i * .6, y1 = 110 - 44 * Math.sin(a), y2 = 110 + 44 * Math.sin(a), c = ['#ff5d73', '#ffcf4d', '#34d399', '#4da3ff'][i % 4], c2 = ['#ffcf4d', '#ff5d73', '#4da3ff', '#34d399'][i % 4]; return `<line x1="${x}" y1="${y1}" x2="${x}" y2="110" stroke="${c}" stroke-width="7"/><line x1="${x}" y1="110" x2="${x}" y2="${y2}" stroke="${c2}" stroke-width="7"/>`; }).join('')}
+      <polyline points="${Array.from({ length: 12 }, (_, i) => `${40 + i * 29},${110 - 44 * Math.sin(i * .6)}`).join(' ')}" fill="none" stroke="#c9d4ff" stroke-width="5"/><polyline points="${Array.from({ length: 12 }, (_, i) => `${40 + i * 29},${110 + 44 * Math.sin(i * .6)}`).join(' ')}" fill="none" stroke="#c9d4ff" stroke-width="5" opacity=".6"/>
+      <g transform="translate(300 40)"><circle r="16" fill="#c58bff" opacity=".25"/><path d="M-8,-12 L3,-2 L-4,1 L8,12" fill="none" stroke="#c58bff" stroke-width="3.4"/></g>
+      <line x1="200" y1="236" x2="292" y2="46" stroke="#9ff3ff" stroke-width="3" opacity=".8"/><circle cx="292" cy="46" r="10" fill="#fff" opacity=".7"/>
+      <g transform="translate(200 196)"><path d="M-30,30 L-18,0 L18,0 L30,30Z" fill="#1c2a55" stroke="#9ff3ff"/><circle cy="-2" r="9" fill="#9ff3ff"/></g>
+      <g transform="translate(76 196)"><path d="M0,-26 L22,-17 Q20,12 0,26 Q-20,12 -22,-17Z" fill="#4da3ff"/><path d="M-9,0 l6,7 l12,-14" stroke="#fff" stroke-width="4" fill="none"/></g>`,
   };
   void big;
   return `<svg viewBox="0 0 400 240" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${bg}${art[id] || ''}</svg>`;
@@ -4061,6 +4107,676 @@ const VseprLab = (() => {
   return Lab;
 })();
 
+/* ═══════════ HS Physics: projectile motion, "Planet Strike" (a launcher and targets, no lab bench) ═══════════
+   Students fire a plasma core from a rail cannon at rogue drones on Earth, the Moon and Mars. Until it hits something,
+   the core follows the exact projectile equations with no air resistance: x = v·cosθ·t, y = h + v·sinθ·t − ½gt².
+   Readouts, strobe dots and velocity components all come from those equations, so the numbers match the formulas. */
+const ProjectileLab = (() => {
+  const K = Kit, W = 1000, GY = 560, RP = 8, RS = 15;
+  const PL = { earth: { n: 'Earth', g: 9.8 }, moon: { n: 'the Moon', g: 1.62 }, mars: { n: 'Mars', g: 3.71 } };
+  const view = { vec: false, ghost: true, aim: true };
+  const f1 = n => (Math.round(n * 10) / 10).toFixed(1), R2D = 180 / Math.PI, D2R = Math.PI / 180;
+  let V = null; /* the running level */
+
+  /* ── backgrounds, one per world ── */
+  function stars(n, seed, maxY) { let s = ''; for (let i = 0; i < n; i++) { const x = (i * 263 + seed * 97) % 1000, y = (i * 151 + seed * 41) % maxY, r = i % 5 ? .8 : 1.5; s += `<circle cx="${x}" cy="${y}" r="${r}" fill="#fff" opacity="${.25 + (i % 4) * .15}"/>`; } return s; }
+  function bgFor(lv) {
+    const p = lv.planet; let sky, deco, ground, edge;
+    if (p === 'earth') { sky = ['#0b1630', '#26386e', '#b8655a']; ground = '#1c3428'; edge = '#4f8a5b';
+      deco = `${stars(40, 3, 220)}<path d="M690,70 a26,26 0 1,0 18,46 a20,20 0 1,1 -18,-46z" fill="#f4e6c4" opacity=".9"/>
+        <path d="M0,${GY} L0,500 Q120,440 260,486 T520,470 T780,452 T1000,480 L1000,${GY}Z" fill="#142a3a"/><path d="M0,${GY} L0,522 Q160,488 330,516 T700,500 T1000,512 L1000,${GY}Z" fill="#183324"/>`; }
+    else if (p === 'moon') { sky = ['#03040a', '#070a16', '#121628']; ground = '#5d606c'; edge = '#9aa0ad';
+      deco = `${stars(90, 7, 470)}<g transform="translate(-140 0)"><circle cx="820" cy="110" r="42" fill="#2f6fd6"/><path d="M800,84 q22,-8 30,14 q-6,18 -26,14 q-16,-12 -4,-28z M832,120 q16,4 18,20 q-14,8 -22,-6z" fill="#4fae6a"/><circle cx="820" cy="110" r="42" fill="none" stroke="#9fd0ff" stroke-opacity=".4" stroke-width="3"/></g>`; }
+    else { sky = ['#1e0e0b', '#6a3320', '#d08a57']; ground = '#6e3420'; edge = '#b8613c';
+      deco = `${stars(20, 5, 160)}<circle cx="640" cy="80" r="9" fill="#d9c2a8"/><circle cx="720" cy="150" r="5" fill="#cbb49a"/>
+        <path d="M0,${GY} L0,506 L90,470 L170,498 L260,452 L380,494 L520,462 L640,500 L760,470 L900,496 L1000,476 L1000,${GY}Z" fill="#5a2a1a"/>`; }
+    let s = `<defs><linearGradient id="plSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${sky[0]}"/><stop offset=".6" stop-color="${sky[1]}"/><stop offset="1" stop-color="${sky[2]}"/></linearGradient>
+      <radialGradient id="plCore" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#ffffff"/><stop offset=".4" stop-color="#8ff6ff"/><stop offset="1" stop-color="#7a4dff"/></radialGradient>
+      <radialGradient id="plGlow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#8ff6ff" stop-opacity=".55"/><stop offset="1" stop-color="#8ff6ff" stop-opacity="0"/></radialGradient>
+      <linearGradient id="plCrys" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c9fbff" stop-opacity=".85"/><stop offset="1" stop-color="#36c6e0" stop-opacity=".45"/></linearGradient>
+      <linearGradient id="plAlloy" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8d9ab0"/><stop offset="1" stop-color="#4b5669"/></linearGradient></defs>
+      <rect width="1000" height="620" fill="url(#plSky)"/>${deco}`;
+    if (lv.h0 > 0) { const top = GY - lv.h0 * lv.s; /* the cliff the launcher sits on */
+      s += `<path d="M0,${top} L${lv.LX + 4},${top} L${lv.LX + 10},${top + 30} L${lv.LX + 2},${top + 90} L${lv.LX + 14},${top + 170} L${lv.LX + 4},${GY} L0,${GY}Z" fill="#2e2a3a"/>
+        ${[50, 120, 200, 290].filter(d => top + d < GY).map(d => `<path d="M0,${top + d} L${lv.LX},${top + d + 6}" stroke="#4a4560" stroke-width="2"/>`).join('')}<rect x="0" y="${top - 3}" width="${lv.LX + 4}" height="5" fill="${edge}"/>`; }
+    s += `<rect x="0" y="${GY}" width="1000" height="${620 - GY}" fill="${ground}"/><rect x="0" y="${GY}" width="1000" height="3" fill="${edge}"/>`;
+    if (p === 'moon') s += [[300, 588, 40], [620, 600, 26], [860, 584, 34]].map(([x, y, r]) => `<ellipse cx="${x}" cy="${y}" rx="${r}" ry="${r * .25}" fill="#4a4d58"/>`).join('');
+    /* distance ruler along the ground */
+    const step = lv.s >= 8 ? 10 : 20;
+    for (let d = 0; lv.LX + d * lv.s < 990; d += step) { const x = lv.LX + d * lv.s; s += `<line x1="${x}" y1="${GY + 3}" x2="${x}" y2="${GY + 11}" stroke="#fff" stroke-opacity=".55" stroke-width="1.5"/><text x="${x}" y="${GY + 26}" font-size="12" fill="#fff" fill-opacity=".7" text-anchor="middle" style="font-family:var(--f-mono)">${d} m</text>`; }
+    return s;
+  }
+
+  /* ── level runtime ── */
+  function build(def) {
+    const lv = Object.assign({ LX: 70, h0: 0, s: 10, planet: 'earth', angle: { min: 0, max: 90, def: 40 }, speed: { min: 5, max: 30, def: 15 }, sents: [], blocks: [] }, JSON.parse(JSON.stringify(def)));
+    lv.g = PL[lv.planet].g; lv.ang = lv.angle.lock != null ? lv.angle.lock : lv.angle.def; lv.v = lv.speed.lock != null ? lv.speed.lock : lv.speed.def;
+    lv.shot = null; lv.ghosts = []; lv.debris = []; lv.shots = 0; lv.flags = []; lv.busy = false;
+    reset(lv); return lv;
+  }
+  function reset(lv) {
+    lv.S = lv.sents.map(s => ({ x: s.x, y: s.y || 0, on: s.on || [], st: 'stand', vx: 0, vy: 0, a: 0, va: 0 }));
+    lv.B = lv.blocks.map(b => Object.assign({ on: [], st: 'still', vx: 0, vy: 0, a: 0, va: 0 }, b, { cy: (b.y || 0) + b.h / 2, cx: b.x }));
+    lv.debris = [];
+  }
+  const px = x => V.LX + x * V.s, py = y => GY - y * V.s;
+
+  /* ── launching and flight ── */
+  function launch() {
+    if (!V || V.busy) return; const lv = V, th = lv.ang * D2R, g = lv.g;
+    const vx = lv.v * Math.cos(th), vy0 = lv.v * Math.sin(th), T = (vy0 + Math.sqrt(vy0 * vy0 + 2 * g * lv.h0)) / g;
+    const peakT = Math.max(0, vy0 / g), peak = lv.h0 + (vy0 > 0 ? vy0 * vy0 / (2 * g) : 0);
+    lv.shot = { v: lv.v, ang: lv.ang, vx, vy0, g, T, peakT, peak, t: 0, sp: Math.max(1, T / 2.4), x: 0, y: lv.h0, vy: vy0, st: 'fly', path: [[0, lv.h0]], strobe: [], dt: T / 14, next: 0, tail: [], hit: '' };
+    if (lv.drop) lv.shot.drop = { x: 1, y: lv.h0, done: false, t: 0 };
+    lv.busy = true; lv.shots++; SND.tone(180, .3, 'sawtooth', .07, 900); SND.noise(.25, 2500, .12, .8);
+    lv.onLaunch && lv.onLaunch(lv.shot);
+  }
+  function hitRect(cx, cy, b) { /* circle (px) vs block rectangle (px) */
+    const bx = px(b.cx) - b.w * V.s / 2, by = py(b.cy + b.h / 2), bw = b.w * V.s, bh = b.h * V.s;
+    const nx = clamp(cx, bx, bx + bw), ny = clamp(cy, by, by + bh); return Math.hypot(cx - nx, cy - ny) < RP;
+  }
+  function disturb(i, push, depth = 0) {
+    const b = V.B[i]; if (!b || b.st !== 'still' || b.fixed) return;
+    b.st = 'fall'; b.vx = push * (1 - depth * .15); b.vy = 1.5 + Math.random() * 2; b.va = (Math.random() - .3) * 4 * Math.sign(push || 1);
+    V.B.forEach((o, j) => { if (o.on.includes(i)) disturb(j, push * .85, depth + 1); });
+    V.S.forEach(s => { if (s.st === 'stand' && s.on.includes(i)) knock(s, push * .8); });
+  }
+  function knock(s, push) { s.st = 'fall'; s.vx = push; s.vy = 3 + Math.random() * 2; s.va = 3 + Math.random() * 3; SND.tone(300, .18, 'square', .05, 80); }
+  function shatter(i, push) {
+    const b = V.B[i]; b.st = 'gone'; SND.crash();
+    for (let k = 0; k < 26; k++) K.spawn({ kind: 'shard', x: px(b.cx) + rnd(-b.w * V.s / 2, b.w * V.s / 2), y: py(b.cy) + rnd(-b.h * V.s / 2, b.h * V.s / 2), vx: rnd(-120, 260) * Math.sign(push || 1), vy: rnd(-260, 40), g: 900, r: rnd(3, 8), va: rnd(-10, 10), life: 2.4, floor: GY + rnd(0, 20) });
+    V.B.forEach((o, j) => { if (o.on.includes(i)) disturb(j, push * .8, 1); }); V.S.forEach(s => { if (s.st === 'stand' && s.on.includes(i)) knock(s, push * .7); });
+  }
+  function zap(x, y) { SND.crash(); SND.tone(1300, .14, 'square', .05, 260);
+    for (let k = 0; k < 40; k++) { const a = rnd(0, 6.28), v = rnd(80, 360); K.spawn({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 80, g: 500, r: rnd(1.4, 3.4), c: ['#8ff6ff', '#ff4d6d', '#ffffff', '#ffd27a'][k % 4], life: rnd(.5, 1), floor: GY }); }
+    K.word('ZAP!', x, y - 46, '#8ff6ff', 34); }
+  function endShot(how) {
+    const lv = V, sh = lv.shot; if (!sh || sh.st === 'done') return; sh.st = 'done'; lv.busy = false;
+    lv.ghosts.unshift(sh.path.slice()); lv.ghosts = lv.ghosts.slice(0, 3);
+    lv.onEnd && lv.onEnd(sh, how);
+  }
+  function flyTo(t1) {
+    const lv = V, sh = lv.shot;
+    while (sh.st === 'fly' && sh.t < t1) {
+      const t = Math.min(t1, sh.t + .01, sh.T); sh.t = t;
+      sh.x = sh.vx * t; sh.y = lv.h0 + sh.vy0 * t - .5 * sh.g * t * t; sh.vy = sh.vy0 - sh.g * t;
+      while (sh.next <= t + 1e-9) { const tt = sh.next; sh.strobe.push({ x: sh.vx * tt, y: lv.h0 + sh.vy0 * tt - .5 * sh.g * tt * tt, vx: sh.vx, vy: sh.vy0 - sh.g * tt }); sh.next += sh.dt; }
+      sh.k = (sh.k || 0) + 1; if (sh.k % 3 === 0) sh.path.push([sh.x, sh.y]);
+      const cx = px(sh.x), cy = py(sh.y);
+      for (let i = 0; i < lv.B.length; i++) { const b = lv.B[i]; if (b.st !== 'still') continue;
+        if (hitRect(cx, cy, b)) { sh.hit = b.fixed ? 'wall' : b.kind; sh.hitAt = { x: sh.x, y: sh.y, t };
+          if (b.fixed) { K.fx.bonk.call(K, { x: cx, y: cy }); } else if (b.kind === 'crystal') shatter(i, sh.vx * .6); else { disturb(i, sh.vx * .5); SND.tone(140, .25, 'square', .1, 60); }
+          toDebris(sh, b.fixed ? -.25 : .15); return; } }
+      for (const s of lv.S) { if (s.st !== 'stand') continue; const sx = px(s.x), sy = py(s.y) - RS;
+        if (Math.hypot(cx - sx, cy - sy) < RP + RS) { sh.hit = 'drone'; sh.hitAt = { x: sh.x, y: sh.y, t }; knock(s, sh.vx * .6); zap(sx, sy); lv.onHit && lv.onHit(s, sh); toDebris(sh, .2); return; } }
+      if (t >= sh.T - 1e-9) { /* touched the ground: exact landing point from the equations */
+        sh.x = sh.vx * sh.T; sh.y = 0; sh.path.push([sh.x, 0]); sh.st = 'landed'; sh.landX = sh.x; SND.tone(90, .2, 'sine', .14, 45);
+        for (let k = 0; k < 16; k++) K.spawn({ x: px(sh.x), y: GY, vx: rnd(-140, 140), vy: rnd(-200, -40), g: 700, r: rnd(1.5, 3.5), c: ['#8ff6ff', '#c9b6ff', '#ffffff'][k % 3], life: 1, floor: GY + 2 });
+        lv.flags.unshift({ x: sh.x }); lv.flags = lv.flags.slice(0, 3);
+        sh.restT = .7; return; }
+      if (cx > W + 60) { sh.st = 'off'; sh.restT = .3; return; }
+    }
+  }
+  function toDebris(sh, bounce) { sh.st = 'debris'; sh.dvx = bounce < 0 ? -Math.abs(sh.vx) * .25 : sh.vx * bounce; sh.dvy = Math.abs(sh.vy) * .15; sh.restT = 1.2; sh.path.push([sh.x, sh.y]); }
+  function physics(dt) {
+    const lv = V, g = lv.g, sp = lv.shot ? lv.shot.sp : 1, d = dt * sp;
+    const fall = o => { o.vy -= g * d; o.cx != null ? (o.cx += o.vx * d, o.cy += o.vy * d) : (o.x += o.vx * d, o.y += o.vy * d); o.a += o.va * d * R2D;
+      const bottom = o.cy != null ? o.cy - Math.min(o.h, o.w) / 2 : o.y; if (bottom <= 0 && o.vy < 0) { if (o.cy != null) o.cy -= bottom; else o.y = 0; o.vy = Math.abs(o.vy) < 1.2 ? 0 : -o.vy * .25; o.vx *= .55; o.va *= .5; if (!o.vy && Math.abs(o.vx) < .3) { o.st = 'rest'; o.vx = 0; o.va = 0; } } };
+    lv.B.forEach(b => { if (b.st === 'fall') fall(b); });
+    lv.S.forEach(s => { if (s.st === 'fall') { fall(s); if (s.st === 'rest') s.st = 'down'; } });
+    const sh = lv.shot; if (!sh) return;
+    if (sh.st === 'fly') flyTo(sh.t + d);
+    if (sh.drop && !sh.drop.done) { sh.drop.t += d; sh.drop.y = lv.h0 - .5 * g * sh.drop.t * sh.drop.t; if (sh.drop.y <= 0) { sh.drop.y = 0; sh.drop.done = true; sh.drop.T = Math.sqrt(2 * lv.h0 / g); SND.tone(110, .2, 'sine', .12, 50); } }
+    if (sh.st === 'debris') { sh.dvy -= g * d; sh.x += sh.dvx * d; sh.y += sh.dvy * d; if (sh.y <= 0) { sh.y = 0; sh.dvy = -sh.dvy * .3; sh.dvx *= .5; } }
+    if (sh.st !== 'fly' && sh.st !== 'done') { sh.restT -= dt; const settling = lv.B.some(b => b.st === 'fall') || lv.S.some(s => s.st === 'fall'); if (sh.restT <= 0 && !settling && (!sh.drop || sh.drop.done)) endShot(sh.st); }
+  }
+
+  /* ── drawing ── */
+  const arrow = (x1, y1, x2, y2, c) => { const a = Math.atan2(y2 - y1, x2 - x1), l = Math.hypot(x2 - x1, y2 - y1); if (l < 3) return '';
+    const h1 = [x2 - 8 * Math.cos(a - .45), y2 - 8 * Math.sin(a - .45)], h2 = [x2 - 8 * Math.cos(a + .45), y2 - 8 * Math.sin(a + .45)];
+    return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c}" stroke-width="2.4"/><path d="M${x2},${y2} L${h1[0]},${h1[1]} L${h2[0]},${h2[1]}Z" fill="${c}"/>`; };
+  function core(x, y, r = RP) { return `<circle cx="${x}" cy="${y}" r="${r * 2.6}" fill="url(#plGlow)"/><circle cx="${x}" cy="${y}" r="${r}" fill="url(#plCore)"/><circle cx="${x}" cy="${y}" r="${r + 3}" fill="none" stroke="#c9b6ff" stroke-opacity=".7" stroke-width="1.4" stroke-dasharray="3 3"/>`; }
+  function drone(s) {
+    const x = px(s.x), y = py(s.y), down = s.st !== 'stand';
+    return `<g transform="translate(${x} ${y}) rotate(${s.a})"><rect x="-12" y="-28" width="24" height="22" rx="7" fill="#3b4458" stroke="#1a2030" stroke-width="2"/>
+      <line x1="0" y1="-28" x2="0" y2="-36" stroke="#9aa6bd" stroke-width="2"/><circle cx="0" cy="-37" r="2.6" fill="${down ? '#555' : '#ff4d6d'}"/>
+      ${down ? '<path d="M-5,-21 l6,6 M1,-21 l-6,6" stroke="#ffb3c0" stroke-width="2.2"/>' : '<circle cx="0" cy="-17" r="6" fill="#ff4d6d"/><circle cx="0" cy="-17" r="9" fill="#ff4d6d" opacity=".25"/><circle cx="-2" cy="-19" r="1.8" fill="#fff"/>'}
+      <rect x="-9" y="-6" width="5" height="6" rx="1.5" fill="#2a3142"/><rect x="4" y="-6" width="5" height="6" rx="1.5" fill="#2a3142"/></g>`;
+  }
+  function block(b) {
+    if (b.st === 'gone') return ''; const w = b.w * V.s, h = b.h * V.s, x = px(b.cx), y = py(b.cy);
+    const fill = b.kind === 'crystal' ? 'url(#plCrys)' : 'url(#plAlloy)', st = b.kind === 'crystal' ? '#c9fbff' : '#2a3142';
+    return `<g transform="translate(${x} ${y}) rotate(${b.a})"><rect x="${-w / 2}" y="${-h / 2}" width="${w}" height="${h}" rx="2" fill="${fill}" stroke="${st}" stroke-width="1.5"/>
+      ${b.kind === 'crystal' ? `<path d="M${-w / 2 + 3},${h / 2 - 4} L${w / 2 - 3},${-h / 2 + 4}" stroke="#fff" stroke-opacity=".5"/>` : [-1, 1].map(k => `<circle cx="${k * (w / 2 - 4)}" cy="${-h / 2 + 4}" r="1.6" fill="#c3cad6"/><circle cx="${k * (w / 2 - 4)}" cy="${h / 2 - 4}" r="1.6" fill="#c3cad6"/>`).join('')}</g>`;
+  }
+  function launcher(lv) {
+    const x = lv.LX, y = py(lv.h0), a = -lv.ang, glow = (lv.v - lv.speed.min) / Math.max(1, (lv.speed.max - lv.speed.min));
+    return `<g transform="translate(${x} ${y})"><path d="M-26,0 L-18,-14 L18,-14 L26,0Z" fill="#2a3448" stroke="#5fd4ff" stroke-opacity=".5"/>
+      <path d="M 40 0 A 40 40 0 0 0 0 -40" fill="none" stroke="#fff" stroke-opacity=".18" stroke-width="1.5"/>
+      <path d="M 40 0 A 40 40 0 0 0 ${40 * Math.cos(lv.ang * D2R)} ${-40 * Math.sin(lv.ang * D2R)}" fill="none" stroke="#ffd27a" stroke-width="2.2"/>
+      <text x="48" y="${-8}" font-size="13" font-weight="800" fill="#ffd27a" stroke="#0b1020" stroke-width="4" paint-order="stroke">${Math.round(lv.ang)}°</text>
+      <g transform="rotate(${a})"><rect x="-6" y="-8" width="56" height="16" rx="5" fill="#3d4a66" stroke="#141a28" stroke-width="2"/>
+        ${[14, 26, 38].map((k, i) => `<rect x="${k}" y="-9" width="4" height="18" rx="1.5" fill="#5fd4ff" opacity="${.25 + (glow > i / 3 ? .7 : 0)}"/>`).join('')}
+        <circle cx="52" cy="0" r="${4 + glow * 4}" fill="#8ff6ff" opacity="${.35 + glow * .5}"/></g>
+      <circle cx="0" cy="0" r="9" fill="#5fd4ff" stroke="#141a28" stroke-width="2"/></g>`;
+  }
+  function draw(g, dt) {
+    const lv = V; if (!lv) return; physics(dt);
+    let s = '';
+    /* ghost paths of earlier shots */
+    if (view.ghost) lv.ghosts.forEach((p, i) => { s += `<polyline points="${p.map(q => `${px(q[0]).toFixed(1)},${py(q[1]).toFixed(1)}`).join(' ')}" fill="none" stroke="#c9b6ff" stroke-opacity="${.35 - i * .1}" stroke-width="2" stroke-dasharray="2 6"/>`; });
+    if (lv.earthGhost) s += `<polyline points="${lv.earthGhost.pts}" fill="none" stroke="#7fb8ff" stroke-width="2" stroke-dasharray="6 5" opacity=".8"/><text x="${Math.max(lv.earthGhost.lx, lv.LX + 90)}" y="${GY - 40}" font-size="12" fill="#bcd8ff" stroke="#03040a" stroke-width="3" paint-order="stroke" style="font-family:var(--f-mono)">same shot on Earth: ${f1(lv.earthGhost.R)} m</text>`;
+    /* predicted-landing flag (Predict challenge) */
+    if (lv.predFlag != null) { const x = px(lv.predFlag); s += `<line x1="${x}" y1="${GY}" x2="${x}" y2="${GY - 46}" stroke="#ffd27a" stroke-width="2"/><path d="M${x},${GY - 46} l22,7 l-22,7z" fill="#ffd27a"/><text x="${x}" y="${GY - 52}" font-size="12" fill="#ffd27a" text-anchor="middle" style="font-family:var(--f-mono)">your prediction</text>`; }
+    lv.flags.forEach((f, i) => { const x = px(f.x); s += `<g opacity="${1 - i * .3}"><line x1="${x}" y1="${GY}" x2="${x}" y2="${GY - 26}" stroke="#8ff6ff" stroke-width="1.5"/><text x="${x}" y="${GY - 31}" font-size="12" font-weight="700" fill="#8ff6ff" text-anchor="middle" stroke="#0b1020" stroke-width="3" paint-order="stroke" style="font-family:var(--f-mono)">${f1(f.x)} m</text></g>`; });
+    lv.B.forEach(b => { s += block(b); }); lv.S.forEach(d => { s += drone(d); });
+    /* aim guide: the first part of the path only */
+    const busy = lv.busy;
+    if (!busy && view.aim && !lv.noAim) { const th = lv.ang * D2R, vx = lv.v * Math.cos(th), vy = lv.v * Math.sin(th), T = (vy + Math.sqrt(vy * vy + 2 * lv.g * lv.h0)) / lv.g;
+      for (let i = 1; i <= 7; i++) { const t = T * .3 * i / 7; s += `<circle cx="${px(vx * t)}" cy="${py(lv.h0 + vy * t - .5 * lv.g * t * t)}" r="${3.4 - i * .3}" fill="#fff" opacity="${.75 - i * .07}"/>`; } }
+    s += launcher(lv);
+    const sh = lv.shot;
+    if (sh) {
+      s += `<polyline points="${sh.path.map(q => `${px(q[0]).toFixed(1)},${py(q[1]).toFixed(1)}`).join(' ')}${sh.st === 'fly' ? ` ${px(sh.x).toFixed(1)},${py(sh.y).toFixed(1)}` : ''}" fill="none" stroke="#8ff6ff" stroke-opacity=".55" stroke-width="2"/>`;
+      sh.strobe.forEach(q => { const x = px(q.x), y = py(q.y); s += `<circle cx="${x}" cy="${y}" r="3.4" fill="#ffffff" opacity=".9"/>`;
+        if (view.vec) s += arrow(x, y, x + q.vx * 2.4, y, '#ffb347') + arrow(x, y, x, y - q.vy * 2.4, '#5fd4ff'); });
+      { const x = px(sh.x), y = py(sh.y);
+        if (y < -10) s += `<g transform="translate(${clamp(x, 20, 980)} 22)"><path d="M0,-10 l9,14 h-18z" fill="#8ff6ff"/><text y="22" font-size="12" text-anchor="middle" fill="#8ff6ff" style="font-family:var(--f-mono)">${f1(sh.y)} m up</text></g>`;
+        else if (sh.st !== 'off') s += core(x, y); }
+      if (sh.drop) { const x = px(sh.drop.x), y = py(sh.drop.y); s += core(x, y, 7).replace(/url\(#plCore\)/, '#ffd27a'); }
+      if (sh.st !== 'fly' && sh.peak > lv.h0 + .3 && (sh.landX != null || (sh.hitAt && sh.hitAt.t >= sh.peakT))) { const x = px(sh.vx * sh.peakT), y = py(sh.peak); s += `<line x1="${x}" y1="${y}" x2="${x}" y2="${GY}" stroke="#ffd27a" stroke-opacity=".5" stroke-dasharray="3 5"/><text x="${x + 6}" y="${Math.max(16, y - 8)}" font-size="12" fill="#ffd27a" style="font-family:var(--f-mono)">peak ${f1(sh.peak)} m</text>`; }
+    }
+    /* HUD */
+    const pl = PL[lv.planet];
+    s += `<g transform="translate(14 14)"><rect width="196" height="${sh && sh.sp > 1.15 && sh.st === 'fly' ? 52 : 34}" rx="8" fill="#0b1020" fill-opacity=".72"/><text x="12" y="22" font-size="14" font-weight="700" fill="#fff">${cap(pl.n)} · g = ${pl.g} m/s²</text>
+      ${sh && sh.sp > 1.15 && sh.st === 'fly' ? `<text x="12" y="42" font-size="12" fill="#ffd27a" style="font-family:var(--f-mono)">▶▶ time × ${f1(sh.sp)}</text>` : ''}</g>`;
+    if (sh) { const rows = sh.st === 'fly' ? [['t', f1(sh.t) + ' s'], ['x', f1(sh.x) + ' m'], ['y', f1(sh.y) + ' m'], ['vₓ', f1(sh.vx) + ' m/s'], ['v_y', f1(sh.vy) + ' m/s']]
+        : sh.landX != null ? [['range', f1(sh.landX) + ' m'], ['peak', f1(sh.peak) + ' m'], ['flight', f1(sh.T) + ' s'], ['vₓ', f1(sh.vx) + ' m/s'], ['v_y at launch', f1(sh.vy0) + ' m/s']]
+        : sh.hitAt ? [['hit at', `x ${f1(sh.hitAt.x)} m`], ['height', f1(sh.hitAt.y) + ' m'], ['time', f1(sh.hitAt.t) + ' s'], ['vₓ', f1(sh.vx) + ' m/s']] : [['flew off', 'the screen'], ['range', f1(sh.vx * sh.T) + ' m']];
+      if (sh.drop && sh.drop.done) rows.push(['drop orb fall', f1(sh.drop.T) + ' s']);
+      const hgt = 16 + rows.length * 20;
+      s += `<g transform="translate(${W - 214} 14)"><rect width="200" height="${hgt}" rx="8" fill="#0b1020" fill-opacity=".72"/>${rows.map((r, i) => `<text x="12" y="${26 + i * 20}" font-size="12.5" fill="#a9b6cc" style="font-family:var(--f-mono)">${r[0].replace('v_y', 'v<tspan font-size="9" dy="3">y</tspan><tspan dy="-3"></tspan>')}</text><text x="188" y="${26 + i * 20}" font-size="12.5" font-weight="700" fill="#fff" text-anchor="end" style="font-family:var(--f-mono)">${r[1]}</text>`).join('')}</g>`; }
+    if (view.vec && sh) s += `<g transform="translate(14 ${GY - 40})"><rect width="170" height="30" rx="6" fill="#0b1020" fill-opacity=".6"/>${arrow(12, 15, 36, 15, '#ffb347')}<text x="42" y="19" font-size="11" fill="#ffb347">vₓ</text>${arrow(76, 24, 76, 6, '#5fd4ff')}<text x="84" y="19" font-size="11" fill="#5fd4ff">v<tspan font-size="8" dy="3">y</tspan><tspan dy="-3"> (vertical)</tspan></text></g>`;
+    g.innerHTML = s;
+  }
+  const cap = s => s[0].toUpperCase() + s.slice(1);
+
+  /* ── the challenge runner: stage + controls in the lab sheet ── */
+  function arena(R, def, cfg = {}) {
+    V = build(def); const lv = V; K.setBg(bgFor(lv));
+    const g = sv('g', { 'pointer-events': 'none' }, K.layer);
+    const hit = sv('rect', { x: 0, y: 0, width: 1000, height: 620, fill: 'transparent', style: 'cursor:crosshair' }, K.layer); K.layer.insertBefore(hit, g);
+    K.loop(dt => { if (!g.isConnected) return false; draw(g, dt); });
+    /* drag back from the cannon, like a slingshot */
+    let aiming = false;
+    K.press(hit, { down: st => { const p0 = { x: lv.LX, y: py(lv.h0) }; aiming = !lv.busy && Math.hypot(st.x - p0.x, st.y - p0.y) < 130 && !(lv.angle.lock != null && lv.speed.lock != null) && !cfg.noDrag; if (cfg.onDown) cfg.onDown(st); },
+      move: st => { if (!aiming) return; const p0 = { x: lv.LX, y: py(lv.h0) }, dx = st.x - p0.x, dy = st.y - p0.y, len = Math.hypot(dx, dy);
+        if (lv.angle.lock == null) lv.ang = Math.round(clamp(Math.atan2(dy, -dx) * R2D, lv.angle.min, lv.angle.max));
+        if (lv.speed.lock == null) lv.v = Math.round(clamp(lv.speed.min + (lv.speed.max - lv.speed.min) * (len - 20) / 150, lv.speed.min, lv.speed.max) * 2) / 2;
+        syncCtl(); },
+      up: (st, cancelled) => { if (aiming && !cancelled && Math.hypot(st.x - lv.LX, st.y - py(lv.h0)) > 40) fire(); aiming = false; } });
+    K.on(window, 'keydown', e => { if (e.code === 'Space' && !/INPUT|TEXTAREA|BUTTON/.test(document.activeElement.tagName)) { e.preventDefault(); fire(); } });
+    function fire() { if (lv.busy) return; if (cfg.beforeFire && cfg.beforeFire() === false) return; launch(); }
+    lv.fire = fire;
+    /* controls */
+    const box = cfg.noSheet ? null : LabUI.html(''); let syncCtl = () => {};
+    if (box) {
+      const lockA = lv.angle.lock != null, lockV = lv.speed.lock != null;
+      box.className = 'pl-ctl';
+      box.innerHTML = `<div class="pl-sl"><label for="plA">Launch angle θ</label><b id="plAv"></b><input type="range" id="plA" min="${lv.angle.min}" max="${lv.angle.max}" step="1" ${lockA ? 'disabled' : ''}></div>
+        <div class="pl-sl"><label for="plV">Launch speed v</label><b id="plVv"></b><input type="range" id="plV" min="${lv.speed.min}" max="${lv.speed.max}" step=".5" ${lockV ? 'disabled' : ''}></div>
+        <div class="pl-comp" id="plComp"></div>
+        ${cfg.extraCtl || ''}
+        <div class="row"><button class="btn primary" id="plGo">Launch <span class="small" style="opacity:.75">(space)</span></button><button class="btn sm" id="plRe">Reset targets</button></div>
+        <div class="pl-tog"><label><input type="checkbox" data-pt="vec" ${view.vec ? 'checked' : ''}> Velocity vectors</label><label><input type="checkbox" data-pt="ghost" ${view.ghost ? 'checked' : ''}> Earlier paths</label>${lv.noAim ? '' : `<label><input type="checkbox" data-pt="aim" ${view.aim ? 'checked' : ''}> Aim guide</label>`}</div>
+        <div class="pl-goal" id="plGoal"></div>`;
+      const A = $('#plA', box), Vv = $('#plV', box);
+      syncCtl = () => { A.value = lv.ang; Vv.value = lv.v; $('#plAv', box).textContent = Math.round(lv.ang) + '°' + (lockA ? ' (fixed)' : ''); $('#plVv', box).textContent = f1(lv.v) + ' m/s' + (lockV ? ' (fixed)' : '');
+        const th = lv.ang * D2R; $('#plComp', box).innerHTML = `vₓ = v·cos θ = <b>${f1(lv.v * Math.cos(th))}</b> m/s &nbsp;·&nbsp; v<sub>y</sub> = v·sin θ = <b>${f1(lv.v * Math.sin(th))}</b> m/s`; };
+      A.oninput = () => { lv.ang = +A.value; syncCtl(); }; Vv.oninput = () => { lv.v = +Vv.value; syncCtl(); };
+      $('#plGo', box).onclick = fire; $('#plRe', box).onclick = () => { if (lv.busy) return; reset(lv); lv.shot = null; cfg.onReset && cfg.onReset(); goal(); };
+      $$('[data-pt]', box).forEach(x => x.onchange = () => { view[x.dataset.pt] = x.checked; });
+      syncCtl();
+    }
+    const qbox = cfg.noSheet ? null : LabUI.html('');
+    /* goal checklist + the question once the goal is met */
+    let asked = false;
+    function goal() { if (!box || !cfg.goal) return; const items = cfg.goal(lv); $('#plGoal', box).innerHTML = `<div class="pl-lab">Challenge</div>${items.map(([ok, t]) => `<div class="pl-ck ${ok ? 'ok' : ''}"><span>${ok ? '✓' : '○'}</span><span>${t}</span></div>`).join('')}`;
+      if (items.every(x => x[0]) && !asked) { asked = true; SND.ok(); K.sparkle({ x: 500, y: 240 }, 40); K.msg(cfg.winMsg || 'Challenge complete!', 'ok', 2600); if (cfg.q) ask(cfg.q); } }
+    function ask(q) {
+      const ord = q.a.map((_, i) => i).sort(() => Math.random() - .5);
+      qbox.innerHTML = `<div class="quiz pl-qz"><div class="q">${q.q}</div><div class="opts">${ord.map(i => `<button class="opt" data-qa="${i}">${q.a[i]}</button>`).join('')}</div><div class="exp" id="plExp"></div></div>`;
+      qbox.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      $$('[data-qa]', qbox).forEach(x => x.onclick = () => { const i = +x.dataset.qa;
+        if (i === q.c) { x.classList.add('right'); $$('[data-qa]', qbox).forEach(y => y.disabled = true); $('#plExp', qbox).innerHTML = `<b>Correct.</b> ${q.e}`; SND.ok(); R.next(2800); }
+        else { x.classList.add('wrong'); x.disabled = true; R.mistake('Wrong answer: ' + (def.name || 'projectile question'), q.e); K.msg(q.hint || 'Not quite. Look at the readouts and try again.', 'bad', 3800); } });
+    }
+    lv.onEnd = (sh, how) => { cfg.onEnd && cfg.onEnd(sh, how); goal(); };
+    lv.onHit = (s, sh) => { cfg.onHit && cfg.onHit(s, sh); };
+    goal();
+    return { lv, goal, box, syncCtl };
+  }
+
+  /* ── the seven challenges ── */
+  const Q = {
+    first: { q: 'At the very top of its path, the core’s vertical velocity is…', a: ['Zero, for an instant', 'The same as when it launched', '9.8 m/s', 'Equal to its horizontal velocity'], c: 0, e: 'On the way up v<sub>y</sub> shrinks by 9.8 m/s every second, hits zero at the peak, then grows downward. The horizontal velocity never changes.' },
+    twin: { q: 'Why do 30° and 60° land in the same place?', a: ['Range depends on sin 2θ, and sin 60° = sin 120°', 'Gravity is weaker at steep angles', 'The 60° shot is faster', 'It is a coincidence of this speed only'], c: 0, e: 'R = v² sin 2θ / g. For 30° and 60°, 2θ is 60° and 120°, which have the same sine. Any two angles that add to 90° give the same range.' },
+    wall: { q: 'To clear a taller wall, which part of the launch velocity matters most?', a: ['The vertical component, v sin θ', 'The horizontal component, v cos θ', 'Neither: only the angle matters', 'The mass of the core'], c: 0, e: 'Peak height = h + (v sin θ)² / 2g. Only the vertical component lifts the core; the horizontal component just carries it sideways.' },
+    cliff: { q: 'The launched core and the dropped orb leave the cliff at the same moment. Which hits the ground first?', a: ['They land at the same time', 'The dropped orb', 'The launched core', 'It depends on the launch speed'], c: 0, e: 'Both start with zero vertical velocity and fall with the same g. Horizontal motion doesn’t change vertical motion, so t = √(2h/g) for both.' },
+    moon: { q: 'With the same speed and angle, how far does a shot go on the Moon compared with Earth?', a: ['About 6 times farther', 'The same distance', 'About 1/6 as far', 'About twice as far'], c: 0, e: 'R = v² sin 2θ / g, so range is inversely proportional to g: 9.8 ÷ 1.62 ≈ 6. The flight also lasts 6 times longer.' },
+    predict: { q: 'On flat ground with no air, which launch angle gives the longest range?', a: ['45°', '90°', '30°', '60°'], c: 0, e: 'sin 2θ is largest (equal to 1) when 2θ = 90°, so θ = 45°. Then R = v² / g.' },
+    tower: { q: 'While the core flies (no air resistance), its horizontal velocity…', a: ['Stays the same the whole time', 'Slowly decreases', 'Increases as it falls', 'Drops to zero at the peak'], c: 0, e: 'No horizontal force acts, so vₓ is constant. That is why the strobe dots are evenly spaced left to right even though their heights change.' }
+  };
+  const C = (id, name, title, html, hint) => ({ id, name, title, html, hint });
+  const steps = [
+    C('first', 'First shot', 'Knock out the drone', 'A rogue drone is parked <b>40 m</b> away. Set an angle and speed with the sliders, or <b>drag back from the cannon</b> like a slingshot, then launch.<br><br>Turn on <b>Velocity vectors</b> to see the horizontal (orange) and vertical (blue) parts of the velocity at each strobe dot.', 'Try about 40° and 20 m/s, then adjust. Read the landing distance on the ground ruler.'),
+    C('twin', 'Two angles, one target', 'Two angles, one target', 'The speed is locked at <b>20 m/s</b>. Hit the drone <b>twice, with two different angles</b> at least 10° apart.<br><br>Watch the ranges: a low shot and a high shot can land in exactly the same place.', 'One answer is 30°. Which steeper angle pairs with it?'),
+    C('wall', 'Over the wall', 'Over the wall', 'A <b>14 m</b> alloy wall blocks a flat shot. Lob the core over it and hit the drone behind.<br><br>Look at the <b>peak</b> label after each shot: what makes the core go higher?', 'You need a big vertical component: v sin θ of at least 17 m/s.'),
+    C('cliff', 'Launch from a cliff', 'Launch from a cliff', 'The cannon sits on a <b>40 m</b> cliff and fires <b>straight out (0°)</b>. At the same moment, a second orb is dropped off the edge.<br><br>Hit the drone at <b>30 m</b>, and compare when the two orbs land.', 'Fall time is √(2h/g) ≈ 2.86 s. How fast must the core move sideways to cover 30 m in that time?'),
+    C('moon', 'Moon shot', 'Moon shot', 'On the Moon, <b>g = 1.62 m/s²</b>. Hit the drone <b>110 m</b> away. After each shot, a dashed blue line shows what the same shot would do on Earth.', 'At 45°, R = v²/g. Solve for v: √(110 × 1.62) ≈ 13.3 m/s.'),
+    C('predict', 'Predict, then fire', 'Predict the range, then fire', 'On Mars (<b>g = 3.71 m/s²</b>) the cannon is locked at <b>16 m/s</b> and <b>35°</b>. Calculate where the core will land, enter it, then fire.<br><br>Range on flat ground: <b>R = v² sin(2θ) / g</b>. Get within <b>5%</b>.', 'v² = 256. 2θ = 70°, and sin 70° ≈ 0.940. Then divide by 3.71.'),
+    C('tower', 'Tower siege', 'Tower siege', 'Three drones guard a tower on Mars. <b>Knock all three down</b>: topple the tower, shatter crystal, or lob over the wall.<br><br>Use as many shots as you need. Keep an eye on the strobe dots: notice anything about their spacing?', 'Hitting a support pillar brings down everything resting on it.')
+  ];
+  const DEF = {
+    first: { name: 'First shot', planet: 'earth', s: 10, sents: [{ x: 40 }], angle: { min: 5, max: 85, def: 30 }, speed: { min: 5, max: 30, def: 15 } },
+    twin: { name: 'Two angles', planet: 'earth', s: 12, sents: [{ x: 35.3 }], angle: { min: 5, max: 85, def: 20 }, speed: { min: 5, max: 30, lock: 20 } },
+    wall: { name: 'Over the wall', planet: 'earth', s: 10, sents: [{ x: 44 }], blocks: [{ x: 24, y: 0, w: 1.6, h: 14, kind: 'alloy', fixed: true }], angle: { min: 5, max: 85, def: 35 }, speed: { min: 5, max: 30, def: 18 } },
+    cliff: { name: 'Cliff launch', planet: 'earth', s: 10, h0: 40, LX: 120, drop: true, sents: [{ x: 30 }], angle: { min: 0, max: 0, lock: 0 }, speed: { min: 2, max: 25, def: 6 } },
+    moon: { name: 'Moon shot', planet: 'moon', s: 6, LX: 60, sents: [{ x: 110 }], angle: { min: 5, max: 85, def: 40 }, speed: { min: 4, max: 16, def: 10 } },
+    predict: { name: 'Predict the range', planet: 'mars', s: 10, LX: 60, noAim: true, sents: [{ x: 64.84 }], angle: { min: 35, max: 35, lock: 35 }, speed: { min: 16, max: 16, lock: 16 } },
+    tower: { name: 'Tower siege', planet: 'mars', s: 10, LX: 60, angle: { min: 5, max: 85, def: 30 }, speed: { min: 5, max: 25, def: 15 },
+      blocks: [{ x: 54, y: 0, w: 1.2, h: 4, kind: 'alloy' }, { x: 60, y: 0, w: 1.2, h: 4, kind: 'alloy' }, { x: 57, y: 4, w: 7.6, h: .8, kind: 'alloy', on: [0, 1] },
+        { x: 55, y: 4.8, w: 1, h: 3.4, kind: 'crystal', on: [2] }, { x: 59, y: 4.8, w: 1, h: 3.4, kind: 'crystal', on: [2] }, { x: 57, y: 8.2, w: 5.6, h: .7, kind: 'alloy', on: [3, 4] },
+        { x: 64, y: 0, w: 1, h: 6, kind: 'crystal' }],
+      sents: [{ x: 57, y: 4.8, on: [2] }, { x: 57, y: 8.9, on: [5] }, { x: 68 }] }
+  };
+  const down = lv => lv.S.filter(s => s.st !== 'stand').length;
+  const S = {
+    first: R => arena(R, DEF.first, { q: Q.first, goal: lv => [[down(lv) >= 1, 'Knock out the drone at 40 m']] }),
+    twin: R => { const hits = []; let a;
+      a = arena(R, DEF.twin, { q: Q.twin, winMsg: 'Two angles, same landing spot!',
+        onHit: (s, sh) => { if (!hits.some(h => Math.abs(h - sh.ang) < 10)) hits.push(sh.ang); },
+        onEnd: () => { if (hits.length < 2) { a.lv.S.forEach(s => { s.st = 'stand'; s.a = 0; s.x = 35.3; s.y = 0; }); if (hits.length === 1) K.msg(`Hit at ${hits[0]}°. Now find a different angle that lands there too.`, '', 4000); } },
+        goal: () => [[hits.length >= 1, hits[0] != null ? `First hit at <b>${hits[0]}°</b>` : 'First hit'], [hits.length >= 2, hits[1] != null ? `Second hit at <b>${hits[1]}°</b>` : 'Second hit, at least 10° different']] }); },
+    wall: R => arena(R, DEF.wall, { q: Q.wall, goal: lv => [[down(lv) >= 1, 'Clear the 14 m wall and hit the drone at 44 m']] }),
+    cliff: R => { let both = false;
+      arena(R, DEF.cliff, { q: Q.cliff, winMsg: 'Same fall time for both orbs!', onEnd: sh => { if (sh.drop && sh.drop.done && (sh.landX != null || sh.hitAt)) { both = true; K.msg(sh.hitAt ? `The dropped orb fell in ${f1(sh.drop.T)} s. The core hit the drone at ${f1(sh.hitAt.t)} s, just above the ground, and would have landed at ${f1(sh.T)} s too.` : `Both landed after ${f1(sh.T)} s, even though one flew ${f1(sh.landX)} m sideways.`, '', 6500); } },
+        goal: lv => [[down(lv) >= 1, 'Hit the drone at the bottom, 30 m out'], [both, 'Compare the two landing times']] }); },
+    moon: R => { const a = arena(R, DEF.moon, { q: Q.moon, onEnd: sh => { const g = 9.8, T = 2 * sh.vy0 / g, pts = []; for (let i = 0; i <= 30; i++) { const t = T * i / 30; pts.push(`${(V.LX + sh.vx * t * V.s).toFixed(1)},${(GY - (sh.vy0 * t - .5 * g * t * t) * V.s).toFixed(1)}`); } a.lv.earthGhost = { pts: pts.join(' '), R: sh.vx * T, lx: V.LX + sh.vx * T * V.s + 40 }; },
+      goal: lv => [[down(lv) >= 1, 'Hit the drone 110 m away']] }); },
+    predict: R => { let pred = null, ok = false; const truth = 16 * 16 * Math.sin(70 * D2R) / 3.71;
+      const a = arena(R, DEF.predict, { q: Q.predict, noDrag: true, winMsg: 'Your prediction was on target!',
+        extraCtl: `<div class="pl-pred"><label for="plP">Your predicted range</label><div class="row"><input type="number" id="plP" min="0" max="200" step=".1" placeholder="e.g. 50"><span>m</span></div></div>`,
+        beforeFire: () => { const v = parseFloat($('#plP').value); if (!(v > 0)) { K.msg('Enter your predicted range first.', 'bad', 3000); $('#plP').focus(); return false; } pred = v; a.lv.predFlag = v; return true; },
+        onEnd: sh => { if (pred == null) return; const err = Math.abs(pred - truth) / truth;
+          if (err <= .05) { ok = true; K.msg(`Landed at ${f1(truth)} m. You predicted ${f1(pred)} m: ${f1(err * 100)}% off.`, 'ok', 5000); }
+          else { R.mistake(`Prediction off by ${Math.round(err * 100)}%`, 'Range on flat ground: R = v² sin(2θ) / g. Use degrees for the sine, and square the speed.'); K.msg(`Landed at ${f1(truth)} m, but you predicted ${f1(pred)} m (${Math.round(err * 100)}% off). Recalculate and try again.`, 'bad', 6000); } },
+        goal: () => [[pred != null, 'Enter a prediction and fire'], [ok, 'Land within 5% of your prediction']] }); },
+    tower: R => arena(R, DEF.tower, { q: Q.tower, winMsg: 'Tower cleared!', goal: lv => [[down(lv) >= 1, 'First drone down'], [down(lv) >= 2, 'Second drone down'], [down(lv) >= 3, `All three down${lv.shots ? ` · ${lv.shots} shot${lv.shots === 1 ? '' : 's'}` : ''}`]] })
+  };
+
+  /* ── finale: free play while the quiz runs in the sheet ── */
+  function finale() {
+    const worlds = ['earth', 'moon', 'mars']; let wi = 0;
+    const mk = () => Object.assign({}, DEF.tower, { planet: worlds[wi], s: worlds[wi] === 'moon' ? 6 : 10, speed: { min: 5, max: worlds[wi] === 'moon' ? 16 : 25, def: 15 },
+      blocks: worlds[wi] === 'moon' ? [] : DEF.tower.blocks, sents: worlds[wi] === 'moon' ? [{ x: 60 }, { x: 95 }, { x: 130 }] : DEF.tower.sents });
+    const a = arena({ next() {}, mistake() {} }, mk(), { noSheet: true, onDown: st => { if (st.x > 220 && st.x < 520 && st.y > 12 && st.y < 46) { wi = Math.floor((st.x - 220) / 100); K.clear(); finale(); } } });
+    const chips = sv('g', { 'pointer-events': 'none' }, K.layer);
+    chips.innerHTML = worlds.map((w, i) => `<g transform="translate(${220 + i * 100} 14)"><rect width="92" height="30" rx="15" fill="${i === wi ? '#ffd27a' : '#0b1020'}" fill-opacity="${i === wi ? 1 : .72}"/><text x="46" y="20" font-size="13" font-weight="700" text-anchor="middle" fill="${i === wi ? '#0b1020' : '#fff'}">${cap(PL[w].n.replace('the ', ''))}</text></g>`).join('')
+      + `<text x="500" y="604" font-size="13" fill="#fff" fill-opacity=".75" text-anchor="middle">Free play: drag back from the cannon to fire · tap a world to switch</text>`;
+    void a;
+  }
+
+  const Lab = makeLab({
+    noSetup: true, fit: true, bg: () => '',
+    fresh: () => ({}), steps, S,
+    finale() { finale(); },
+    finaleMsg: 'All seven challenges done. Free play is on while you answer the questions.',
+    verdicts: [['Launch commander', 'You can predict and control projectile motion on any world.'], ['Almost there', 'Good work. Look over the questions you missed below.'], ['Practice again', 'Run the challenges once more and watch the readouts closely.']], reviewLabel: 'Review these',
+    summary: () => 'You launched on Earth, the Moon and Mars, and used R = v² sin 2θ / g to predict a landing spot.',
+    quiz: [
+      { q: 'A core is launched at 20 m/s at 30°. Its horizontal velocity is…', a: ['17.3 m/s', '10 m/s', '20 m/s', '11.5 m/s'], c: 0, e: 'vₓ = v cos θ = 20 × cos 30° = 20 × 0.866 ≈ 17.3 m/s. The vertical part is v sin θ = 10 m/s.' },
+      { q: 'What is the acceleration of a projectile at the top of its path (no air)?', a: ['g, pointing down', 'Zero', 'g, pointing up', 'It depends on the launch speed'], c: 0, e: 'Gravity never switches off. Only the vertical velocity is zero at the top; the acceleration is still g downward.' },
+      { q: 'Two balls are thrown horizontally from the same height, at 5 m/s and 15 m/s. Which lands first?', a: ['They land at the same time', 'The 15 m/s ball', 'The 5 m/s ball', 'It depends on their masses'], c: 0, e: 'Horizontal speed doesn’t affect the fall. Both start with zero vertical velocity, so both fall for √(2h/g). The faster one just lands farther away.' },
+      { q: 'If you double the launch speed at the same angle (flat ground), the range becomes…', a: ['4 times as far', '2 times as far', 'The same', 'Half as far'], c: 0, e: 'R = v² sin 2θ / g, so range grows with the square of speed: 2² = 4.' },
+      { q: 'Why does a projectile’s path curve into a parabola?', a: ['Constant horizontal velocity combined with constant downward acceleration', 'Air pushes it down harder over time', 'Gravity gets stronger as it rises', 'The launcher gives it spin'], c: 0, e: 'x grows linearly with time while y has a −½gt² term. Put together, y depends on x², which is a parabola.' },
+      { q: 'On a planet with g twice Earth’s, the same launch would stay in the air…', a: ['Half as long', 'Twice as long', 'The same time', 'Four times as long'], c: 0, e: 'Flight time on flat ground is T = 2v sin θ / g, so doubling g halves the time (and halves the range).' }
+    ],
+    meta: { id: 'projectile', short: 'Projectile Motion', title: 'Projectile Motion: Planet Strike', courses: ['hs-phys'], time: '25–35 min',
+      summary: 'Fire a plasma core at rogue drones on Earth, the Moon and Mars. Control angle and speed, read live velocity components, and predict ranges with the equations.',
+      objective: 'Describe projectile motion as independent horizontal (constant velocity) and vertical (constant acceleration) motions, and use v, θ and g to predict range, height and flight time.',
+      materials: ['A computer or tablet', 'A calculator for the prediction challenge'],
+      safety: ['No safety gear needed. This is a simulation.'],
+      ngss: [['HS-PS2-1', 'Analyze data to support the claim that Newton’s second law describes the mathematical relationship among net force, mass and acceleration.'], ['SEP 5', 'Using mathematics and computational thinking: predict a projectile’s range from v, θ and g, then test the prediction.'], ['CCC 7', 'Stability and change: the horizontal velocity stays constant while the vertical velocity changes at a steady rate.']],
+      thumb: big => labThumb('projectile', big) }
+  });
+  return Lab;
+})();
+
+/* ═══════════ HS Biology: DNA replication and mutation, "Helix Hero" (an arcade-style builder, no lab bench) ═══════════
+   Students fire matching nucleotides to copy a gene, proofread mismatches, blast UV rays and free radicals and repair
+   the damage they cause, classify mutations by their effect on the protein, and unlock real gene variants that act like
+   "superpowers" (each with its real cost). The biology is real; only the arcade framing is a game. */
+const HelixLab = (() => {
+  const K = Kit;
+  const COL = { A: '#ff5d73', T: '#ffcf4d', G: '#34d399', C: '#4da3ff', U: '#ffcf4d' };
+  const PAIR = { A: 'T', T: 'A', G: 'C', C: 'G' }, HB = { A: 2, T: 2, G: 3, C: 3 };
+  const NAME = { A: 'adenine', T: 'thymine', G: 'guanine', C: 'cytosine' };
+  const pick = a => a[Math.random() * a.length | 0];
+  /* the standard genetic code (mRNA codons) */
+  const AA1 = 'FFLLSSSSYY**CC*WLLLLPPPPHHQQRRRRIIIMTTTTNNKKSSRRVVVVAAAADDEEGGGG', B4 = 'UCAG';
+  const AA3 = { F: 'Phe', L: 'Leu', S: 'Ser', Y: 'Tyr', '*': 'Stop', C: 'Cys', W: 'Trp', P: 'Pro', H: 'His', Q: 'Gln', R: 'Arg', I: 'Ile', M: 'Met', T: 'Thr', N: 'Asn', K: 'Lys', V: 'Val', A: 'Ala', D: 'Asp', E: 'Glu', G: 'Gly' };
+  const CODE = {}; for (let i = 0; i < 64; i++) CODE[B4[i >> 4] + B4[(i >> 2) & 3] + B4[i & 3]] = AA3[AA1[i]];
+  const translate = m => { const out = []; for (let i = 0; i + 3 <= m.length; i += 3) { const a = CODE[m.slice(i, i + 3)]; out.push(a); if (a === 'Stop') break; } return out; };
+
+  /* ── shared drawing ── */
+  const bg = () => `<defs><radialGradient id="hxBg" cx=".5" cy=".42" r=".8"><stop offset="0" stop-color="#18264f"/><stop offset=".65" stop-color="#0b1230"/><stop offset="1" stop-color="#05081a"/></radialGradient>
+      <radialGradient id="hxGlow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#9ff3ff" stop-opacity=".6"/><stop offset="1" stop-color="#9ff3ff" stop-opacity="0"/></radialGradient></defs>
+    <rect width="1000" height="620" fill="url(#hxBg)"/>
+    <path d="M-40,40 Q500,-50 1040,40" fill="none" stroke="#3d5a9c" stroke-opacity=".35" stroke-width="10"/>${[90, 300, 520, 760, 930].map((x, i) => `<circle cx="${x}" cy="${18 + (i % 2) * 6}" r="5" fill="#0b1230" stroke="#3d5a9c" stroke-opacity=".5" stroke-width="2"/>`).join('')}
+    ${Array.from({ length: 26 }, (_, i) => `<text x="${(i * 173) % 980 + 10}" y="${(i * 97) % 560 + 60}" font-size="${10 + (i % 3) * 3}" font-weight="800" fill="${COL['ATGC'[i % 4]]}" opacity=".07">${'ATGC'[i % 4]}</text>`).join('')}`;
+  function tile(x, y, b, down, o = {}) { /* a nucleotide hanging off a backbone at (x, y), pointing down (template) or up (new strand) */
+    const c = COL[b] || '#7a86a8', w = 44, h = 38, y0 = down ? 0 : -h;
+    return `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)})" opacity="${o.op == null ? 1 : o.op}">${o.glow ? `<circle cx="0" cy="${y0 + h / 2}" r="34" fill="${o.glow}" opacity=".35"/>` : ''}
+      <rect x="${-w / 2}" y="${y0}" width="${w}" height="${h}" rx="9" fill="${o.dim ? 'none' : c}" stroke="${o.dim ? '#4a5a86' : '#0b1230'}" stroke-width="${o.dim ? 2 : 2}" ${o.dim ? 'stroke-dasharray="5 4"' : ''}/>
+      ${o.dim ? '' : `<rect x="${-w / 2 + 4}" y="${y0 + 4}" width="${w - 8}" height="7" rx="3.5" fill="#fff" opacity=".28"/>`}
+      <text x="0" y="${y0 + h / 2 + 7}" font-size="20" font-weight="800" text-anchor="middle" fill="${o.dim ? '#6b7aa6' : '#0b1230'}" style="font-family:var(--f-display)">${o.dim ? '?' : b}</text>${o.x ? `<path d="M-14,${y0 + 6} l28,26 M14,${y0 + 6} l-28,26" stroke="#ff2e55" stroke-width="4"/>` : ''}</g>`;
+  }
+  const hbonds = (x, y1, y2, n, bad) => Array.from({ length: n }, (_, k) => { const xx = x + (k - (n - 1) / 2) * 9; return `<line x1="${xx}" y1="${y1}" x2="${xx}" y2="${y2}" stroke="${bad ? '#ff5d73' : '#e6f4ff'}" stroke-width="2.4" stroke-dasharray="3 3" opacity=".9"/>`; }).join('');
+  const backbone = (x1, x2, y) => `<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="#c9d4ff" stroke-width="5" stroke-linecap="round" opacity=".85"/>`;
+  function hud(left, right) {
+    return `<g transform="translate(14 14)"><rect width="${left.w || 260}" height="40" rx="10" fill="#05081a" fill-opacity=".75"/>${left.svg}</g>${right ? `<g transform="translate(${986 - (right.w || 220)} 14)"><rect width="${right.w || 220}" height="40" rx="10" fill="#05081a" fill-opacity=".75"/>${right.svg}</g>` : ''}`;
+  }
+  const meter = (label, frac, c = '#9ff3ff', w = 260) => ({ w, svg: `<text x="12" y="17" font-size="11" font-weight="700" fill="#a9b6e0" letter-spacing="1.2">${label}</text><rect x="12" y="24" width="${w - 24}" height="8" rx="4" fill="#ffffff" fill-opacity=".12"/><rect x="12" y="24" width="${Math.max(0, (w - 24) * Math.min(1, frac))}" height="8" rx="4" fill="${c}"/>` });
+  const counters = (items, w = 220) => ({ w, svg: items.map((t, i) => `<text x="${12 + i * (w - 24) / items.length}" y="25" font-size="12.5" font-weight="700" fill="${t[1]}">${t[0]}</text>`).join('') });
+  function burst(x, y, cols, n = 26, sp = 240) { for (let k = 0; k < n; k++) { const a = rnd(0, 6.28), v = rnd(sp * .3, sp); K.spawn({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, g: 200, r: rnd(1.4, 3.6), c: cols[k % cols.length], life: rnd(.4, .9), drag: 1.5 }); } }
+
+  /* ── the stage + sheet scaffolding used by every challenge ── */
+  function scene(R, o) {
+    K.setBg(bg()); const g = sv('g', { 'pointer-events': 'none' }, K.layer);
+    const hit = sv('rect', { x: 0, y: 0, width: 1000, height: 620, fill: 'transparent', style: 'cursor:crosshair' }, K.layer); K.layer.insertBefore(hit, g);
+    K.loop(dt => { if (!g.isConnected) return false; o.tick && o.tick(dt); g.innerHTML = o.draw(); });
+    K.on(hit, 'pointerdown', e => { if (e.button !== 0) return; e.preventDefault(); o.click && o.click(K.pt(e)); });
+    if (o.keys) K.on(window, 'keydown', e => { if (/INPUT|TEXTAREA/.test(document.activeElement.tagName)) return; const k = e.key.toUpperCase(); if (o.keys[k]) { e.preventDefault(); o.keys[k](); } });
+    const box = o.noSheet ? null : LabUI.html(''), qbox = o.noSheet ? null : LabUI.html(''); if (box) box.className = 'pl-ctl';
+    let asked = false;
+    const api = {
+      box, setCtl: h => { if (box) box.innerHTML = h + '<div class="pl-goal" id="hxGoal"></div>'; },
+      goal(items) { const el = box && $('#hxGoal', box); if (!el) return; el.innerHTML = `<div class="pl-lab">Challenge</div>${items.map(([ok, t]) => `<div class="pl-ck ${ok ? 'ok' : ''}"><span>${ok ? '✓' : '○'}</span><span>${t}</span></div>`).join('')}`;
+        if (items.every(x => x[0]) && !asked && o.q) { asked = true; SND.ok(); K.sparkle({ x: 500, y: 260 }, 40); K.msg(o.winMsg || 'Challenge complete!', 'ok', 2800); api.ask(o.q); } },
+      ask(q) { const ord = q.a.map((_, i) => i).sort(() => Math.random() - .5);
+        qbox.innerHTML = `<div class="quiz pl-qz"><div class="q">${q.q}</div><div class="opts">${ord.map(i => `<button class="opt" data-qa="${i}">${q.a[i]}</button>`).join('')}</div><div class="exp" id="hxExp"></div></div>`;
+        qbox.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        $$('[data-qa]', qbox).forEach(x => x.onclick = () => { const i = +x.dataset.qa;
+          if (i === q.c) { x.classList.add('right'); $$('[data-qa]', qbox).forEach(y => y.disabled = true); $('#hxExp', qbox).innerHTML = `<b>Correct.</b> ${q.e}`; SND.ok(); R.next(2800); }
+          else { x.classList.add('wrong'); x.disabled = true; R.mistake('Wrong answer: ' + (o.name || 'DNA question'), q.e); K.msg(q.hint || 'Not quite. Look at the model again.', 'bad', 3800); } }); }
+    };
+    return api;
+  }
+
+  /* ── base-pairing blaster: fire the matching nucleotide into the next slot of the new strand ── */
+  const CH = ['A', 'T', 'G', 'C'], chX = k => 500 + (k - 1.5) * 112;
+  function pairer(n, o = {}) {
+    const P = { n, tm: Array.from({ length: n }, (_, i) => o.seq ? o.seq[i] : CH[(i * 7 + (Math.random() * 4 | 0)) % 4]), fill: [], cur: 0, shot: null, flash: 0, wrong: 0, lastWrong: '' };
+    if (!o.seq) { CH.forEach((b, k) => { if (!P.tm.includes(b)) P.tm[k * 3 % n] = b; }); }
+    const gap = Math.min(66, 860 / Math.max(1, n - 1)); P.x = i => 500 - (n - 1) * gap / 2 + i * gap; P.Y = 150; P.NY = 300;
+    P.fire = b => { if (P.shot || P.cur >= n) return; const k = CH.indexOf(b); P.shot = { b, x0: chX(k), y0: 530, x1: P.x(P.cur), y1: P.NY - 19, t: 0 }; SND.tone(500 + k * 90, .08, 'triangle', .07, 900); };
+    P.tick = dt => { P.flash = Math.max(0, P.flash - dt); const s = P.shot; if (!s) return; s.t += dt / .28; if (s.t < 1) return; P.shot = null;
+      const want = PAIR[P.tm[P.cur]];
+      if (s.b === want) { P.fill[P.cur] = s.b; burst(P.x(P.cur), P.NY - 30, [COL[s.b], '#ffffff'], 18, 180); SND.tone(700 + P.cur * 30, .1, 'sine', .08); P.cur++; o.onPair && o.onPair(P); }
+      else { P.wrong++; P.flash = .5; P.lastWrong = `${P.tm[P.cur]} pairs with ${want}, not ${s.b}`; SND.nope(); K.msg(`${P.tm[P.cur]} (${NAME[P.tm[P.cur]]}) pairs with ${want} (${NAME[want]}), not ${s.b}.`, 'bad', 2400);
+        for (let k = 0; k < 10; k++) K.spawn({ x: s.x1, y: s.y1, vx: rnd(-200, 200), vy: rnd(-60, 160), g: 600, r: rnd(2, 4), c: COL[s.b], life: .8 }); o.onWrong && o.onWrong(P, s.b); } };
+    P.draw = (extra = {}) => {
+      let s = backbone(P.x(0) - 40, P.x(n - 1) + 40, P.Y) + `<text x="${P.x(0) - 58}" y="${P.Y + 5}" font-size="13" font-weight="700" fill="#c9d4ff" text-anchor="end">3′</text><text x="${P.x(n - 1) + 58}" y="${P.Y + 5}" font-size="13" font-weight="700" fill="#c9d4ff">5′</text>
+        <text x="${P.x(0) - 40}" y="${P.Y - 16}" font-size="12" fill="#a9b6e0">template strand</text>`;
+      if (P.cur > 0) s += backbone(P.x(0) - 40, P.x(P.cur - 1) + 22, P.NY) + `<text x="${P.x(0) - 58}" y="${P.NY + 5}" font-size="13" font-weight="700" fill="#c9d4ff" text-anchor="end">5′</text><text x="${P.x(0) - 40}" y="${P.NY + 26}" font-size="12" fill="#a9b6e0">new strand, built 5′ → 3′</text>`;
+      for (let i = 0; i < n; i++) { const x = P.x(i), b = P.tm[i], f = P.fill[i], les = extra.lesion && extra.lesion(i);
+        s += tile(x, P.Y + 1, b, true, { x: extra.mut && extra.mut(i) });
+        if (f) s += hbonds(x, P.Y + 40, P.NY - 39, HB[b]) + tile(x, P.NY - 1, f, false);
+        else s += tile(x, P.NY - 1, '?', false, { dim: true, op: i === P.cur ? 1 : .45 });
+        if (les) s += les; }
+      if (P.cur < n) { const x = P.x(P.cur); s += `<g transform="translate(${x} ${P.NY + 22})"><ellipse rx="36" ry="13" fill="#9ff3ff" opacity="${.18 + .12 * Math.sin(performance.now() / 160)}"/><text y="5" font-size="11" font-weight="800" text-anchor="middle" fill="#9ff3ff" letter-spacing="1">POLYMERASE</text></g>`;
+        if (P.flash) s += `<rect x="${x - 26}" y="${P.NY - 44}" width="52" height="48" rx="10" fill="none" stroke="#ff5d73" stroke-width="3" opacity="${P.flash * 2}"/>`; }
+      /* the blaster's four chambers */
+      if (extra.noCh) return s;
+      CH.forEach((b, k) => { const x = chX(k); s += `<g transform="translate(${x} 556)"><rect x="-50" y="-28" width="100" height="56" rx="14" fill="#0b1230" stroke="${COL[b]}" stroke-width="2.5"/><rect x="-44" y="-22" width="88" height="44" rx="10" fill="${COL[b]}" opacity=".16"/>
+        <text y="9" font-size="28" font-weight="800" text-anchor="middle" fill="${COL[b]}" style="font-family:var(--f-display)">${b}</text><text x="34" y="-10" font-size="10" fill="#a9b6e0" text-anchor="middle">${b}</text></g>`; });
+      s += `<path d="M330,520 L670,520" stroke="#3d5a9c" stroke-width="2" opacity=".6"/><text x="500" y="606" font-size="12" fill="#a9b6e0" text-anchor="middle">Click a chamber or press A, T, G or C</text>`;
+      if (P.shot) { const sh = P.shot, t = Math.min(1, sh.t), x = sh.x0 + (sh.x1 - sh.x0) * t, y = sh.y0 + (sh.y1 - sh.y0) * t - Math.sin(t * Math.PI) * 40;
+        s += `<circle cx="${x}" cy="${y}" r="26" fill="${COL[sh.b]}" opacity=".25"/>${tile(x, y + 19, sh.b, false)}`; }
+      return s;
+    };
+    P.clickChamber = p => { if (p.y < 528 || p.y > 584) return false; const k = CH.findIndex((b, i) => Math.abs(p.x - chX(i)) < 50); if (k < 0) return false; P.fire(CH[k]); return true; };
+    P.keys = Object.fromEntries(CH.map(b => [b, () => P.fire(b)]));
+    return P;
+  }
+  const keysHTML = () => `<div class="hx-keys">${CH.map(b => `<button style="--c:${COL[b]}" data-fire="${b}">${b}<small>${NAME[b]}</small></button>`).join('')}</div>`;
+
+  /* ── mutagen storm: threats fly at the DNA; blast them, or repair the damage before its timer runs out ── */
+  const KINDS = {
+    uv: { n: 'UV ray', les: 'T=T dimer', c: '#c58bff', sp: 150, hp: 1, why: 'UV light links two neighboring thymines into a thymine dimer that kinks the helix.' },
+    rad: { n: 'Free radical', les: '8-oxo-G', c: '#ff9a3c', sp: 95, hp: 1, why: 'Free radicals (reactive oxygen) oxidize guanine into 8-oxo-G, which can pair with A by mistake.' },
+    chem: { n: 'Smoke chemical', les: 'adduct', c: '#7ee06b', sp: 60, hp: 2, why: 'Chemicals in tobacco smoke bolt onto bases (adducts) and block copying.' }
+  };
+  function storm(pos, count, o = {}) {
+    const St = { th: [], les: {}, locked: new Set(), blasted: 0, repaired: 0, t: 0, dur: o.dur || 40, next: 1.2, lasers: [], over: false, lesT: o.lesT || 7 };
+    const rate = () => (o.rate0 || 1.7) - ((o.rate0 || 1.7) - (o.rate1 || .75)) * Math.min(1, St.t / St.dur);
+    St.tick = dt => { if (St.over) return; St.t += dt; St.lasers = St.lasers.filter(l => (l.life -= dt) > 0);
+      if (St.t >= St.dur && !o.endless) { St.over = true; St.th = []; o.onOver && o.onOver(St); return; }
+      if ((St.next -= dt) <= 0) { St.next = rate() * rnd(.7, 1.3); const pool = o.targets ? o.targets() : [...Array(count).keys()]; const free = pool.filter(i => !St.les[i] && !St.locked.has(i)); if (free.length) {
+        const i = pick(free), k = pick(['uv', 'uv', 'rad', 'rad', 'chem']), p = pos(i); St.th.push({ k, i, x: rnd(40, 960), y: -20, hp: KINDS[k].hp, ph: rnd(0, 6), age: 0 }); void p; } }
+      for (const t of St.th) { const p = pos(t.i), K2 = KINDS[t.k], dx = p.x - t.x, dy = p.y - t.y, d = Math.hypot(dx, dy) || 1; t.age += dt;
+        const wob = t.k === 'rad' ? Math.sin(t.age * 7 + t.ph) * 60 : t.k === 'uv' ? Math.sin(t.age * 22) * 30 : 0;
+        t.x += (dx / d * K2.sp + (-dy / d) * wob) * dt; t.y += (dy / d * K2.sp + (dx / d) * wob) * dt;
+        if (d < 18) { t.dead = true; if (!St.les[t.i]) { St.les[t.i] = { k: t.k, left: St.lesT }; SND.tone(160, .25, 'sawtooth', .07, 80); K.msg(`${K2.n} hit! ${K2.why} Click the damage to repair it.`, 'bad', 3600); } } }
+      St.th = St.th.filter(t => !t.dead);
+      for (const i in St.les) { const L = St.les[i]; L.left -= dt; if (L.left <= 0) { delete St.les[i]; St.locked.add(+i); SND.tone(90, .5, 'square', .08, 40); K.msg('Too late: that damage was copied into the DNA as a permanent mutation.', 'bad', 3200); o.onLock && o.onLock(+i); } } };
+    St.click = p => {
+      const t = St.th.slice().sort((a, b) => Math.hypot(a.x - p.x, a.y - p.y) - Math.hypot(b.x - p.x, b.y - p.y))[0];
+      if (t && Math.hypot(t.x - p.x, t.y - p.y) < 30) { St.lasers.push({ x: t.x, y: t.y, life: .12 }); SND.tone(1400, .06, 'square', .05, 400); if (--t.hp <= 0) { t.dead = true; St.th = St.th.filter(q => !q.dead); St.blasted++; burst(t.x, t.y, [KINDS[t.k].c, '#ffffff'], 22, 260); } return true; }
+      for (const i in St.les) { const q = pos(+i); if (Math.hypot(q.x - p.x, q.y - p.y) < 30) { delete St.les[i]; St.repaired++; SND.ok(); burst(q.x, q.y, ['#9ff3ff', '#ffffff', '#34d399'], 30, 200); K.word('REPAIRED', q.x, q.y - 40, '#9ff3ff', 26); return true; } }
+      return false; };
+    St.lesionSVG = i => { const L = St.les[i]; if (!L) return ''; const p = pos(i), K2 = KINDS[L.k], fr = L.left / St.lesT, a = fr * 2 * Math.PI, r = 24;
+      return `<circle cx="${p.x}" cy="${p.y}" r="${r + 6}" fill="${K2.c}" opacity="${.18 + .12 * Math.sin(performance.now() / 110)}"/><circle cx="${p.x}" cy="${p.y}" r="${r}" fill="none" stroke="#ffffff" stroke-opacity=".15" stroke-width="4"/>
+        <path d="M${p.x},${p.y - r} A${r},${r} 0 ${a > Math.PI ? 1 : 0} 1 ${p.x + r * Math.sin(a)},${p.y - r * Math.cos(a)}" fill="none" stroke="${fr < .35 ? '#ff2e55' : K2.c}" stroke-width="4" stroke-linecap="round"/>
+        <g transform="translate(${p.x} ${p.y - r - 14})"><rect x="-34" y="-11" width="68" height="18" rx="9" fill="#05081a" stroke="${K2.c}"/><text y="3" font-size="10.5" font-weight="800" text-anchor="middle" fill="${K2.c}">${K2.les}</text></g>`; };
+    St.draw = () => { let s = '';
+      for (const t of St.th) { const c = KINDS[t.k].c;
+        if (t.k === 'uv') s += `<g transform="translate(${t.x} ${t.y})"><circle r="16" fill="${c}" opacity=".2"/><path d="M-8,-14 L3,-3 L-4,0 L8,14" fill="none" stroke="${c}" stroke-width="3.4" stroke-linejoin="round"/><text x="12" y="-10" font-size="10" font-weight="800" fill="${c}">UV</text></g>`;
+        else if (t.k === 'rad') s += `<g transform="translate(${t.x} ${t.y}) rotate(${t.age * 200})"><circle r="15" fill="${c}" opacity=".2"/>${[0, 60, 120, 180, 240, 300].map(a => `<path d="M0,0 L${11 * Math.cos(a * Math.PI / 180)},${11 * Math.sin(a * Math.PI / 180)}" stroke="${c}" stroke-width="3"/>`).join('')}<circle r="5" fill="#fff"/><text x="9" y="-9" font-size="11" font-weight="800" fill="#fff" transform="rotate(${-t.age * 200})">•</text></g>`;
+        else s += `<g transform="translate(${t.x} ${t.y})"><circle r="${t.hp > 1 ? 18 : 14}" fill="${c}" opacity=".85"/><circle cx="-5" cy="-5" r="4" fill="#fff" opacity=".5"/><circle r="${t.hp > 1 ? 22 : 18}" fill="none" stroke="${c}" stroke-opacity=".5" stroke-dasharray="4 4"/></g>`; }
+      for (const l of St.lasers) s += `<line x1="500" y1="610" x2="${l.x}" y2="${l.y}" stroke="#9ff3ff" stroke-width="${3 + l.life * 30}" opacity="${l.life * 8}"/><circle cx="${l.x}" cy="${l.y}" r="14" fill="#fff" opacity="${l.life * 6}"/>`;
+      return s; };
+    return St;
+  }
+
+  /* ── 1 · pair the bases ── */
+  const Q = {
+    pair: { q: 'Which bases pair in DNA, and why does a G–C pair hold on more tightly than A–T?', a: ['A pairs with T and G with C; G–C forms three hydrogen bonds, A–T only two', 'A pairs with G and T with C; purines hold tighter', 'Any base can pair with any other; G and C are heavier', 'A pairs with U and G with C; U makes weaker bonds'], c: 0, e: 'Complementary pairs fit like puzzle pieces: A–T (2 hydrogen bonds) and G–C (3). Count the dashed lines between the pairs you built.' },
+    proof: { q: 'What does DNA polymerase’s proofreading do?', a: ['It checks each new base, cuts out a mismatched one and puts in the right base', 'It copies the DNA a second time to compare', 'It stops replication until the cell divides', 'It changes the template to match the new strand'], c: 0, e: 'Polymerase can back up one step and remove a wrong nucleotide (its exonuclease activity). Proofreading plus mismatch repair cut errors to about 1 in a billion bases.' },
+    storm: { q: 'Why does sunscreen help protect your DNA?', a: ['It blocks UV light, which links neighboring thymines into dimers', 'It repairs mutations that already happened', 'It stops free radicals from forming anywhere in the body', 'It makes DNA polymerase work faster'], c: 0, e: 'UV photons create thymine dimers in skin cells. Repair enzymes fix most of them, but unrepaired damage can become a mutation, which is why sun damage raises skin-cancer risk.' },
+    decode: { q: 'Which kind of mutation usually changes a protein the most?', a: ['A frameshift near the start of the gene', 'A silent mutation', 'A missense mutation at the very end', 'They all have exactly the same effect'], c: 0, e: 'Inserting or deleting bases (not in a multiple of 3) shifts every codon after it, so the rest of the protein comes out scrambled, usually with an early stop.' },
+    powers: { q: 'The sickle-cell allele is common in parts of Africa where malaria is common. Why?', a: ['People with one copy are protected from severe malaria, so the allele is passed on', 'Malaria causes the mutation in each person', 'People with two copies are the healthiest', 'The mosquitoes carry the allele between people'], c: 0, e: 'This is called heterozygote advantage. One copy protects against malaria; two copies cause sickle cell disease. Where malaria is common, the protection keeps the allele frequent.' },
+    hero: { q: 'Your copy was perfect. Why does a cell need such accurate copies?', a: ['Every new cell needs the same instructions; errors can change or break proteins', 'Perfect copies make the cell divide faster', 'The cell can’t read DNA with any mistakes in it', 'Copying errors always give new abilities'], c: 0, e: 'DNA is the instruction set for proteins. A copying error can change a protein’s shape and job. Most changes are neutral or harmful; only a few turn out helpful in a particular environment.' }
+  };
+  const S = {
+    pair: R => { let P; const sc = scene(R, { name: 'Pair the bases', q: Q.pair, winMsg: 'Gene copied without a gap!',
+      tick: dt => P.tick(dt), draw: () => P.draw() + hud(meter('NEW STRAND', P.cur / P.n, '#9ff3ff'), counters([[`paired ${P.cur}/${P.n}`, '#9ff3ff'], [`misfires ${P.wrong}`, P.wrong ? '#ff8a9a' : '#a9b6e0']])),
+      click: p => P.clickChamber(p), keys: {} });
+      P = pairer(12, { onPair: () => upd(), onWrong: (_, b) => { R.mistake('Wrong base paired', `Each base has one partner: A–T and G–C. ${P.lastWrong}.`); } });
+      const upd =() => sc.goal([[P.cur >= 3, 'Pair the first three bases'], [P.cur >= P.n, `Copy all ${P.n} bases`]]);
+      sc.setCtl(keysHTML() + '<p class="small muted" style="margin:0">Keyboard: press <b>A</b>, <b>T</b>, <b>G</b> or <b>C</b>.</p>'); $$('[data-fire]', sc.box).forEach(x => x.onclick = () => P.fire(x.dataset.fire));
+      K.on(window, 'keydown', e => { const k = e.key.toUpperCase(); if (P.keys[k] && !/INPUT|TEXTAREA/.test(document.activeElement.tagName)) { e.preventDefault(); P.keys[k](); } });
+      upd(); },
+
+    /* ── 2 · proofreading patrol ── */
+    proof: R => { let run; const sc = scene(R, { name: 'Proofreading', q: Q.proof, winMsg: 'Proofreading complete!',
+      tick: dt => run.tick(dt), draw: () => run.draw(), click: p => run.click(p) });
+      const start = () => { const N = 30, bad = new Set(); while (bad.size < 7) bad.add(3 + (Math.random() * (N - 4) | 0));
+        run = { list: [], made: 0, N, bad, next: .2, esc: 0, fixed: 0, alarms: 0, done: false,
+          tick(dt) { if (this.done) return; if ((this.next -= dt) <= 0 && this.made < N) { this.next = .78; const tb = pick(CH), ok = !bad.has(this.made); const nb = ok ? PAIR[tb] : pick(CH.filter(b => b !== PAIR[tb])); this.list.push({ tb, nb, ok, x: 880, fx: 0 }); this.made++; }
+            this.list.forEach(q => { q.x -= 62 * dt; q.fx = Math.max(0, q.fx - dt); if (!q.gone && q.x < 170) { q.gone = true; if (!q.ok) { this.esc++; R.mistake('A mismatch got past proofreading', 'Mismatched pairs bulge out of the helix and their colors don’t match the A–T / G–C rule. Catch them before they leave the polymerase.'); K.msg(`${q.tb}–${q.nb} mismatch escaped! Now it’s a permanent mutation.`, 'bad', 2600); SND.nope(); } } });
+            this.list = this.list.filter(q => q.x > 80);
+            if (this.made >= N && !this.list.some(q => !q.gone)) { this.done = true; upd(); } },
+          click(p) { const q = this.list.find(q => !q.gone && Math.abs(q.x - p.x) < 26 && p.y > 170 && p.y < 360); if (!q) return;
+            if (!q.ok) { q.nb = PAIR[q.tb]; q.ok = true; q.fx = .8; this.fixed++; SND.ok(); burst(q.x, 300, ['#9ff3ff', '#ffffff'], 24, 200); K.word('FIXED', q.x, 170, '#9ff3ff', 24); upd(); }
+            else { this.alarms++; K.msg(`${q.tb}–${q.nb} is a correct pair. Look for bases that don’t match.`, '', 2000); } },
+          draw() { let s = `<rect x="170" y="120" width="740" height="260" rx="18" fill="#9ff3ff" opacity=".04"/><line x1="170" y1="110" x2="170" y2="390" stroke="#ffcf4d" stroke-width="2" stroke-dasharray="6 6"/><text x="176" y="104" font-size="12" fill="#ffcf4d">checkpoint: errors past here are permanent</text>
+              <g transform="translate(905 255)"><ellipse rx="54" ry="90" fill="#9ff3ff" opacity=".14"/><ellipse rx="44" ry="78" fill="none" stroke="#9ff3ff" stroke-opacity=".5" stroke-width="2"/><text y="4" font-size="11" font-weight="800" fill="#9ff3ff" text-anchor="middle" letter-spacing="1">POLY-</text><text y="18" font-size="11" font-weight="800" fill="#9ff3ff" text-anchor="middle" letter-spacing="1">MERASE</text></g>`;
+            s += backbone(90, 880, 190) + backbone(90, 880, 330);
+            for (const q of this.list) { const bulge = q.ok ? 0 : 12, wob = q.ok ? 0 : Math.sin(performance.now() / 120 + q.x) * 4;
+              s += tile(q.x, 191, q.tb, true, { op: q.gone ? .55 : 1, glow: q.fx ? '#9ff3ff' : '' }) + hbonds(q.x, 231, 291 + bulge, q.ok ? HB[q.tb] : 1, !q.ok) + `<g transform="translate(${wob} ${bulge}) rotate(${q.ok ? 0 : 8} ${q.x} 310)">${tile(q.x, 329, q.nb, false, { op: q.gone ? .55 : 1, x: q.gone && !q.ok })}</g>`; }
+            return s + hud(meter('RUN PROGRESS', this.made / N, '#ffcf4d'), counters([[`fixed ${this.fixed}`, '#9ff3ff'], [`escaped ${this.esc}`, this.esc ? '#ff8a9a' : '#a9b6e0']], 220)) + `<text x="500" y="440" font-size="13" fill="#a9b6e0" text-anchor="middle">Click a mismatched pair (wrong partner, bulging out) before it reaches the checkpoint.</text>`; } }; };
+      const upd = () => { const r = run, finished = r.done; sc.goal([[r.fixed >= 3, `Fix mismatches (${r.fixed} fixed)`], [finished && r.esc <= 1, finished ? (r.esc <= 1 ? `Run finished: ${r.esc} escaped` : `${r.esc} escaped: try again`) : 'Finish the run with at most 1 escaped']]);
+        if (finished && r.esc > 1) $('#hxGoal', sc.box).insertAdjacentHTML('beforeend', '<button class="btn sm primary" id="hxRetry" style="margin-top:6px">Run it again</button>'), $('#hxRetry').onclick = () => { start(); upd(); }; };
+      sc.setCtl('<p class="small" style="margin:0">Mismatched pairs <b>bulge out</b> and show a red bond. Correct pairs fit flat with 2 (A–T) or 3 (G–C) bonds.</p>'); start(); upd(); },
+
+    /* ── 3 · mutagen storm ── */
+    storm: R => { let St; const N = 28, pos = i => ({ x: 70 + i * 31.5, y: 330 }); let bases = Array.from({ length: N }, () => pick(CH)); let ph = 0;
+      const sc = scene(R, { name: 'Mutagen storm', q: Q.storm, winMsg: 'The genome survived the storm!',
+        tick: dt => { ph += dt * .8; St.tick(dt); },
+        draw: () => { let s = ''; const top = [], bot = [];
+          for (let i = 0; i < N; i++) { const x = pos(i).x, a = ph + i * .55, y1 = 330 - 40 * Math.sin(a), y2 = 330 + 40 * Math.sin(a), front = Math.cos(a) > 0, m = St.locked.has(i);
+            top.push(`${x},${y1}`); bot.push(`${x},${y2}`);
+            s += `<line x1="${x}" y1="${y1}" x2="${x}" y2="330" stroke="${m ? '#5b2340' : COL[bases[i]]}" stroke-width="6" opacity="${front ? 1 : .55}"/><line x1="${x}" y1="330" x2="${x}" y2="${y2}" stroke="${m ? '#5b2340' : COL[PAIR[bases[i]]]}" stroke-width="6" opacity="${front ? 1 : .55}"/>${m ? `<path d="M${x - 7},323 l14,14 M${x + 7},323 l-14,14" stroke="#ff2e55" stroke-width="3"/>` : ''}`; }
+          s = `<polyline points="${top.join(' ')}" fill="none" stroke="#c9d4ff" stroke-width="5" opacity=".9"/><polyline points="${bot.join(' ')}" fill="none" stroke="#c9d4ff" stroke-width="5" opacity=".6"/>` + s;
+          for (let i = 0; i < N; i++) s += St.lesionSVG(i);
+          s += St.draw() + `<g transform="translate(500 600)"><path d="M-26,20 L-16,-6 L16,-6 L26,20Z" fill="#1c2a55" stroke="#9ff3ff" stroke-opacity=".6"/><circle cy="-8" r="9" fill="#9ff3ff"/></g>`;
+          const left = Math.max(0, St.dur - St.t);
+          return s + hud(meter(`STORM · ${Math.ceil(left)} s LEFT`, St.t / St.dur, '#ffcf4d'), counters([[`blasted ${St.blasted}`, '#9ff3ff'], [`repaired ${St.repaired}`, '#34d399'], [`mutations ${St.locked.size}`, St.locked.size ? '#ff8a9a' : '#a9b6e0']], 300));
+        },
+        click: p => St.click(p) });
+      const start = () => { St = storm(pos, N, { dur: 40, lesT: 7, onOver: () => upd(), onLock: () => { R.mistake('Damage became a mutation', 'Blast threats before they reach the DNA, and click damaged spots to repair them before the timer ring runs out.'); upd(); } }); upd(); };
+      const upd = () => { const done = St.over; sc.goal([[St.blasted + St.repaired >= 5, `Blast threats or repair damage (${St.blasted + St.repaired})`], [done && St.locked.size <= 2, done ? (St.locked.size <= 2 ? `Survived with ${St.locked.size} mutation${St.locked.size === 1 ? '' : 's'}` : `${St.locked.size} mutations: try again`) : 'Survive 40 s with at most 2 mutations']]);
+        if (done && St.locked.size > 2 && !$('#hxRetry')) { $('#hxGoal', sc.box).insertAdjacentHTML('beforeend', '<button class="btn sm primary" id="hxRetry" style="margin-top:6px">Try the storm again</button>'); $('#hxRetry').onclick = () => { bases = bases.map(() => pick(CH)); start(); }; } };
+      sc.setCtl(`<div class="hx-card"><span><b style="color:${KINDS.uv.c}">UV ray</b> → thymine dimer. Fast and zig-zagging.</span><span><b style="color:${KINDS.rad.c}">Free radical</b> → oxidized guanine. Wobbles.</span><span><b style="color:${KINDS.chem.c}">Smoke chemical</b> → base adduct. Slow, takes 2 hits.</span></div><p class="small" style="margin:0">Click threats to blast them. If one gets through, click the glowing damage to send in a <b>repair enzyme</b> before its ring runs out.</p>`);
+      start(); },
+
+    /* ── 4 · decode the damage: silent, missense, nonsense, frameshift ── */
+    decode: R => { const ORIG = 'AUGGGAGAGUGGAAAUAA';
+      const MUTS = [
+        { type: 'Silent', m: 'AUGGGGGAGUGGAAAUAA', at: [5], e: 'GGA → GGG: both codons still mean glycine, so the protein is unchanged. The genetic code has several codons for most amino acids.' },
+        { type: 'Missense', m: 'AUGGGAGUGUGGAAAUAA', at: [7], e: 'GAG → GUG swaps glutamic acid for valine. One amino acid changes. This exact swap in hemoglobin causes sickle cell disease.' },
+        { type: 'Nonsense', m: 'AUGGGAGAGUAGAAAUAA', at: [10], e: 'UGG → UAG turns tryptophan into a stop signal. The protein is cut short after three amino acids and usually doesn’t work.' },
+        { type: 'Frameshift', m: 'AUGGAGAGUGGAAAUAA', at: [3], del: true, e: 'One base (G) was deleted, so every codon after it is read in a new frame: Glu, Ser, Gly, Asn… and the original stop is lost.' }
+      ].sort(() => Math.random() - .5);
+      let i = 0, solved = 0, showAns = false;
+      const row = (m, y, hl, del) => { let s = ''; const cods = []; for (let k = 0; k < m.length; k += 3) cods.push(m.slice(k, k + 3));
+        cods.forEach((c, ci) => { const x0 = 150 + ci * 120; s += `<rect x="${x0 - 4}" y="${y - 4}" width="${c.length * 34 + 8}" height="48" rx="10" fill="#ffffff" opacity=".05"/>`; [...c].forEach((b, bi) => { const x = x0 + bi * 34 + 15, idx = ci * 3 + bi, h = hl.includes(idx);
+          s += `<g transform="translate(${x} ${y})"><rect x="-15" y="0" width="30" height="40" rx="7" fill="${COL[b]}" ${h ? 'stroke="#fff" stroke-width="3"' : ''}/><text y="27" font-size="18" font-weight="800" text-anchor="middle" fill="#0b1230">${b}</text>${h ? `<circle cy="20" r="26" fill="none" stroke="#fff" stroke-opacity=".5" stroke-dasharray="4 4"/>` : ''}</g>`; }); });
+        if (del) { const x = 150 + 34 + 15 - 17; s += `<g transform="translate(${150 + 120 - 6} ${y - 18})"><text font-size="12" font-weight="800" fill="#ff8a9a">G deleted here</text></g>`; void x; }
+        const prot = translate(m); prot.forEach((a, ci) => { const x = 150 + ci * 120 + 49; s += `<g transform="translate(${x} ${y + 82})"><circle r="22" fill="${a === 'Stop' ? '#ff2e55' : '#c9b6ff'}" opacity="${a === 'Stop' ? 1 : .9}"/><text y="${a === 'Stop' ? 4 : 5}" font-size="${a === 'Stop' ? 10.5 : 13}" font-weight="800" text-anchor="middle" fill="${a === 'Stop' ? '#fff' : '#0b1230'}">${a === 'Stop' ? 'STOP' : a}</text></g>${ci < prot.length - 1 ? `<line x1="${x + 22}" y1="${y + 82}" x2="${x + 98}" y2="${y + 82}" stroke="#c9b6ff" stroke-width="3"/>` : ''}`; });
+        if (prot[prot.length - 1] !== 'Stop') s += `<text x="${150 + prot.length * 120}" y="${y + 88}" font-size="14" font-weight="800" fill="#ff8a9a">… no stop</text>`;
+        return s; };
+      const sc = scene(R, { name: 'Decode the damage', q: Q.decode, winMsg: 'All four mutations decoded!',
+        draw: () => { const M = MUTS[Math.min(i, MUTS.length - 1)];
+          return `<text x="40" y="104" font-size="13" font-weight="800" fill="#a9b6e0" letter-spacing="1.2">ORIGINAL mRNA</text>${row(ORIG, 116, [])}<text x="40" y="232" font-size="12" fill="#a9b6e0">protein →</text>
+            <line x1="40" y1="300" x2="960" y2="300" stroke="#3d5a9c" stroke-dasharray="6 6"/>
+            <text x="40" y="334" font-size="13" font-weight="800" fill="#ffcf4d" letter-spacing="1.2">MUTATION ${Math.min(i + 1, 4)} OF 4</text>${row(M.m, 346, M.at, M.del)}<text x="40" y="462" font-size="12" fill="#a9b6e0">protein →</text>
+            ${showAns ? `<text x="500" y="560" font-size="16" font-weight="800" fill="#9ff3ff" text-anchor="middle">${M.type} mutation</text>` : ''}` + hud(meter('DECODED', solved / 4, '#c9b6ff'), null); } });
+      const ctl = () => { const M = MUTS[i]; sc.setCtl(`<p class="small" style="margin:0">Compare the codons and the protein beads. What kind of mutation is #${i + 1}?</p><div class="hx-types">${['Silent', 'Missense', 'Nonsense', 'Frameshift'].map(t => `<button data-ty="${t}">${t}</button>`).join('')}</div><div id="hxEx" class="small"></div>`);
+        $$('[data-ty]', sc.box).forEach(b => b.onclick = () => { if (b.dataset.ty === M.type) { b.classList.add('right'); $$('[data-ty]', sc.box).forEach(y => y.disabled = true); solved++; showAns = true; SND.ok(); $('#hxEx').innerHTML = `<b>${M.type}.</b> ${M.e}`;
+            if (solved < 4) { $('#hxEx').insertAdjacentHTML('beforeend', '<div style="margin-top:8px"><button class="btn sm primary" id="hxNx">Next mutation</button></div>'); $('#hxNx').onclick = () => { i++; showAns = false; ctl(); }; }
+            upd(); }
+          else { b.classList.add('wrong'); b.disabled = true; R.mistake('Mutation type', 'Silent: same amino acid. Missense: one different amino acid. Nonsense: an early STOP. Frameshift: a base added or removed, so every later codon changes.'); K.msg('Not that one. Look at what happened to the protein beads.', 'bad', 3000); } });
+        upd(); };
+      const upd = () => sc.goal([[solved >= 1, 'Decode the first mutation'], [solved >= 4, `Decode all four (${solved}/4)`]]);
+      ctl(); },
+
+    /* ── 5 · real-life superpowers (and their costs) ── */
+    powers: R => { const st = R.st; st.powers = st.powers || [];
+      const CARDS = [
+        { id: 'lrp5', gene: 'LRP5', p: 'Unbreakable bones', type: 'Missense', icon: 'bone', ch: 'One DNA letter change swaps a single amino acid (glycine → valine) in LRP5, a receptor that tells bones to grow. The growth signal stays switched on.', real: 'Found in a family with extremely dense bones; one member walked away from a car crash without a single fracture.', cost: 'Extra bone can grow inside the mouth, and the jaw can become very wide.' },
+        { id: 'mstn', gene: 'MSTN', p: 'Super muscles', type: 'Frameshift', icon: 'arm', ch: 'A small deletion in MSTN, the gene for myostatin, shifts the reading frame. Without working myostatin, the signal that says “stop building muscle” is gone.', real: 'Belgian Blue cattle (an 11-letter deletion) and “bully” whippets (a 2-letter deletion) are double-muscled.', cost: 'Belgian Blue calves are often too big to be born naturally, and bully whippets can get muscle cramps.' },
+        { id: 'ccr5', gene: 'CCR5-Δ32', p: 'Virus shield', type: 'Frameshift', icon: 'shield', ch: '32 DNA letters are deleted from CCR5, a doorway protein on white blood cells that most HIV strains use to get in. 32 isn’t a multiple of 3, so the frame shifts and no doorway is made.', real: 'People with two copies are highly resistant to the most common strains of HIV.', cost: 'Two copies are linked to more severe West Nile virus infections.' },
+        { id: 'hbb', gene: 'HBB (sickle)', p: 'Malaria shield', type: 'Missense', icon: 'cell', ch: 'One letter swap (GAG → GTG) in the hemoglobin gene puts valine where glutamic acid belongs.', real: 'People with one copy are much less likely to die from severe malaria.', cost: 'Two copies cause sickle cell disease: red blood cells bend into sickles and block blood vessels.' },
+        { id: 'epas1', gene: 'EPAS1', p: 'High-altitude power', type: 'Regulatory change', icon: 'peak', ch: 'A version of EPAS1, inherited from ancient Denisovans, changes how strongly the body reacts to low oxygen. It changes how much the gene is used, not the protein’s amino acids.', real: 'Common in Tibetans, who live above 4,000 m without the thick, sludgy blood most people make at high altitude.', cost: 'It helps at high altitude; at sea level it gives no clear advantage.' }
+      ];
+      let sel = null;
+      const cardPos = k => ({ x: k < 3 ? 210 + k * 290 : 355 + (k - 3) * 290, y: k < 3 ? 80 : 330 });
+      const ICON = { bone: '<path d="M-26,-6 a8,8 0 1,1 8,-10 l36,0 a8,8 0 1,1 8,10 a8,8 0 1,1 -8,10 l-36,0 a8,8 0 1,1 -8,-10z" fill="#f4ecd8"/>', arm: '<path d="M-26,18 L-26,-2 Q-24,-22 -4,-20 Q14,-30 22,-12 Q28,4 12,8 Q0,10 -6,4 L-8,18Z" fill="#ffb38a"/><path d="M-4,-20 Q4,-8 12,-14" stroke="#c97a52" stroke-width="2" fill="none"/>', shield: '<path d="M0,-28 L24,-18 Q22,14 0,28 Q-22,14 -24,-18Z" fill="#4da3ff"/><path d="M-10,0 l7,8 l14,-16" stroke="#fff" stroke-width="4" fill="none"/>', cell: '<ellipse rx="26" ry="20" fill="#ff5d73"/><ellipse rx="12" ry="8" fill="#c93a52"/><path d="M14,18 q20,-4 18,-26" stroke="#ff9aa8" stroke-width="5" fill="none"/>', peak: '<path d="M-30,20 L-8,-22 L4,-4 L12,-14 L30,20Z" fill="#c9d4ff"/><path d="M-8,-22 L-2,-10 L-14,-10Z" fill="#fff"/>' };
+      const sc = scene(R, { name: 'Real-life superpowers', q: Q.powers, winMsg: 'All five powers unlocked!',
+        draw: () => { let s = '';
+          CARDS.forEach((c, k) => { const p = cardPos(k), on = st.powers.includes(c.id), isSel = sel === k;
+            s += `<g transform="translate(${p.x} ${p.y})"><rect x="-120" y="0" width="240" height="210" rx="18" fill="${on ? '#12355a' : '#0b1230'}" stroke="${isSel ? '#ffcf4d' : on ? '#9ff3ff' : '#3d5a9c'}" stroke-width="${isSel ? 3 : 2}"/>${on ? '<rect x="-120" y="0" width="240" height="210" rx="18" fill="url(#hxGlow)" opacity=".5"/>' : ''}
+              <g transform="translate(0 64) scale(1.3)" opacity="${on ? 1 : .35}">${ICON[c.icon]}</g>
+              <text y="128" font-size="17" font-weight="800" text-anchor="middle" fill="${on ? '#fff' : '#a9b6e0'}" style="font-family:var(--f-display)">${c.p}</text>
+              <text y="152" font-size="13" font-weight="700" text-anchor="middle" fill="#9ff3ff" style="font-family:var(--f-mono)">${c.gene}</text>
+              <text y="186" font-size="12" font-weight="800" text-anchor="middle" fill="${on ? '#34d399' : '#6b7aa6'}" letter-spacing="1.2">${on ? 'UNLOCKED' : 'LOCKED · CLICK TO STUDY'}</text></g>`; });
+          return s + hud(meter('POWERS UNLOCKED', st.powers.length / 5, '#34d399'), null) + `<text x="500" y="604" font-size="12" fill="#a9b6e0" text-anchor="middle">Real gene variants. Each one helps in some way and has a real cost.</text>`; },
+        click: p => { const k = CARDS.findIndex((c, i) => { const q = cardPos(i); return Math.abs(p.x - q.x) < 120 && p.y > q.y && p.y < q.y + 210; }); if (k >= 0) { sel = k; SND.pop(); ctl(); } } });
+      const ctl = () => { const c = CARDS[sel], on = c && st.powers.includes(c.id);
+        if (!c) { sc.setCtl('<p class="small" style="margin:0">Click a card on the stage to study that gene variant.</p>'); upd(); return; }
+        sc.setCtl(`<div class="hx-card"><b class="t">${c.p} · <span style="font-family:var(--f-mono);font-size:14px">${c.gene}</span></b><span>${c.ch}</span>${on ? `<span><b>Real life:</b> ${c.real}</span><span class="cost"><b>The cost:</b> ${c.cost}</span>` : ''}</div>
+          ${on ? '' : `<p class="small" style="margin:0"><b>What kind of change is this?</b></p><div class="hx-types">${['Missense', 'Nonsense', 'Frameshift', 'Regulatory change'].map(t => `<button data-pw="${t}">${t}</button>`).join('')}</div>`}`);
+        $$('[data-pw]', sc.box).forEach(b => b.onclick = () => { if (b.dataset.pw === c.type) { st.powers.push(c.id); SND.win(); const q = cardPos(sel); K.sparkle({ x: q.x, y: q.y + 80 }, 40); K.word('POWER UNLOCKED', q.x, q.y + 40, '#9ff3ff', 26); ctl(); }
+          else { b.classList.add('wrong'); b.disabled = true; R.mistake('Gene variant type: ' + c.gene, 'Missense: one amino acid swapped. Frameshift: letters deleted or added (not in 3s). Regulatory: changes how much of a protein is made.'); K.msg('Not quite. Reread what changed in the DNA.', 'bad', 3000); } });
+        upd(); };
+      const upd = () => sc.goal([[st.powers.length >= 1, 'Unlock your first power'], [st.powers.length >= 5, `Unlock all five (${st.powers.length}/5)`]]);
+      ctl(); },
+
+    /* ── 6 · hero run: copy a gene while the storm hits ── */
+    hero: R => { const st = R.st; let P, St, hero = 0, failed = false;
+      const SEQ = 'TACGGATCCTAGCGTA'.split('');
+      const sc = scene(R, { name: 'Hero run', q: Q.hero, winMsg: 'HERO MODE: a perfect copy!',
+        tick: dt => { P.tick(dt); if (!St.over) St.tick(dt); if (hero) hero += dt; },
+        draw: () => { let s = '';
+          if (hero) s += `<circle cx="500" cy="230" r="${200 + Math.sin(hero * 3) * 10}" fill="url(#hxGlow)" opacity=".6"/>`;
+          s += P.draw({ lesion: i => St.lesionSVG(i), mut: i => St.locked.has(i) }) + St.draw();
+          const pw = (st.powers || []).length;
+          s += hud(meter(hero ? 'GENE POWER · MAX' : 'GENE POWER', P.cur / P.n, hero ? '#34d399' : '#9ff3ff'), counters([[`mutations ${St.locked.size}`, St.locked.size ? '#ff8a9a' : '#a9b6e0'], [`powers ${pw}/5`, '#34d399']], 240));
+          if (hero) s += `<text x="500" y="470" font-size="34" font-weight="800" text-anchor="middle" fill="#9ff3ff" stroke="#05081a" stroke-width="6" paint-order="stroke" style="font-family:var(--f-display)">HERO MODE · PERFECT COPY</text>`;
+          return s; },
+        click: p => { if (!St.click(p) && !failed) P.clickChamber(p); } });
+      const start = () => { failed = false; hero = 0;
+        P = pairer(SEQ.length, { seq: SEQ, onPair: () => { if (P.cur >= P.n) { St.over = true; St.th = []; if (St.locked.size <= 1) { hero = .01; SND.win(); K.sparkle({ x: 500, y: 230 }, 70); } } upd(); }, onWrong: () => R.mistake('Wrong base paired', 'A pairs with T, G pairs with C.') });
+        St = storm(i => ({ x: P.x(i), y: P.Y + 20 }), SEQ.length, { endless: true, rate0: 2.6, rate1: 1.4, dur: 60, lesT: 8, targets: () => [...Array(SEQ.length).keys()],
+          onLock: () => { R.mistake('Damage became a mutation', 'Blast threats and repair damage while you copy.'); if (St.locked.size > 1) { failed = true; St.over = true; St.th = []; K.msg('Two mutations locked in. The gene is damaged: try the run again.', 'bad', 4000); } upd(); } });
+        upd(); };
+      const upd = () => { sc.goal([[P.cur >= 8, 'Copy half the gene'], [P.cur >= P.n && St.locked.size <= 1, `Copy all ${P.n} bases with at most 1 mutation`]]);
+        if (failed && !$('#hxRetry')) { $('#hxGoal', sc.box).insertAdjacentHTML('beforeend', '<button class="btn sm primary" id="hxRetry" style="margin-top:6px">Start the run again</button>'); $('#hxRetry').onclick = () => start(); } };
+      sc.setCtl(keysHTML() + '<p class="small muted" style="margin:0">Fire bases with the chambers or A/T/G/C keys. Click threats to blast them and click damage to repair it.</p>');
+      $$('[data-fire]', sc.box).forEach(x => x.onclick = () => { if (!failed) P.fire(x.dataset.fire); });
+      K.on(window, 'keydown', e => { const k = e.key.toUpperCase(); if (P.keys[k] && !failed && !/INPUT|TEXTAREA/.test(document.activeElement.tagName)) { e.preventDefault(); P.keys[k](); } });
+      start(); }
+  };
+  const C = (id, name, title, html, hint) => ({ id, name, title, html, hint });
+  const steps = [
+    C('pair', 'Pair the bases', 'Pair the bases', 'Helicase has unzipped the DNA. Copy the <b>template strand</b> by firing the matching nucleotide into each slot: <b>A pairs with T</b>, <b>G pairs with C</b>.<br><br>Watch the dashed lines: those are hydrogen bonds.', 'Look at the template base above the glowing slot, then fire its partner.'),
+    C('proof', 'Proofreading patrol', 'Proofreading patrol', 'Now polymerase is copying fast, and about one base in four comes out <b>mismatched</b>. You are its proofreader: <b>click each mismatch</b> before it passes the checkpoint.', 'A mismatch bulges out, tilts, and has a single red bond instead of 2 or 3 white ones.'),
+    C('storm', 'Mutagen storm', 'Mutagen storm', 'UV rays, free radicals and smoke chemicals are attacking the genome. <b>Blast them</b> before they hit. If one gets through, <b>repair the damage</b> before its timer ring runs out, or it becomes a permanent mutation.', 'Repair is worth it: one click on the glowing damage fixes it.'),
+    C('decode', 'Decode the damage', 'Decode the damage', 'What does a mutation actually do? Each round changes the gene. Compare the codons and the protein, then name the mutation type.', 'Silent: same amino acid. Missense: one swap. Nonsense: early STOP. Frameshift: everything after the change is different.'),
+    C('powers', 'Real superpowers', 'Real-life superpowers', 'Some real mutations work like superpowers, but every one has a cost. Click each card, read what changed in the DNA, and name the kind of change to unlock it.', 'Deletions that aren’t a multiple of 3 cause frameshifts.'),
+    C('hero', 'Hero run', 'Hero run', 'Final mission: copy a 16-base gene <b>while the storm attacks</b>. Fire bases, blast threats and repair damage. Finish with at most one mutation to reach <b>Hero Mode</b>.', 'Blast the threats first when they come close, then go back to copying.')
+  ];
+
+  const Lab = makeLab({
+    noSetup: true, fit: true, bg,
+    fresh: () => ({ powers: [] }), steps, S,
+    finale(R) { const st = R.st, P = pairer(16, { seq: 'TACGGATCCTAGCGTA'.split('') }); 'ATGCCTAGGATCGCAT'.split('').forEach((b, i) => { P.fill[i] = b; }); P.cur = 16;
+      scene(R, { noSheet: true, draw: () => `<circle cx="500" cy="230" r="230" fill="url(#hxGlow)" opacity=".5"/>` + P.draw({ noCh: true }) +`<text x="500" y="470" font-size="26" font-weight="800" text-anchor="middle" fill="#9ff3ff" style="font-family:var(--f-display)">Gene copied · ${(st.powers || []).length} of 5 powers unlocked</text>` }); },
+    finaleMsg: 'Mission complete. Now check your thinking.',
+    verdicts: [['Helix hero', 'You copied, proofread and defended DNA, and explained how mutations change proteins.'], ['Almost there', 'Nice work. Look over the questions you missed below.'], ['Practice again', 'Run the missions once more and read each explanation.']], reviewLabel: 'Review these',
+    summary: R => `You unlocked ${(R.st.powers || []).length} of 5 real-life gene powers.`,
+    quiz: [
+      { q: 'A template strand reads 3′-TACG-5′. What does the new strand read?', a: ['5′-ATGC-3′', '5′-TACG-3′', '5′-AUGC-3′', '5′-GCAT-3′'], c: 0, e: 'Each base gets its partner (T→A, A→T, C→G, G→C), and the new strand runs the opposite direction, 5′ to 3′. U only appears in RNA.' },
+      { q: 'Why is DNA replication called semiconservative?', a: ['Each new double helix keeps one old strand and one new strand', 'Half of the bases are copied and half are not', 'Only half of the genes are copied each time', 'The old helix is broken down and rebuilt'], c: 0, e: 'The two strands separate and each serves as a template, so every daughter helix is half old, half new.' },
+      { q: 'A mutation changes the codon UGG (Trp) to UAG. What kind of mutation is it?', a: ['Nonsense: it creates an early stop codon', 'Silent: the protein is unchanged', 'Missense: one amino acid changes', 'Frameshift: the reading frame shifts'], c: 0, e: 'UAG is a stop codon, so translation ends early and the protein is cut short.' },
+      { q: 'Which of these is a mutagen?', a: ['UV light', 'DNA polymerase', 'Helicase', 'Hydrogen bonds'], c: 0, e: 'Mutagens damage DNA: UV light, X-rays, free radicals and some chemicals such as those in tobacco smoke. Polymerase and helicase are enzymes that copy DNA.' },
+      { q: 'Deleting 3 bases from a gene usually causes less damage than deleting 1 base. Why?', a: ['Deleting 3 removes one codon but keeps the reading frame', 'Three bases are too few to matter', 'Cells can’t notice a 3-base deletion', 'Deleting 1 base always creates a stop codon at that spot'], c: 0, e: 'A 3-base deletion removes one amino acid and leaves the rest of the frame intact. A 1-base deletion shifts every codon after it.' },
+      { q: 'Which statement about mutations is most accurate?', a: ['Most are neutral or harmful; a few help in particular environments', 'All mutations are harmful', 'Mutations always give new abilities', 'Mutations only happen when people are exposed to radiation'], c: 0, e: 'Many mutations do nothing, some break proteins, and a few (like the ones in Part 5) help, often with a cost. Copying errors also happen on their own, without any mutagen.' }
+    ],
+    meta: { id: 'helix', short: 'Helix Hero', title: 'Helix Hero: DNA Replication & Mutation', courses: ['hs-bio'], time: '25–35 min',
+      summary: 'Fire matching nucleotides to copy DNA, proofread mismatches, blast UV rays and free radicals, decode mutations, and unlock real gene variants that work like superpowers.',
+      objective: 'Explain complementary base pairing and replication accuracy, describe how mutagens damage DNA and how cells repair it, and connect mutation types to their effects on proteins and traits.',
+      materials: ['A computer or tablet with a keyboard (optional)'],
+      safety: ['No safety gear needed. This is a simulation.'],
+      ngss: [['HS-LS1-1', 'Construct an explanation based on evidence for how the structure of DNA determines the structure of proteins, which carry out the essential functions of life.'], ['HS-LS3-2', 'Make and defend a claim that inheritable genetic variations may result from viable errors during replication and mutations caused by environmental factors.'], ['HS-LS3-1', 'Ask questions to clarify relationships about the role of DNA and chromosomes in coding the instructions for characteristic traits.']],
+      thumb: big => labThumb('helix', big) }
+  });
+  return Lab;
+})();
+
 /* ═══════════ Science Showdown: team quiz board for the projector ═══════════
    Teams take turns picking a tile. A wrong answer lets the next team steal for half the points.
    One hidden tile is a Lab Bonus (double points, no steal). Answer order is shuffled every time.
@@ -5176,7 +5892,7 @@ const Zombies = {
    SITE_KEY. Students join with it (no account), run the labs, and each finished lab is posted to the sign-up Apps Script,
    which saves it in the "educator-space.com · Lab results" tab. Teachers read back only their own students' results.
    LAB_ORDER is the bit order inside codes: only ever ADD new labs at the end, never reorder. */
-const LAB_ORDER = ['dna-strawberry', 'titration', 'flame', 'pendulum', 'ohm', 'mass', 'erosion', 'onion', 'heart', 'vsepr'];
+const LAB_ORDER = ['dna-strawberry', 'titration', 'flame', 'pendulum', 'ohm', 'mass', 'erosion', 'onion', 'heart', 'vsepr', 'projectile', 'helix'];
 /* GAME_ORDER is also append-only. A code with games = the usual 13 signed characters + a short tail holding a bitmask
    (labs in bits 0–11, games from bit 12). The 13-character core is version 2 and carries a 10-bit check of the tail, so the
    tail can't be edited. Only the core is sent with results, so the Apps Script needs no change. */
