@@ -118,6 +118,49 @@ label.fld { display: grid; gap: 6px; font-weight: 600; font-size: 13.5px; }
 .hero .txt p { max-width: 54ch; color: var(--muted); }
 .hero .pic { background: #12304f; min-height: 240px; position: relative; }
 .hero .pic svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+/* ── home: hero with featured labs, feature strip, course cards ── */
+.hh { position: relative; overflow: hidden; border-radius: 22px; padding: clamp(24px, 4vw, 44px); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 28px; align-items: center; border: 1px solid var(--line);
+  background: radial-gradient(520px 320px at 90% 8%, color-mix(in srgb, #8b7cf6 26%, transparent), transparent 70%), radial-gradient(480px 300px at 62% 115%, color-mix(in srgb, var(--accent) 20%, transparent), transparent 70%), linear-gradient(120deg, color-mix(in srgb, var(--accent) 5%, var(--panel)), color-mix(in srgb, #8b7cf6 11%, var(--panel))); }
+.hh-mol { position: absolute; width: 110px; left: 44%; top: 46%; color: var(--accent); opacity: .14; pointer-events: none; }
+.hh-txt { display: grid; gap: 14px; position: relative; z-index: 1; min-width: 0; }
+.hh h1 { font-family: var(--f-display); font-size: clamp(32px, 3.9vw, 54px); line-height: 1.04; letter-spacing: -.02em; margin: 0; }
+.hh h1 span { color: var(--accent); }
+.hh-sub { font-size: clamp(16px, 1.5vw, 20px); line-height: 1.4; max-width: 36ch; margin: 0; }
+.hh-dots { display: flex; flex-wrap: wrap; row-gap: 2px; margin: 0; color: var(--muted); font-size: 14.5px; }
+.hh-dots span + span::before { content: "•"; margin: 0 10px; }
+.hh .row { margin-top: 6px; }
+.hh .btn { padding: 11px 18px; font-size: 15px; gap: 8px; }
+.hh .btn svg { width: 18px; height: 18px; }
+.hh-art { position: relative; height: 230px; min-width: 0; }
+.hh-card { position: absolute; width: 34.5%; padding: 7px 7px 4px; border-radius: 16px; background: var(--panel); border: 1px solid var(--line); box-shadow: 0 12px 30px rgba(16, 45, 75, .18); cursor: pointer; transition: transform .25s ease, box-shadow .25s ease; font: inherit; color: var(--ink); text-align: left; }
+.hh-thumb { display: block; border-radius: 11px; overflow: hidden; aspect-ratio: 400 / 240; }
+.hh-thumb svg { display: block; width: 100%; height: 100%; }
+.hh-chip { position: absolute; top: 13px; right: 13px; background: var(--panel); color: var(--ink); font: 700 11px var(--f-mono); padding: 3px 8px; border-radius: 999px; box-shadow: 0 2px 8px rgba(0, 0, 0, .2); }
+.hh-cap { display: block; font-weight: 700; font-size: 13px; padding: 6px 4px 2px; }
+.hh-c0 { left: 0; top: 40px; transform: rotate(-4deg); z-index: 1; }
+.hh-c1 { left: 33%; top: 22px; transform: rotate(-1deg); z-index: 2; }
+.hh-c2 { left: 65.5%; top: 34px; transform: rotate(4deg); z-index: 3; }
+.hh-card:hover, .hh-card:focus-visible { transform: rotate(0) translateY(-6px) scale(1.03); z-index: 5; box-shadow: 0 18px 40px rgba(16, 45, 75, .28); }
+.hh-feat { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); background: var(--panel); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow); }
+.hh-feat > div { display: flex; gap: 12px; align-items: center; padding: 16px 18px; min-width: 0; }
+.hh-feat > div + div { border-left: 1px solid var(--line); }
+.hh-feat b { display: block; color: var(--accent); font-size: 15px; }
+.hh-fi { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); flex: none; }
+.hh-fi svg { width: 22px; height: 22px; }
+.hh-courses { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+.hh-course { --t: #23a26b; display: flex; align-items: center; gap: 14px; padding: 18px; border-radius: 16px; text-decoration: none; color: var(--ink); background: color-mix(in srgb, var(--t) 11%, var(--panel)); border: 1px solid color-mix(in srgb, var(--t) 30%, var(--line)); transition: transform .15s, box-shadow .15s; }
+.hh-course:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+.hh-ci { color: var(--t); flex: none; display: grid; }
+.hh-ci svg { width: 38px; height: 38px; }
+.hh-ct { display: grid; gap: 2px; flex: 1; min-width: 0; }
+.hh-ct b { font-family: var(--f-display); font-size: 17px; }
+.hh-ct .small { color: var(--muted); }
+.hh-go { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--panel); color: var(--ink); flex: none; box-shadow: 0 1px 4px rgba(0, 0, 0, .1); }
+.hh-go svg { width: 16px; height: 16px; }
+.t-bio { --t: #23a26b; } .t-chem { --t: #1686e8; } .t-phys { --t: #7c5ce6; } .t-life { --t: #4f9b2f; } .t-earth { --t: #d08a1c; } .t-mphys { --t: #d64f8a; }
+@media (max-width: 1080px) { .hh { grid-template-columns: minmax(0, 1fr); } .hh-mol { display: none; } .hh-feat { grid-template-columns: repeat(2, minmax(0, 1fr)); } .hh-feat > div:nth-child(3) { border-left: 0; } .hh-feat > div:nth-child(n+3) { border-top: 1px solid var(--line); } }
+@media (max-width: 560px) { .hh-art { height: 140px; } .hh-c0 { top: 20px; } .hh-c1 { top: 8px; } .hh-c2 { top: 16px; } .hh-chip { display: none; } .hh-cap { font-size: 11px; } .hh-feat { grid-template-columns: minmax(0, 1fr); } .hh-feat > div + div { border-left: 0; border-top: 1px solid var(--line); } }
+@media (prefers-reduced-motion: reduce) { .hh-card, .hh-course { transition: none; } }
 .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
 @media (max-width: 760px) { .hero { grid-template-columns: 1fr; } .hero .pic { min-height: 180px; } }
 
@@ -140,6 +183,14 @@ button.card { text-align: left; cursor: pointer; font: inherit; }
 table.rec { width: 100%; border-collapse: collapse; font-size: 14px; }
 table.rec th { text-align: left; font-size: 11.5px; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); padding: 8px 10px; border-bottom: 1px solid var(--line); }
 table.rec td { padding: 10px; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+.rs-mk { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+.rs-dt { font: inherit; font-size: 12px; font-weight: 600; color: var(--muted); background: none; border: 1px solid var(--line); border-radius: 999px; padding: 2px 9px; cursor: pointer; }
+.rs-dt:hover, .rs-dt[aria-expanded="true"] { color: var(--ink); border-color: var(--ink); }
+.rs-dt::after { content: ' ▸'; } .rs-dt[aria-expanded="true"]::after { content: ' ▾'; }
+table.rec tr.rs-has td { border-bottom-color: transparent; }
+table.rec tr.rs-det td { padding: 0 10px 12px 10px; }
+.rs-det ul { margin: 0; padding: 10px 14px 10px 30px; background: var(--paper-2, rgba(127,127,127,.07)); border-radius: 10px; display: grid; gap: 3px; font-size: 13px; columns: 2 260px; }
+.rs-det li { break-inside: avoid; } .rs-det li.h { list-style: none; margin-left: -16px; font-weight: 600; column-span: all; }
 .tbl-wrap { overflow-x: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; }
 
 /* ── modal ── */
@@ -836,7 +887,7 @@ const root = () => $('#app');
 /* clean addresses on the real website (educator-space.com/games-ms, /j/CODE); no # anywhere. In previews the address stays put. */
 const CLEAN_URLS = /^https?:$/.test(location.protocol) && !/claude|localhost|^$/.test(location.hostname);
 const HP = CLEAN_URLS ? '/' : '#';
-const VIEWS = () => ['home', 'records', 'assign', 'results', 'blaster'].concat(COURSES.map(c => c.id), GameHub.ids());
+const VIEWS = () => ['home', 'assign', 'results', 'blaster'].concat(COURSES.map(c => c.id), GameHub.ids());
 function setPath(view, replace) { if (!CLEAN_URLS) return; const p = !view || view === 'home' ? '/' : '/' + view; if (location.pathname === p && !location.hash && !location.search) return; try { history[replace ? 'replaceState' : 'pushState'](null, '', p); } catch (e) {} }
 function go(view) { APP.view = view; setPath(view); render(); window.scrollTo(0, 0); }
 window.addEventListener('popstate', () => { const v = location.pathname.replace(/^\/+|\/+$/g, '') || 'home'; if (VIEWS().includes(v)) { APP.view = v; render(); window.scrollTo(0, 0); } });
@@ -982,7 +1033,7 @@ function renderShell() {
   const nvg = (id, label, ic, b) => `<a class="nv ${GameHub.bandOf(v) === b ? 'on' : ''}" href="${HP}${id}" data-go="${id}">${ico(ic)}<span>${label}</span><span class="ct">${GAMES.filter(g => g.band === b).length}</span></a>`;
   root().innerHTML = `<div class="shell"><aside class="rail">
     <div class="brand">${logo()}${brandWord()}</div>
-    <nav aria-label="Main">${nv('home', 'Home', 'home')}${nv('records', 'Lab records', 'list')}
+    <nav aria-label="Main">${nv('home', 'Home', 'home')}
       <div class="grp">Your classes</div>${nv('assign', 'Assign labs', 'link')}${nv('results', 'Student results', 'users')}
       <div class="grp">Games</div>${nvg('games-hs', 'High school games', 'trophy', 'hs')}${nvg('games-ms', 'Middle school games', 'rocket', 'ms')}
       <div class="grp">High School Science</div>${band('High School Science')}
@@ -994,7 +1045,7 @@ function renderShell() {
   $('#outB').onclick = () => { LS.del('session'); APP.user = null; APP.view = 'home'; render(); };
   $('#sndT').onclick = () => { SND.on = !SND.on; LS.set('sound', SND.on); renderShell(); };
   const m = $('#main');
-  if (v === 'home') pageHome(m); else if (GameHub.route(v, m)) {} else if (v === 'assign') pageAssign(m); else if (v === 'results') pageResults(m); else if (v === 'records') pageRecords(m);
+  if (v === 'home') pageHome(m); else if (GameHub.route(v, m)) {} else if (v === 'assign') pageAssign(m); else if (v === 'results') pageResults(m);
   else { const c = COURSES.find(c => c.id === v); if (c) pageCourse(m, c); else pageHome(m); }
 }
 
@@ -1008,20 +1059,23 @@ function labCard(l, c) {
 function bindLabButtons(m) { $$('[data-lab]', m).forEach(b => b.onclick = () => openBrief(LABS.find(l => l.id === b.dataset.lab), b.dataset.course)); }
 
 function pageHome(m) {
-  const recs = LS.get('records', []).slice(-5).reverse(), dna = LABS[0];
-  m.innerHTML = `<section class="hero"><div class="txt"><span class="eyebrow">Virtual lab · mouse required</span>
-      <h1>Every student does the lab once here, then for real.</h1>
-      <p>Students put on goggles, a lab coat and gloves, pick the right materials from the cabinet, and run each step at the bench. Mistakes cause something messy, followed by the science of what went wrong.</p>
-      <div class="row">${dna ? `<button class="btn primary" data-lab="${dna.id}" data-course="hs-bio">${ico('play')}Start ${esc(dna.short)}</button>` : ''}<button class="btn" data-go2="games-hs">${ico('trophy')}Browse games</button></div></div>
-    <div class="pic">${dna && dna.thumb ? dna.thumb(true) : ''}</div></section>
-    <section class="sec"><div class="sec-h"><h2>Courses</h2><span class="muted small">New labs appear here as they're added.</span></div>
-      <div class="grid">${COURSES.map(c => { const n = labsFor(c.id).length, gn = GAMES.filter(g => g.course === c.id).length; return `<a class="card" href="${HP}${c.id}" data-go2="${c.id}"><div class="ic">${ico(c.ic)}</div><span class="eyebrow">${c.band}</span><h3>${c.name}</h3><div class="meta"><span class="chip ${n ? 'acc' : ''}">${n ? n + (n === 1 ? ' lab' : ' labs') : 'Labs coming soon'}</span>${gn ? `<span class="chip">${gn} interactive</span>` : ''}</div></a>`; }).join('')}</div></section>
+  const feat = [['titration', 'hs-chem', 'pH 7.00'], ['helix', 'hs-bio', 'Gene power 100%'], ['projectile', 'hs-phys', 'Range 40.8 m']].filter(([id]) => LABS.some(l => l.id === id));
+  const TINT = { 'hs-bio': 'bio', 'hs-chem': 'chem', 'hs-phys': 'phys', 'ms-life': 'life', 'ms-earth': 'earth', 'ms-phys': 'mphys' };
+  m.innerHTML = `<section class="hh"><svg class="hh-mol" viewBox="0 0 120 120" aria-hidden="true"><g stroke="currentColor" stroke-width="5"><line x1="58" y1="62" x2="98" y2="20"/><line x1="58" y1="62" x2="20" y2="98"/><line x1="58" y1="62" x2="102" y2="98"/></g><circle cx="58" cy="62" r="14" fill="currentColor"/><circle cx="98" cy="20" r="10" fill="currentColor"/><circle cx="20" cy="98" r="10" fill="currentColor"/><circle cx="102" cy="98" r="10" fill="currentColor"/></svg>
+      <div class="hh-txt"><h1>Explore. Experiment. <span>Learn.</span></h1>
+      <p class="hh-sub">A free space for students and teachers to run virtual science labs and play science games.</p>
+      <p class="hh-dots"><span>Interactive simulations</span><span>Fun games</span><span>Real lab practice</span></p>
+      <div class="row"><button class="btn primary" id="hhLabs">${ico('flask')}Start virtual labs${ico('arrow')}</button><button class="btn" data-go2="games-hs">${ico('pad')}Play science games${ico('arrow')}</button></div></div>
+      <div class="hh-art">${feat.map(([id, c, chip], i) => { const l = LABS.find(x => x.id === id); return `<button class="hh-card hh-c${i}" data-lab="${id}" data-course="${c}" aria-label="Open ${esc(l.title)}"><span class="hh-thumb">${labThumb(id)}</span><span class="hh-chip">${chip}</span><span class="hh-cap">${esc(l.short)}</span></button>`; }).join('')}</div></section>
+    <section class="hh-feat">${[['bolt', 'Interactive simulations', `${LABS.length} virtual labs, step by step`], ['pad', 'Engaging games', `${GAMES.length} games for review`], ['chart', 'Track progress', 'Class codes and student results'], ['users', 'For every class', 'High school and middle school']].map(([ic, t, d]) => `<div><span class="hh-fi">${ico(ic)}</span><span><b>${t}</b><span class="small muted">${d}</span></span></div>`).join('')}</section>
+    <section class="sec" id="homeExplore"><div class="sec-h"><h2>Explore our labs &amp; games</h2><a href="${HP}games-hs" data-go2="games-hs" class="small">All games →</a></div>
+      <div class="hh-courses">${COURSES.map(c => { const n = labsFor(c.id).length, gn = GAMES.filter(g => g.course === c.id).length; return `<a class="hh-course t-${TINT[c.id] || 'bio'}" href="${HP}${c.id}" data-go2="${c.id}"><span class="hh-ci">${ico(c.ic)}</span><span class="hh-ct"><b>${c.name}</b><span class="small">${c.band.replace(' Science', '')} · ${n ? n + (n === 1 ? ' lab' : ' labs') : 'labs coming soon'}${gn ? ` · ${gn} interactive` : ''}</span></span><span class="hh-go">${ico('arrow')}</span></a>`; }).join('')}</div></section>
     <section class="sec"><div class="sec-h"><h2>Games</h2><span class="muted small">Separate games for high school and middle school.</span></div>
       <div class="gm-cols">${['hs', 'ms'].map(b => `<div class="gm-col"><div class="sec-h"><h3>${GBAND[b].name}</h3><a href="${HP}games-${b}" data-go2="games-${b}" class="small">See all</a></div>${GAMES.filter(g => g.band === b).map(g => `<a class="card gm-mini" href="${HP}${g.id}" data-go2="${g.id}"><span class="thumb">${gameThumb(g.id)}</span><span><b>${esc(g.title)}</b><span class="small muted">${esc(g.tag)}</span></span></a>`).join('')}</div>`).join('')}</div></section>
-    <section class="sec"><div class="sec-h"><h2>Recent lab runs</h2><a href="${HP}records" data-go2="records" class="small">See all records</a></div>
-      ${recs.length ? `<div class="tbl-wrap">${recTable(recs)}</div>` : `<div class="empty"><b>No lab runs yet on this computer.</b><span class="small">When a student finishes a lab, their name, mistakes, quiz score and time show up here.</span></div>`}</section>`;
+`;
   $$('[data-go2]', m).forEach(a => a.addEventListener('click', e => { e.preventDefault(); go(a.dataset.go2); }));
   bindLabButtons(m);
+  const hl = $('#hhLabs', m); if (hl) hl.onclick = () => $('#homeExplore', m).scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
 }
 function pageCourse(m, c) {
   const labs = labsFor(c.id);
@@ -1053,7 +1107,7 @@ function openBrief(l, cid) {
     <div class="mb"><div class="brief"><div><span class="eyebrow">Materials</span><ul>${l.materials.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>
       <div><span class="eyebrow">Safety</span><ul>${l.safety.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div></div>
       <div class="std"><span class="eyebrow">NGSS connections</span>${ngss.map(n => `<div class="s"><span class="chip ngss">${n[0]}</span><span>${esc(n[1])}</span></div>`).join('')}</div>
-      <label class="fld" for="stName">Student name (shows in Lab records)<input type="text" id="stName" placeholder="First name and last initial" value="${esc(LS.get('lastStudent', ''))}"></label>
+      <label class="fld" for="stName">Student name<input type="text" id="stName" placeholder="First name and last initial" value="${esc(LS.get('lastStudent', ''))}"></label>
       <p class="small muted">Use a mouse. Hold the left button to pour or squeeze, and move the mouse to stir, mash or shake. About ${esc(l.time)}.</p></div>
     <div class="mf"><button class="btn" id="bX">Cancel</button><button class="btn primary" id="bGo">${ico('play')}Start lab</button></div></div>`;
   document.body.appendChild(sc); ($('#stName', sc) || $('#bGo', sc)).focus();
@@ -1104,6 +1158,11 @@ class Obj {
 
 IC.full = '<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>';
 IC.unfull = '<path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/>';
+IC.trash = '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>';
+IC.bolt = '<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>';
+IC.pad = '<rect x="2" y="7" width="20" height="11" rx="5"/><path d="M7 10.5v4M5 12.5h4"/><circle cx="15.5" cy="11.5" r=".9"/><circle cx="18" cy="13.8" r=".9"/>';
+IC.chart = '<path d="M5 20V11M11 20V5M17 20v-6M3 20h18"/>';
+IC.arrow = '<path d="M5 12h14M13 6l6 6-6 6"/>';
 const Kit = {
   live: false,
   mount(cfg) {
@@ -5967,12 +6026,12 @@ function pageAssign(m) {
         <label class="check" for="oHints"><input type="checkbox" id="oHints" ${ao.hints ? 'checked' : ''}> Students can use <b>Show hint</b></label>
         <label class="check" for="oRep"><input type="checkbox" id="oRep" ${ao.rep ? 'checked' : ''}> Students can run a lab again after finishing (each run is sent to you)</label></div>
       <div style="display:grid;gap:8px"><span class="eyebrow">4 · Code closes</span><div class="row" style="gap:10px"><select id="oClose" style="max-width:300px" aria-label="When the code closes">${CLOSE_OPTS.map(o => `<option value="${o[0]}" ${ao.close === o[0] ? 'selected' : ''}>${o[1]}</option>`).join('')}</select><input type="date" id="oDate" style="max-width:200px" aria-label="Closing date" min="${ymd(new Date())}" value="${esc(ao.date)}" ${ao.close === 'date' ? '' : 'hidden'}></div>
-        <span class="small muted" style="max-width:70ch">After the closing date, students can’t open these labs or games or send results anymore. You can also close or reopen a code any time below, or in your Google Sheet (tab <b>educator-space.com · Class codes</b>).</span></div>
+        <span class="small muted" style="max-width:70ch">After the closing date, students can’t open these labs or games or send results anymore. You can also close or reopen a code any time below.</span></div>
       <label class="fld" for="oLabel" style="max-width:360px"><span class="eyebrow" style="font-size:11px">5 · Name it (only you see this)</span><input type="text" id="oLabel" maxlength="40" placeholder="e.g. Period 3 Biology" value="${esc(ao.label)}"></label>
       <div class="row"><button class="btn primary" id="mkCode">${ico('link')}Make class code</button><span class="err small" id="mkErr"></span></div>
       <div id="mkOut"></div>
     </section>
-    <section class="sec"><div class="sec-h"><h2>Your class codes</h2><span class="small muted" id="cdSync">Checking your Google Sheet…</span></div><div id="codesBox"></div></section>`;
+    <section class="sec"><div class="sec-h"><h2>Your class codes</h2><span class="small muted" id="cdSync">Checking…</span></div><div id="codesBox"></div></section>`;
   void codes; drawCodes(m); syncCodes(m);
   $('#oClose', m).onchange = e => { const d = $('#oDate', m); d.hidden = e.target.value !== 'date'; if (!d.hidden && !d.value) { const t = new Date(); t.setDate(t.getDate() + 14); d.value = ymd(t); } };
   $$('[data-lab]', m).forEach(cb => cb.onchange = () => { cb.checked ? sel.add(cb.dataset.lab) : sel.delete(cb.dataset.lab); cb.closest('.pick').classList.toggle('on', cb.checked); APP.assignSel = [...sel]; });
@@ -5992,8 +6051,8 @@ function pageAssign(m) {
     const link = joinLink(code), how = `Open ${link} on your laptop (or go to ${SITE_URL.replace('https://', '')}, choose "I'm a student" and enter code ${code}). Type your name, then do: ${labs.map(labTitle).concat(games.map(gameTitle)).join(', ')}.`;
     $('#mkOut', m).innerHTML = `<div class="code-out"><span class="eyebrow">${esc(label || 'New class code')}</span><div class="big-code mono">${code}</div>
       <div class="row"><button class="btn primary" id="cpLink">${ico('copy')}Copy student link</button><button class="btn" id="cpCode">${ico('copy')}Copy code</button><button class="btn" id="cpHow">${ico('copy')}Copy instructions</button></div>
-      <p class="small muted" style="word-break:break-all">${esc(link)}</p><p class="small" id="mkReg"><b>Closes:</b> ${closes ? fmtDay(closes) + ' (works through the end of that day)' : 'never, until you close it'} · <span class="muted">saving to your Google Sheet…</span></p></div>`;
-    reg.then(d => { const e = $('#mkReg', m); if (e) e.innerHTML = `<b>Closes:</b> ${closes ? fmtDay(closes) + ' (works through the end of that day)' : 'never, until you close it'} · ${d && d.ok ? '✓ Saved to your Google Sheet' : '<span class="muted">Couldn’t reach your Google Sheet from here. On the live site, codes are saved there automatically.</span>'}`; if (d && d.ok) { APP.codeStat = APP.codeStat || {}; APP.codeStat[normCode(code).slice(0, 13)] = { open: true, closes }; drawCodes(m); } });
+      <p class="small muted" style="word-break:break-all">${esc(link)}</p><p class="small" id="mkReg"><b>Closes:</b> ${closes ? fmtDay(closes) + ' (works through the end of that day)' : 'never, until you close it'} · <span class="muted">saving…</span></p></div>`;
+    reg.then(d => { const e = $('#mkReg', m); if (e) e.innerHTML = `<b>Closes:</b> ${closes ? fmtDay(closes) + ' (works through the end of that day)' : 'never, until you close it'} · ${d && d.ok ? '✓ Saved' : '<span class="muted">Not saved online from this preview. On the live site, codes save automatically.</span>'}`; if (d && d.ok) { APP.codeStat = APP.codeStat || {}; APP.codeStat[normCode(code).slice(0, 13)] = { open: true, closes }; drawCodes(m); } });
     $('#cpLink', m).onclick = e => copyBtn(e.currentTarget, link); $('#cpCode', m).onclick = e => copyBtn(e.currentTarget, code); $('#cpHow', m).onclick = e => copyBtn(e.currentTarget, how);
     SND.ok(); setTimeout(() => { const keep = $('#mkOut', m).innerHTML; pageAssign(m); $('#mkOut', m).innerHTML = keep; drawCodes(m); $('#cpLink', m).onclick = e => copyBtn(e.currentTarget, link); $('#cpCode', m).onclick = e => copyBtn(e.currentTarget, code); $('#cpHow', m).onclick = e => copyBtn(e.currentTarget, how); $('#mkOut', m).scrollIntoView({ block: 'nearest' }); }, 10);
   };
@@ -6014,22 +6073,25 @@ function drawCodes(m) {
     const l = myCodes(), c = l[+b.dataset.st], open = codeIsOpen(c), sync = $('#cdSync', m); b.disabled = true; b.textContent = open ? 'Closing…' : 'Reopening…';
     const d = await sheetCall('', { type: 'codestatus', email: APP.user.email, ck: APP.user.ck, code: c.code, status: open ? 'Closed' : 'Open', label: c.label, items: itemsOf(c).join(', ') });
     if (d && d.ok) { APP.codeStat = APP.codeStat || {}; APP.codeStat[normCode(c.code).slice(0, 13)] = { open: d.open, closes: d.closes }; c.closes = d.closes; c.closedHere = !d.open; saveMyCodes(l); SND.ok(); if (sync) sync.textContent = open ? 'Closed. Students with this code are locked out within a minute.' : 'Reopened.'; }
-    else if (sync) sync.textContent = d && d.msg ? d.msg : 'Couldn’t reach your Google Sheet from here. On the live site this works, or change Status in the Sheet.';
+    else if (sync) sync.textContent = d && d.msg ? d.msg : 'Couldn’t update this code from here. Try again on the live site.';
     drawCodes(m); });
 }
 async function syncCodes(m) {
   const d = await sheetCall(`a=mycodes&e=${encodeURIComponent(APP.user.email)}&ck=${APP.user.ck}`), sync = $('#cdSync', m); if (!m.isConnected) return;
-  if (!d || !d.ok) { if (sync) sync.textContent = 'Saved on this computer. (Your Google Sheet can’t be reached from here.)'; return; }
+  if (!d || !d.ok) { if (sync) sync.textContent = 'Saved on this computer. (Online sync isn’t available here.)'; return; }
   APP.codeStat = {}; const l = myCodes();
   for (const s of d.codes) { const core = normCode(s.code).slice(0, 13); APP.codeStat[core] = { open: s.open, closes: s.closes };
     if (!l.some(c => normCode(c.code).slice(0, 13) === core)) { const k = await readLabCode(s.code); if (k) l.unshift({ code: k.code, label: s.label, labs: k.labs, games: k.games, opts: k.opts, set: k.set, closes: s.closes, at: s.made || new Date().toISOString() }); } }
-  saveMyCodes(l); if (sync) sync.textContent = 'Synced with your Google Sheet.'; drawCodes(m);
+  saveMyCodes(l); if (sync) sync.textContent = 'Up to date.'; drawCodes(m);
 }
 
 /* ═════ teacher: student results (read from the Apps Script) ═════ */
+/* a result's notes as list items: 'A; B; C' -> A, B, C and 'Missed: a, b, c' -> Missed: a, b, c */
+function rsNotes(t) { t = String(t || '').trim(); if (!t) return []; if (/;\s/.test(t)) return t.split(/;\s*/).filter(Boolean);
+  const m = t.match(/^([^:]{1,40}):\s(.+,.+)$/); return m ? [m[1] + ':', ...m[2].split(/,\s*/)] : [t]; }
 async function pageResults(m) {
   const codes = myCodes(), labelOf = c => { const x = codes.find(k => normCode(k.code).slice(0, 13) === normCode(c)); return x ? (x.label || 'Untitled') : 'Code ' + c; };
-  m.innerHTML = `<header style="display:grid;gap:6px"><span class="eyebrow">Your classes</span><h1>Student results</h1><p class="muted" style="max-width:64ch">Every lab your students finish with one of your codes. Results are also kept in your Google Sheet (tab <b>educator-space.com · Lab results</b>).</p></header>
+  m.innerHTML = `<header style="display:grid;gap:6px"><span class="eyebrow">Your classes</span><h1>Student results</h1><p class="muted" style="max-width:64ch">Every lab and game your students finish with one of your class codes. To clear scores, delete one result with its trash button, or delete everything the filters show.</p></header>
     <div class="row" id="rsBar"><button class="btn sm" id="rsRef">Refresh</button><span class="small muted" id="rsMsg">Loading…</span></div><div id="rsBody"></div>`;
   $('#rsRef', m).onclick = () => pageResults(m);
   let d = null;
@@ -6039,22 +6101,35 @@ async function pageResults(m) {
     const r = await fetch(`${SIGNUP_ENDPOINT}?a=labresults&e=${encodeURIComponent(APP.user.email)}&ck=${APP.user.ck}`, { signal: ac.signal }); clearTimeout(tm); d = await r.json();
   } catch (e) { d = null; }
   if (!m.isConnected) return;
-  if (!d) { $('#rsMsg', m).textContent = ''; $('#rsBody', m).innerHTML = `<div class="empty"><b>Can’t reach the results service from here.</b><span class="small">Results load on your live website (${SITE_URL.replace('https://', '')}). This preview can’t connect to Google. Every result is also saved in your Google Sheet.</span></div>`; return; }
+  if (!d) { $('#rsMsg', m).textContent = ''; $('#rsBody', m).innerHTML = `<div class="empty"><b>Can’t reach the results service from here.</b><span class="small">Results load on your live website (${SITE_URL.replace('https://', '')}). This preview can’t load them.</span></div>`; return; }
   if (!d.ok) { $('#rsMsg', m).textContent = d.msg || 'Couldn’t load results.'; return; }
-  const rows = d.rows.slice().reverse(); $('#rsMsg', m).textContent = `${rows.length} result${rows.length === 1 ? '' : 's'}`;
+  let rows = d.rows.slice().reverse(); $('#rsMsg', m).textContent = `${rows.length} result${rows.length === 1 ? '' : 's'}`;
   if (!rows.length) { $('#rsBody', m).innerHTML = '<div class="empty"><b>No results yet.</b><span class="small">When a student finishes a lab with one of your codes, it shows up here.</span></div>'; return; }
   const codeOpts = [...new Set(rows.map(r => r.code))], labOpts = [...new Set(rows.map(r => r.lab))];
   const fc = normCode(APP.resFilter || '').slice(0, 13), f = { code: fc && codeOpts.some(c => normCode(c) === fc) ? codeOpts.find(c => normCode(c) === fc) : '', lab: '' }; APP.resFilter = '';
   const draw = () => {
+    if (!rows.length) { $('#rsBody', m).innerHTML = '<div class="empty"><b>No results.</b><span class="small">When a student finishes a lab with one of your codes, it shows up here.</span></div>'; return; }
     const vis = rows.filter(r => (!f.code || r.code === f.code) && (!f.lab || r.lab === f.lab));
     const byLab = {}; vis.forEach(r => { (byLab[r.lab] = byLab[r.lab] || []).push(r); });
     $('#rsBody', m).innerHTML = `<div class="row" style="gap:12px;margin-bottom:12px"><label class="fld" for="fC" style="min-width:220px">Class code<select id="fC"><option value="">All codes</option>${codeOpts.map(c => `<option value="${esc(c)}" ${f.code === c ? 'selected' : ''}>${esc(labelOf(c))} · ${esc(c)}</option>`).join('')}</select></label>
       <label class="fld" for="fL" style="min-width:200px">Lab<select id="fL"><option value="">All labs</option>${labOpts.map(c => `<option ${f.lab === c ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select></label>
-      <button class="btn sm" id="cpT" style="align-self:end">${ico('copy')}Copy table for Sheets</button></div>
+      <button class="btn sm" id="cpT" style="align-self:end">${ico('copy')}Copy table</button>${vis.some(x => x.review) ? `<button class="btn sm ghost" id="rsAll" style="align-self:end">${f.all ? 'Hide all details' : 'Show all details'}</button>` : ''}${vis.length ? `<button class="btn sm" id="rsDel" style="align-self:end" ${vis.some(x => x.id) ? '' : 'disabled title="Deleting isn’t available yet"'}>${ico('trash')}Delete shown results (${vis.length})</button>` : ''}</div>
       <div class="grid" style="margin-bottom:14px">${Object.entries(byLab).map(([lab, rs]) => { const ready = rs.filter(r => r.result === 'Lab ready').length; return `<div class="card"><span class="eyebrow">${esc(lab)}</span><b style="font-family:var(--f-display);font-size:26px">${ready}/${rs.length}</b><span class="small muted">${/\(game\)$/.test(lab) ? 'students scored well' : 'students lab ready'} · average ${(rs.reduce((a, r) => a + (+r.mistakes || 0), 0) / rs.length).toFixed(1)} mistakes</span></div>`; }).join('')}</div>
-      <div class="tbl-wrap"><table class="rec"><thead><tr><th>Student</th><th>Class</th><th>Lab</th><th>Date</th><th>Mistakes</th><th>Quiz / score</th><th>Time</th><th>Result</th></tr></thead><tbody>
-      ${vis.map(r => `<tr title="${esc(r.review || '')}"><td><b>${esc(r.name)}</b>${r.email ? `<div class="small muted">${esc(r.email)}</div>` : ''}</td><td>${esc(r.period || '')}<div class="small muted">${esc(labelOf(r.code))}</div></td><td>${esc(r.lab)}</td><td>${new Date(r.at).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</td><td>${r.mistakes}${r.review ? `<div class="small muted" style="max-width:260px">${esc(r.review)}</div>` : ''}</td><td>${esc(r.quiz)}</td><td class="mono">${esc(r.time)}</td><td>${(g => r.result === 'Lab ready' ? `<span class="chip ok">${g ? 'Great score' : 'Lab ready'}</span>` : r.result === 'Almost ready' ? `<span class="chip acc">${g ? 'Good score' : 'Almost ready'}</span>` : `<span class="chip warn">${g ? 'Keep practicing' : 'Practice again'}</span>`)(/\(game\)$/.test(r.lab))}</td></tr>`).join('')}</tbody></table></div>`;
+      <div class="tbl-wrap"><table class="rec"><thead><tr><th>Student</th><th>Class</th><th>Lab</th><th>Date</th><th>Mistakes</th><th>Quiz / score</th><th>Time</th><th>Result</th><th><span class="small muted">Delete</span></th></tr></thead><tbody>
+      ${vis.map((r, i) => `<tr class="${r.review && f.all ? 'rs-has' : ''}" data-ri="${i}"><td><b>${esc(r.name)}</b>${r.email ? `<div class="small muted">${esc(r.email)}</div>` : ''}</td><td>${esc(r.period || '')}<div class="small muted">${esc(labelOf(r.code))}</div></td><td>${esc(r.lab)}</td><td>${new Date(r.at).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</td><td><div class="rs-mk"><b>${r.mistakes}</b>${r.review ? `<button class="rs-dt" data-dt="${i}" aria-expanded="${f.all ? 'true' : 'false'}" title="${esc(r.review)}">Details</button>` : ''}</div></td><td>${esc(r.quiz)}</td><td class="mono">${esc(r.time)}</td><td>${(g => r.result === 'Lab ready' ? `<span class="chip ok">${g ? 'Great score' : 'Lab ready'}</span>` : r.result === 'Almost ready' ? `<span class="chip acc">${g ? 'Good score' : 'Almost ready'}</span>` : `<span class="chip warn">${g ? 'Keep practicing' : 'Practice again'}</span>`)(/\(game\)$/.test(r.lab))}</td><td>${r.id ? `<button class="btn sm ghost rs-x" data-del="${esc(r.id)}" aria-label="Delete ${esc(r.name)}’s ${esc(r.lab)} result" title="Delete this result">${ico('trash')}</button>` : ''}</td></tr>${r.review ? `<tr class="rs-det" data-dr="${i}" ${f.all ? '' : 'hidden'}><td colspan="9"><ul>${rsNotes(r.review).map(x => `<li${/:$/.test(x) ? ' class="h"' : ''}>${esc(x)}</li>`).join('')}</ul></td></tr>` : ''}`).join('')}</tbody></table></div>`;
+    $$('[data-dt]', m).forEach(b => b.onclick = () => { const i = b.dataset.dt, open = b.getAttribute('aria-expanded') !== 'true'; b.setAttribute('aria-expanded', open); $(`[data-dr="${i}"]`, m).hidden = !open; $(`[data-ri="${i}"]`, m).classList.toggle('rs-has', open); });
+    if ($('#rsAll', m)) $('#rsAll', m).onclick = () => { f.all = !f.all; draw(); };
     $('#fC', m).onchange = e => { f.code = e.target.value; draw(); }; $('#fL', m).onchange = e => { f.lab = e.target.value; draw(); };
+    /* delete results: the first click arms the button, the second deletes (from the Sheet too, so every computer sees it) */
+    const del = async (ids, btn, armed, label) => { if (!ids.length) return;
+      if (!btn.dataset.sure) { btn.dataset.sure = 1; btn.classList.add('warn'); btn.innerHTML = ico('trash') + armed; setTimeout(() => { if (btn.isConnected && btn.dataset.sure && !btn.disabled) { btn.dataset.sure = ''; btn.classList.remove('warn'); btn.innerHTML = ico('trash') + label; } }, 5000); return; }
+      btn.disabled = true; btn.innerHTML = 'Deleting…'; let r = null;
+      try { const ac = new AbortController(), tm = setTimeout(() => ac.abort(), 20000); const res = await fetch(SIGNUP_ENDPOINT, { method: 'POST', signal: ac.signal, body: JSON.stringify({ type: 'labdelete', email: APP.user.email, ck: APP.user.ck, ids }) }); clearTimeout(tm); r = await res.json(); } catch (e) { r = null; }
+      if (!m.isConnected) return;
+      if (r && r.ok) { const gone = new Set(ids); rows = rows.filter(x => !gone.has(x.id)); $('#rsMsg', m).textContent = `Deleted ${r.deleted} result${r.deleted === 1 ? '' : 's'} · ${rows.length} left`; draw(); }
+      else { btn.disabled = false; btn.dataset.sure = ''; btn.classList.remove('warn'); btn.innerHTML = ico('trash') + label; $('#rsMsg', m).textContent = r && r.msg ? 'Couldn’t delete: ' + r.msg : 'Couldn’t delete right now. Check your connection and try again.'; } };
+    if ($('#rsDel', m)) $('#rsDel', m).onclick = e => del(vis.filter(x => x.id).map(x => x.id), e.currentTarget, `Click again to delete ${vis.length} result${vis.length === 1 ? '' : 's'}`, `Delete shown results (${vis.length})`);
+    $$('[data-del]', m).forEach(b => b.onclick = () => del([b.dataset.del], b, 'Delete?', ''));
     $('#cpT', m).onclick = e => copyBtn(e.currentTarget, ['Student\tEmail\tClass\tCode\tLab\tDate\tMistakes\tQuiz\tTime\tResult\tWhat to review'].concat(vis.map(r => [r.name, r.email, r.period, r.code, r.lab, new Date(r.at).toLocaleString(), r.mistakes, r.quiz, r.time, r.result, r.review].map(v => String(v == null ? '' : v).replace(/\t|\n/g, ' ')).join('\t'))).join('\n'));
   };
   draw();
