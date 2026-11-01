@@ -147,6 +147,8 @@ label.fld { display: grid; gap: 6px; font-weight: 600; font-size: 13.5px; }
 .hh-feat b { display: block; color: var(--accent); font-size: 15px; }
 .hh-fi { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); flex: none; }
 .hh-fi svg { width: 22px; height: 22px; }
+.es-faq details { border: 1px solid var(--line); border-radius: 14px; padding: 14px 18px; background: var(--card, transparent); max-width: 760px; }
+.es-faq summary { cursor: pointer; font-weight: 600; } .es-faq details p { margin: 10px 0 0; max-width: 68ch; color: var(--muted); }
 .hh-courses { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
 .hh-course { --t: #23a26b; display: flex; align-items: center; gap: 14px; padding: 18px; border-radius: 16px; text-decoration: none; color: var(--ink); background: color-mix(in srgb, var(--t) 11%, var(--panel)); border: 1px solid color-mix(in srgb, var(--t) 30%, var(--line)); transition: transform .15s, box-shadow .15s; }
 .hh-course:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
@@ -1072,6 +1074,8 @@ function pageHome(m) {
       <div class="hh-courses">${COURSES.map(c => { const n = labsFor(c.id).length, gn = GAMES.filter(g => g.course === c.id).length; return `<a class="hh-course t-${TINT[c.id] || 'bio'}" href="${HP}${c.id}" data-go2="${c.id}"><span class="hh-ci">${ico(c.ic)}</span><span class="hh-ct"><b>${c.name}</b><span class="small">${c.band.replace(' Science', '')} · ${n ? n + (n === 1 ? ' lab' : ' labs') : 'labs coming soon'}${gn ? ` · ${gn} interactive` : ''}</span></span><span class="hh-go">${ico('arrow')}</span></a>`; }).join('')}</div></section>
     <section class="sec"><div class="sec-h"><h2>Games</h2><span class="muted small">Separate games for high school and middle school.</span></div>
       <div class="gm-cols">${['hs', 'ms'].map(b => `<div class="gm-col"><div class="sec-h"><h3>${GBAND[b].name}</h3><a href="${HP}games-${b}" data-go2="games-${b}" class="small">See all</a></div>${GAMES.filter(g => g.band === b).map(g => `<a class="card gm-mini" href="${HP}${g.id}" data-go2="${g.id}"><span class="thumb">${gameThumb(g.id)}</span><span><b>${esc(g.title)}</b><span class="small muted">${esc(g.tag)}</span></span></a>`).join('')}</div>`).join('')}</div></section>
+    <section class="sec es-faq"><div class="sec-h"><h2>Common questions</h2></div>
+      <details><summary>Which standards do you follow?</summary><p><b>AP classes</b> follow the College Board’s AP standards: the public AP Course and Exam Description for each course (its units, learning objectives, science or skill practices, and exam format).</p><p><b>All other classes</b> follow the <b>Next Generation Science Standards (NGSS)</b> for science and the <b>Common Core State Standards</b> for math and for reading and writing in science. Each lab or unit lists the standards it covers.</p></details></section>
 `;
   $$('[data-go2]', m).forEach(a => a.addEventListener('click', e => { e.preventDefault(); go(a.dataset.go2); }));
   bindLabButtons(m);
@@ -6004,6 +6008,9 @@ const fmtDay = s => s ? new Date(String(s).slice(0, 10) + 'T12:00:00').toLocaleD
 const itemsOf = c => c.labs.map(labTitle).concat((c.games || (c.opts & OPT.blaster ? ['blaster'] : [])).map(gameTitle));
 /* a student whose code was closed goes back to the join screen with a message */
 function closeStudent() { if (typeof GameHub !== 'undefined') GameHub.stopAll(); if (typeof Kit !== 'undefined') Kit.unmount(); const c = APP.student ? APP.student.k.code : ''; LS.del('student'); APP.student = null; APP.gateTab = 'student'; APP.joinCode = ''; APP.view = 'home'; APP.gateMsgStu = `The class code ${c} has been closed by your teacher, so its labs and games aren’t available anymore. Ask your teacher if you need a new code.`; setPath('home', true); render(); }
+/* while a student is in (even mid-lab or mid-game), check every minute and whenever the tab comes back that the teacher hasn't closed the code */
+const stuWatch = () => { const S = APP.student; if (!S || document.hidden) return; codeOpen(S.k.code).then(op => { if (op === false && APP.student === S) closeStudent(); }); };
+setInterval(stuWatch, 60000); document.addEventListener('visibilitychange', () => { if (!document.hidden) stuWatch(); });
 const joinLink = code => (/^https?:$/.test(location.protocol) && !/claude|localhost|^$/.test(location.hostname) ? location.origin : SITE_URL) + '/j/' + normCode(code);
 function copyBtn(btn, text) {
   try { navigator.clipboard.writeText(text).then(() => { const t = btn.innerHTML; btn.textContent = 'Copied'; setTimeout(() => { btn.innerHTML = t; }, 1400); }, () => selectFallback(text)); } catch (e) { selectFallback(text); }
