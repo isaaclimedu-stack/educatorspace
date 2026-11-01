@@ -350,6 +350,31 @@ body:has(.lab.fit) { margin: 0; }
 .vs-gap { width: 8px; }
 .vs-e { margin-top: auto; display: flex; justify-content: space-between; gap: 8px; font-size: 12px; color: #33475e; border-top: 1px solid #d5dfea; padding-top: 7px; flex-wrap: wrap; }
 .vs-e .warn { color: #c2410c; font-weight: 700; }
+/* ── simulation labs (Ecosystem, Cell City, Volcano, Weather, Reaction Detective, Roller Coaster) ── */
+.sim-ctl .sim-btns { gap: 6px; flex-wrap: wrap; }
+.eco-pop { display: grid; grid-template-columns: auto auto auto; gap: 6px 8px; align-items: center; font-size: 13px; font-weight: 650; color: var(--muted); justify-content: start; }
+.sim-pick { display: flex; flex-wrap: wrap; gap: 6px; }
+.sim-pick .btn.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+.sim-note { font-size: 12.5px; color: var(--muted); background: var(--panel-2); border-radius: 8px; padding: 7px 9px; }
+.sim-note b { color: var(--ink); }
+.sim-in { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 13px; }
+.sim-in input[type=number] { width: 96px; font: inherit; padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); color: var(--ink); }
+.sim-tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.sim-tbl th, .sim-tbl td { padding: 4px 6px; border-bottom: 1px solid var(--line); text-align: left; }
+.sim-tbl th { color: var(--muted); font-weight: 650; }
+.cc-build { display: grid; gap: 4px; }
+.cc-row { display: grid; grid-template-columns: 1fr auto 26px auto; gap: 6px; align-items: center; font-size: 13px; }
+.cc-row small { color: var(--muted); font-size: 11.5px; }
+.cc-row .btn { min-width: 30px; padding: 2px 8px; }
+.cc-n { text-align: center; font-family: var(--f-mono); }
+.cc-dx { display: grid; gap: 6px; }
+.sim-pick .btn small { opacity: .7; font-weight: 500; margin-left: 4px; }
+.rx-co { display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center; font-size: 15px; }
+.rx-sp { display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--line); border-radius: 10px; padding: 4px 6px; background: var(--panel-2); }
+.rx-sp span { font-family: var(--f-mono); font-weight: 700; margin-left: 4px; }
+.rx-n { font-family: var(--f-mono); min-width: 16px; text-align: center; }
+.rx-arr { font-size: 20px; }
+details.sim-note summary { cursor: pointer; }
 /* ── Planet Strike + Helix Hero: controls in the lab sheet ── */
 .pl-ctl { display: grid; gap: 10px; }
 .pl-sl { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; align-items: center; }
@@ -960,7 +985,7 @@ function renderGate() {
     $('#sForm').addEventListener('submit', async e => {
       e.preventDefault(); const err = $('#sErr'), code = $('#sCode').value, name = $('#sName').value.trim().replace(/\s+/g, ' '), em = normEmail($('#sEmail').value), per = $('#sPer').value.trim();
       const k = await readLabCode(code);
-      if (!k) { err.textContent = 'That code doesn\u2019t look right. Check it with your teacher (it has 13 or 19 letters and numbers).'; return; }
+      if (!k) { err.textContent = 'That code doesn\u2019t look right. Check it with your teacher (it has 13 to 25 letters and numbers).'; return; }
       if (!k.labs.length && !k.games.length) { err.textContent = 'This code doesn\u2019t include any labs or games. Ask your teacher for a new one.'; return; }
       if (name.length < 2) { err.textContent = 'Enter your name so your teacher knows whose results these are.'; return; }
       if (em && !isEmail(em)) { err.textContent = 'That email doesn\u2019t look right. You can also leave it blank.'; return; }
@@ -1538,7 +1563,7 @@ const ASSIST = {
   otter: { name: 'Pippin', pal: { fur: '#a8754f', dark: '#7d5638', belly: '#f6e6cc', line: '#4a3426' } },
   sheep: { name: 'Puff', pal: { wool: '#fffdf8', face: '#f3dcc3', dark: '#5b4c45', line: '#5a4a42' } }
 };
-const ASSIST_BY_LAB = { 'dna-strawberry': 'otter', titration: 'sheep', flame: 'otter', pendulum: 'sheep', ohm: 'otter', mass: 'otter', erosion: 'sheep', onion: 'sheep', heart: 'otter', projectile: 'sheep', helix: 'otter' };
+const ASSIST_BY_LAB = { 'dna-strawberry': 'otter', titration: 'sheep', flame: 'otter', pendulum: 'sheep', ohm: 'otter', mass: 'otter', erosion: 'sheep', onion: 'sheep', heart: 'otter', projectile: 'sheep', helix: 'otter', ecosystem: 'sheep', cellcity: 'otter', volcano: 'sheep', weather: 'otter', reactions: 'sheep', coaster: 'otter' };
 const assist = () => ASSIST_BY_LAB[(typeof APP !== 'undefined' && APP.curLab) || ''] || 'otter';
 const asstName = () => ASSIST[assist()].name;
 function pipFace(mood = 'happy', size = 64, kind = assist()) { return charFace(kind, mood, size); }
@@ -2225,6 +2250,44 @@ function labThumb(id, big) {
       <line x1="200" y1="236" x2="292" y2="46" stroke="#9ff3ff" stroke-width="3" opacity=".8"/><circle cx="292" cy="46" r="10" fill="#fff" opacity=".7"/>
       <g transform="translate(200 196)"><path d="M-30,30 L-18,0 L18,0 L30,30Z" fill="#1c2a55" stroke="#9ff3ff"/><circle cy="-2" r="9" fill="#9ff3ff"/></g>
       <g transform="translate(76 196)"><path d="M0,-26 L22,-17 Q20,12 0,26 Q-20,12 -22,-17Z" fill="#4da3ff"/><path d="M-9,0 l6,7 l12,-14" stroke="#fff" stroke-width="4" fill="none"/></g>`,
+    ecosystem: `<rect width="400" height="240" fill="#9fd3f2"/><circle cx="60" cy="46" r="22" fill="#fff3a6"/><ellipse cx="290" cy="40" rx="40" ry="13" fill="#fff"/><ellipse cx="310" cy="32" rx="24" ry="11" fill="#fff"/>
+      <path d="M0,130 Q100,104 200,124 T400,118 L400,240 L0,240Z" fill="#79b85e"/>${[[40, 170], [90, 205], [150, 160], [230, 200], [300, 150], [350, 210], [190, 225]].map(([x, y]) => `<path d="M${x},${y} l-4,-12 M${x},${y} l0,-15 M${x},${y} l4,-12" stroke="#3f8a3a" stroke-width="2.4" stroke-linecap="round"/>`).join('')}
+      ${[[70, 150], [120, 182], [260, 170], [330, 186], [205, 150]].map(([x, y]) => `<g transform="translate(${x} ${y})"><ellipse rx="11" ry="7" fill="#f2ebdf" stroke="#9b8f7c"/><ellipse cx="8" cy="-6" rx="5" ry="4.5" fill="#f2ebdf" stroke="#9b8f7c"/><ellipse cx="7" cy="-14" rx="2" ry="6" fill="#f2ebdf" stroke="#9b8f7c"/><ellipse cx="10" cy="-14" rx="2" ry="6" fill="#f2ebdf" stroke="#9b8f7c"/></g>`).join('')}
+      <g transform="translate(170 196)"><path d="M-16,-2 Q-32,-14 -34,2 Q-26,6 -16,2z" fill="#d9692b"/><ellipse rx="16" ry="8" fill="#e0782f"/><path d="M11,-5 L27,-1 L13,5z" fill="#e0782f"/><path d="M13,-5 L16,-15 L20,-4z" fill="#b8541f"/></g>
+      <rect x="250" y="26" width="128" height="78" rx="8" fill="#0b1020" fill-opacity=".72"/><polyline points="260,90 280,70 300,52 320,64 340,86 360,72 370,60" fill="none" stroke="#f4efe4" stroke-width="2.4"/><polyline points="260,96 280,92 300,80 320,70 340,74 360,88 370,90" fill="none" stroke="#ff9a4a" stroke-width="2.4"/><line x1="260" y1="46" x2="370" y2="46" stroke="#7ee06b" stroke-dasharray="4 3"/>`,
+    cellcity: `<rect width="400" height="240" fill="#173a4a"/><ellipse cx="200" cy="122" rx="170" ry="100" fill="#d7efe5" stroke="#3f8f78" stroke-width="5"/>
+      <circle cx="196" cy="118" r="40" fill="#9a82dd" stroke="#6a52b8" stroke-width="3"/><circle cx="206" cy="110" r="12" fill="#6a52b8"/>
+      <path d="M250,80 A60,56 0 0 1 250,160" fill="none" stroke="#e58fb0" stroke-width="5" stroke-dasharray="14 5"/>${[[262, 92], [268, 112], [266, 134], [258, 150]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="3" fill="#5b3fa8"/>`).join('')}
+      ${[[98, 96, 20], [120, 170, -30], [300, 116, 60]].map(([x, y, r]) => `<g transform="translate(${x} ${y}) rotate(${r})"><ellipse rx="22" ry="11" fill="#f08a63" stroke="#b9512b" stroke-width="2"/><path d="M-14,0 q3,-7 6,0 t6,0 t6,0 t6,0" fill="none" stroke="#b9512b" stroke-width="1.6"/></g>`).join('')}
+      ${[0, 1, 2].map(k => `<path d="M${280 + k * 2},${168 + k * 7} q24,-10 48,0" fill="none" stroke="#f0a43a" stroke-width="4.5" stroke-linecap="round"/>`).join('')}
+      <circle cx="142" cy="60" r="9" fill="#b07ae0" stroke="#7a45b0" stroke-width="2"/><circle cx="246" cy="196" r="9" fill="#b07ae0" stroke="#7a45b0" stroke-width="2"/>
+      <g transform="translate(360 40)"><circle r="9" fill="#e5484d"/>${[0, 1, 2, 3, 4, 5].map(k => `<line x1="0" y1="0" x2="${Math.cos(k) * 14}" y2="${Math.sin(k) * 14}" stroke="#e5484d" stroke-width="2.4"/>`).join('')}</g>
+      <path d="M40,120 l-8,-8 v16z M372,150 l8,-8 v16z" fill="#ffcf3f"/>`,
+    volcano: `<rect width="400" height="240" fill="#86b0dc"/><rect y="170" width="400" height="70" fill="#5e4636"/>
+      <path d="M90,170 Q140,160 186,70 L214,70 Q260,160 310,170Z" fill="#7d6a58" stroke="#4e3f33" stroke-width="2"/>
+      ${[[200, 52, 26], [186, 34, 22], [214, 26, 24], [196, 12, 20], [226, 46, 18], [172, 54, 16]].map(([x, y, r], i) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${['#5b5650', '#77716a', '#8f8982'][i % 3]}"/>`).join('')}
+      <path d="M190,72 Q170,110 148,150" fill="none" stroke="#ff6a1a" stroke-width="6" stroke-linecap="round"/><path d="M190,72 Q170,110 148,150" fill="none" stroke="#ffd34d" stroke-width="2"/>
+      <rect x="196" y="72" width="8" height="140" fill="#e07a1f"/><ellipse cx="200" cy="218" rx="80" ry="16" fill="#e07a1f" stroke="#2a1208" stroke-width="2"/>${[[170, 216], [196, 222], [228, 214], [212, 224]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="3" fill="#fff4d6" opacity=".7"/>`).join('')}
+      <g transform="translate(330 30)"><rect x="-8" y="-8" width="62" height="130" rx="8" fill="#0b1020" fill-opacity=".7"/>${[0, 1, 2, 3, 4, 5].map(i => `<rect x="0" y="${i * 19}" width="${16 + (5 - i) * 6}" height="14" rx="3" fill="${['#86201b', '#b33124', '#d9482b', '#f2622f', '#ffa13a', '#ffd34d'][i]}" opacity="${i === 1 ? 1 : .45}"/>`).join('')}</g>`,
+    weather: `<rect width="400" height="240" fill="#98b56f"/><path d="M270,0 Q250,60 280,120 T262,240 L400,240 L400,0Z" fill="#3f7fb8"/>
+      ${[30, 52, 74, 96].map(r => `<ellipse cx="130" cy="110" rx="${r * 1.25}" ry="${r}" fill="none" stroke="#fff" stroke-width="1.3" opacity=".75"/>`).join('')}
+      <polyline points="122,126 108,160 92,200 80,236" fill="none" stroke="#2f6fd6" stroke-width="3.5"/>${[[108, 160], [92, 200]].map(([x, y]) => `<path d="M${x},${y} l-10,-3 l2,10z" fill="#2f6fd6"/>`).join('')}
+      <polyline points="140,118 180,128 222,144" fill="none" stroke="#e5484d" stroke-width="3.5"/>${[[180, 128], [222, 144]].map(([x, y]) => `<path d="M${x - 5},${y} a5,5 0 0 1 10,0z" fill="#e5484d"/>`).join('')}
+      ${[[150, 92], [196, 120], [104, 150]].map(([x, y]) => `<g><ellipse cx="${x}" cy="${y}" rx="26" ry="12" fill="#7b8595"/><ellipse cx="${x + 14}" cy="${y - 7}" rx="15" ry="10" fill="#8a94a4"/>${[0, 1, 2].map(k => `<line x1="${x - 12 + k * 10}" y1="${y + 14}" x2="${x - 15 + k * 10}" y2="${y + 22}" stroke="#2f6fd6" stroke-width="2"/>`).join('')}</g>`).join('')}
+      <path d="M196,128 l-6,12 h6 l-4,12 l12,-16 h-6 l4,-8z" fill="#ffe36b"/><text x="130" y="122" font-size="30" font-weight="900" fill="#e5484d" text-anchor="middle" stroke="#fff" stroke-width="2.5" paint-order="stroke">L</text>
+      <g transform="translate(236 120)">${[[-14, 12, 18], [-4, 8, 26], [6, 10, 20], [16, 8, 30]].map(([x, w, h]) => `<rect x="${x}" y="${10 - h}" width="${w}" height="${h}" fill="#3d4a66"/>`).join('')}</g>
+      <text x="336" y="56" font-size="28" font-weight="900" fill="#2f6fd6" text-anchor="middle" stroke="#fff" stroke-width="2.5" paint-order="stroke">H</text>`,
+    reactions: `<rect width="400" height="240" fill="#22344a"/><rect y="200" width="400" height="40" fill="#3b3f46"/>
+      ${[['#e8f0f5', 'AgNO₃'], ['#3d8fe0', 'CuSO₄'], ['#e8f0f5', 'NaOH'], ['#e0a43a', 'FeCl₃']].map(([c, t], i) => `<g transform="translate(${46 + i * 46} 24)"><rect x="-15" y="0" width="30" height="46" rx="6" fill="${c}" opacity=".85" stroke="#cfe0f2"/><rect x="-7" y="-9" width="14" height="9" rx="2" fill="#3d4a66"/><rect x="-13" y="16" width="26" height="14" fill="#fff"/><text x="0" y="27" font-size="7" font-weight="800" text-anchor="middle" fill="#1a2333">${t}</text></g>`).join('')}
+      <g transform="translate(250 50)"><path d="M-22,0 V120 A22,22 0 0 0 22,120 V0" fill="rgba(255,255,255,.06)" stroke="#cfe0f2" stroke-width="2.5"/><path d="M-20,50 V120 A20,20 0 0 0 20,120 V50Z" fill="#cfe4f5"/>${[[-10, 80], [6, 96], [-4, 110], [10, 120], [-12, 124], [2, 70], [12, 84]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="3.4" fill="#4aa3e8"/>`).join('')}<ellipse cx="0" cy="136" rx="16" ry="5" fill="#4aa3e8"/></g>
+      <g transform="translate(330 50)"><path d="M-22,0 V120 A22,22 0 0 0 22,120 V0" fill="rgba(255,255,255,.06)" stroke="#cfe0f2" stroke-width="2.5"/><path d="M-20,50 V120 A20,20 0 0 0 20,120 V50Z" fill="#e8f0f5" opacity=".8"/>${[[-8, 70], [6, 86], [-4, 104], [10, 118], [0, 60], [-10, 92]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="3.6" fill="none" stroke="#fff" stroke-width="1.4"/>`).join('')}</g>
+      <text x="96" y="150" font-size="18" font-weight="800" fill="#fff" text-anchor="middle">? + ? → !</text><text x="96" y="176" font-size="12" fill="#ffd27a" text-anchor="middle">precipitate · gas · heat</text>`,
+    coaster: `<rect width="400" height="240" fill="#ffd9a8"/><circle cx="330" cy="40" r="22" fill="#fff4c9"/><rect y="206" width="400" height="34" fill="#5f9a52"/>
+      ${[30, 44, 58, 72, 120, 160, 190, 230].map(x => `<line x1="${x}" y1="${x < 80 ? 40 + (x > 44 ? (x - 44) * 3.6 : 0) : 120}" x2="${x}" y2="206" stroke="#8a6d55" stroke-width="2"/>`).join('')}
+      <path d="M20,40 H44 L96,204 H130 Q160,90 190,90 Q220,90 250,204 H272" fill="none" stroke="#3b2f2a" stroke-width="6" stroke-linejoin="round"/><path d="M20,40 H44 L96,204 H130 Q160,90 190,90 Q220,90 250,204 H272" fill="none" stroke="#e5484d" stroke-width="2.6" stroke-linejoin="round"/>
+      <circle cx="310" cy="174" r="30" fill="none" stroke="#3b2f2a" stroke-width="6"/><circle cx="310" cy="174" r="30" fill="none" stroke="#e5484d" stroke-width="2.6"/><path d="M272,204 H380" stroke="#3b2f2a" stroke-width="6"/><path d="M272,204 H380" stroke="#e5484d" stroke-width="2.6"/>
+      <g transform="translate(70 126) rotate(72)"><rect x="-14" y="-12" width="28" height="12" rx="4" fill="#2f6fd6"/><circle cx="-5" cy="-15" r="3.6" fill="#ffcf9a"/><circle cx="6" cy="-15" r="3.6" fill="#ffcf9a"/></g>
+      <g transform="translate(150 20)"><rect width="110" height="56" rx="8" fill="#0b1020" fill-opacity=".72"/>${[['#4f8ff7', .35, 'PE'], ['#ff9a3c', .6, 'KE']].map(([c, k, t], i) => `<text x="8" y="${20 + i * 22}" font-size="10" fill="#fff">${t}</text><rect x="28" y="${12 + i * 22}" width="74" height="7" rx="3.5" fill="#fff" fill-opacity=".15"/><rect x="28" y="${12 + i * 22}" width="${74 * k}" height="7" rx="3.5" fill="${c}"/>`).join('')}</g>`,
   };
   void big;
   return `<svg viewBox="0 0 400 240" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${bg}${art[id] || ''}</svg>`;
@@ -4840,6 +4903,1169 @@ const HelixLab = (() => {
   return Lab;
 })();
 
+/* ═══════════ Shared helpers for the simulation labs (Ecosystem, Cell City, Volcano, Weather, Reaction Detective, Roller Coaster) ═══════════
+   Each lab draws on the Kit stage every frame and keeps its controls in the lab sheet. */
+const SimLab = (() => {
+  const K = Kit;
+  const f = (n, d = 0) => { const p = 10 ** d; return (Math.round(n * p) / p).toFixed(d); };
+  /* a drawing layer on the stage, redrawn every frame by draw(g, dt) until the step changes */
+  function stage(bg, draw) {
+    K.setBg(bg); const g = sv('g', {}, K.layer);
+    K.loop(dt => { if (!g.isConnected) return false; draw(g, Math.min(dt, .05)); });
+    return g;
+  }
+  /* controls in the lab sheet. items:
+       { k, label, min, max, step, unit, fmt, lock }   a slider bound to st[k]
+       { btns: [{ id, label, cls, fn }] }               a row of buttons
+       { html }                                         anything else */
+  function panel(st, items, onChange) {
+    const box = LabUI.html(''); box.className = 'pl-ctl sim-ctl';
+    box.innerHTML = items.map(it => it.k ? `<div class="pl-sl"><label for="sm-${it.k}">${it.label}</label><b id="smv-${it.k}"></b><input type="range" id="sm-${it.k}" min="${it.min}" max="${it.max}" step="${it.step || 1}" ${it.lock ? 'disabled' : ''}></div>`
+      : it.btns ? `<div class="row sim-btns">${it.btns.map(b => `<button class="btn sm ${b.cls || ''}" data-sb="${b.id}">${b.label}</button>`).join('')}</div>` : (it.html || '')).join('');
+    const sync = () => items.forEach(it => { if (!it.k) return; const el = $('#sm-' + it.k, box); if (+el.value !== st[it.k]) el.value = st[it.k]; $('#smv-' + it.k, box).textContent = (it.fmt ? it.fmt(st[it.k]) : st[it.k] + (it.unit || '')) + (it.lock ? ' (fixed)' : ''); });
+    items.forEach(it => {
+      if (it.k) $('#sm-' + it.k, box).oninput = e => { st[it.k] = +e.target.value; sync(); onChange && onChange(it.k); };
+      if (it.btns) it.btns.forEach(b => { $(`[data-sb="${b.id}"]`, box).onclick = () => b.fn(); });
+    });
+    sync();
+    return { box, sync, btn: id => $(`[data-sb="${id}"]`, box), el: s => $(s, box) };
+  }
+  /* the challenge checklist, then one question once every item is done (then the lab moves on) */
+  function goals(R, cfg) {
+    const box = LabUI.html(''); box.className = 'pl-goal'; const qbox = LabUI.html(''); let asked = false, done = false;
+    function check() {
+      if (!box.isConnected) return; const items = cfg.items();
+      box.innerHTML = `<div class="pl-lab">Challenge</div>${items.map(([ok, t]) => `<div class="pl-ck ${ok ? 'ok' : ''}"><span>${ok ? '✓' : '○'}</span><span>${t}</span></div>`).join('')}`;
+      if (items.every(x => x[0]) && !asked) { asked = true; SND.ok(); K.sparkle({ x: 500, y: 240 }, 40); K.msg(cfg.winMsg || 'Challenge complete!', 'ok', 2600); if (cfg.q) ask(cfg.q); else { done = true; R.next(1800); } }
+    }
+    function ask(q) {
+      const ord = q.a.map((_, i) => i).sort(() => Math.random() - .5);
+      qbox.innerHTML = `<div class="quiz pl-qz"><div class="q">${q.q}</div><div class="opts">${ord.map(i => `<button class="opt" data-qa="${i}">${q.a[i]}</button>`).join('')}</div><div class="exp" data-qx></div></div>`;
+      qbox.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      $$('[data-qa]', qbox).forEach(x => x.onclick = () => { const i = +x.dataset.qa;
+        if (i === q.c) { x.classList.add('right'); $$('[data-qa]', qbox).forEach(y => y.disabled = true); $('[data-qx]', qbox).innerHTML = `<b>Correct.</b> ${q.e}`; SND.ok(); done = true; R.next(2800); }
+        else { x.classList.add('wrong'); x.disabled = true; R.mistake('Wrong answer: ' + (cfg.name || 'question'), q.e.replace(/<[^>]+>/g, '')); K.msg(q.hint || 'Not quite. Look at the readouts and try again.', 'bad', 3800); } });
+    }
+    check();
+    return { check, done: () => done, asked: () => asked };
+  }
+  /* a dark readout box on the stage. rows: [[label, value, color?]] */
+  function hud(x, y, w, rows, title) {
+    const h = 14 + (title ? 22 : 0) + rows.length * 20;
+    return `<g transform="translate(${x} ${y})"><rect width="${w}" height="${h}" rx="8" fill="#0b1020" fill-opacity=".74"/>${title ? `<text x="12" y="22" font-size="13" font-weight="700" fill="#fff">${title}</text>` : ''}
+      ${rows.map((r, i) => { const ty = (title ? 44 : 24) + i * 20; return `<text x="12" y="${ty}" font-size="12.5" fill="#a9b6cc" style="font-family:var(--f-mono)">${r[0]}</text><text x="${w - 12}" y="${ty}" font-size="12.5" font-weight="700" fill="${r[2] || '#fff'}" text-anchor="end" style="font-family:var(--f-mono)">${r[1]}</text>`; }).join('')}</g>`;
+  }
+  /* a line chart. series: [{ d: [numbers], c: color, n: name, dash }]; xs = number of x slots */
+  function chart(x, y, w, h, series, opt = {}) {
+    const ymax = opt.ymax || Math.max(10, ...series.flatMap(s => s.d)) * 1.1, xs = opt.xs || Math.max(2, ...series.map(s => s.d.length));
+    const X = i => x + (i / (xs - 1)) * w, Y = v => y + h - (Math.max(0, v) / ymax) * h;
+    let s = `<rect x="${x - 8}" y="${y - (opt.title ? 30 : 10)}" width="${w + 16}" height="${h + (opt.title ? 56 : 36)}" rx="10" fill="#0b1020" fill-opacity=".74"/>${opt.title ? `<text x="${x}" y="${y - 12}" font-size="13" font-weight="700" fill="#fff">${opt.title}</text>` : ''}
+      <line x1="${x}" y1="${y + h}" x2="${x + w}" y2="${y + h}" stroke="#fff" stroke-opacity=".3"/><line x1="${x}" y1="${y}" x2="${x}" y2="${y + h}" stroke="#fff" stroke-opacity=".3"/>`;
+    if (opt.xlab) s += `<text x="${x + w}" y="${y - (opt.title ? 12 : -12)}" font-size="11" fill="#a9b6cc" text-anchor="end">${opt.xlab}</text>`;
+    if (opt.ylab) s += `<text x="${x + 4}" y="${y + 12}" font-size="11" fill="#a9b6cc">${opt.ylab}</text>`;
+    (opt.marks || []).forEach(m => { s += `<line x1="${X(m.i)}" y1="${y}" x2="${X(m.i)}" y2="${y + h}" stroke="${m.c || '#ffd27a'}" stroke-opacity=".5" stroke-dasharray="3 4"/><text x="${X(m.i) + 3}" y="${y + h - 4}" font-size="10" fill="${m.c || '#ffd27a'}">${m.t}</text>`; });
+    series.forEach(sr => { if (sr.d.length < 2) return; s += `<polyline points="${sr.d.map((v, i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(' ')}" fill="none" stroke="${sr.c}" stroke-width="${sr.w || 2.4}" ${sr.dash ? `stroke-dasharray="${sr.dash}"` : ''} stroke-linejoin="round"/>`; });
+    let lx = 0; s += `<g transform="translate(${x} ${y + h + 18})">${series.filter(sr => sr.n).map(sr => { const at = lx; lx += 22 + sr.n.length * 6.1; return `<rect x="${at}" y="-8" width="12" height="4" fill="${sr.c}"/><text x="${at + 16}" y="-3" font-size="11" fill="#d7dfee">${sr.n}</text>`; }).join('')}</g>`;
+    return s;
+  }
+  /* a horizontal bar meter */
+  function bar(x, y, w, frac, color, label, val) {
+    return `<g transform="translate(${x} ${y})"><text x="0" y="-4" font-size="11.5" fill="#d7dfee">${label}</text><text x="${w}" y="-4" font-size="11.5" font-weight="700" fill="#fff" text-anchor="end" style="font-family:var(--f-mono)">${val}</text>
+      <rect width="${w}" height="9" rx="4.5" fill="#fff" fill-opacity=".14"/><rect width="${Math.max(0, Math.min(1, frac)) * w}" height="9" rx="4.5" fill="${color}"/></g>`;
+  }
+  /* a small seeded random generator, so drawings don't flicker */
+  const hash = i => { const x = Math.sin(i * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+  return { f, stage, panel, goals, hud, chart, bar, hash };
+})();
+
+/* ═══════════ MS Life Science: "Ecosystem Survival Simulator" (a meadow with rabbits, foxes and invasive goats) ═══════════
+   One year of the model, in small steps (dt in years):
+     carrying capacity K = 520 rabbits × rain factor × temperature factor × meadow resources
+     rabbits:  dH = 1.1·H·(1 − (H + 1.3·goats)/K) − foxes eating          (logistic growth, minus predation)
+     foxes:    dP = 0.07·(rabbits eaten) − 0.6·P                          (born from food, die of old age)
+     goats:    dI = 0.6·I·(1 − (I + 0.4·H)/(1.1·K))                       (no predators here, so nothing eats them)
+   With the default meadow the populations cycle about every 20 years; too much food, too many foxes, drought, heat
+   or goats can push one species to zero, and the ecosystem collapses. */
+const EcoLab = (() => {
+  const K = Kit, f = SimLab.f, hash = SimLab.hash;
+  const capOf = e => Math.round(520 * clamp(e.rain / 900, .1, 1.3) * Math.exp(-(((e.temp - 18) / 12) ** 2)) * e.res / 100);
+  function step(e, dt) {
+    const Kc = Math.max(1, capOf(e)), H = e.H, P = e.P, I = e.I;
+    const kill = 12 * P * H / (H + 80);
+    const dH = 1.1 * H * (1 - (H + 1.3 * I) / Kc) - kill, dP = 0.07 * kill - 0.6 * P, dI = 0.6 * I * (1 - (I + 0.4 * H) / (1.1 * Kc));
+    e.H = Math.max(0, H + dH * dt); e.P = Math.max(0, P + dP * dt); e.I = Math.max(0, I + dI * dt);
+    if (e.H < 2) e.H = 0; if (e.P < 1) e.P = 0; if (e.I < 1) e.I = 0;
+  }
+  const fresh = o => Object.assign({ rain: 900, temp: 18, res: 100, H: 20, P: 0, I: 0, t: 0, acc: 0, run: false, spd: 1, hist: [], dead: '', events: [], log: '', foxesOn: true, lastEv: '' }, o);
+  const rec = e => e.hist.push({ H: e.H, P: e.P, I: e.I, K: capOf(e) });
+
+  /* ── drawing ── */
+  function bg() {
+    return `<defs><linearGradient id="ecSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7cc4f0"/><stop offset="1" stop-color="#d9f0fb"/></linearGradient></defs>
+      <rect width="1000" height="620" fill="url(#ecSky)"/><path d="M0,330 Q120,280 260,312 T560,300 T1000,318 L1000,620 L0,620Z" fill="#9cc58a" opacity=".5"/>`;
+  }
+  function rabbit(x, y, flip) { return `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(${flip ? -1 : 1} 1)"><ellipse rx="8" ry="5.5" fill="#efe7da" stroke="#9b8f7c" stroke-width=".8"/><ellipse cx="6" cy="-4" rx="4" ry="3.5" fill="#efe7da" stroke="#9b8f7c" stroke-width=".8"/><ellipse cx="5" cy="-10" rx="1.6" ry="4.4" fill="#efe7da" stroke="#9b8f7c" stroke-width=".7"/><ellipse cx="7.5" cy="-10" rx="1.6" ry="4.4" fill="#efe7da" stroke="#9b8f7c" stroke-width=".7"/><circle cx="8" cy="-4.5" r=".9" fill="#222"/><circle cx="-8" cy="-1" r="2.2" fill="#fff"/></g>`; }
+  function fox(x, y, flip) { return `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(${flip ? -1 : 1} 1)"><path d="M-12,-2 Q-24,-10 -26,2 Q-20,4 -12,2z" fill="#d9692b"/><circle cx="-25" cy="1" r="2.4" fill="#fff"/><ellipse rx="12" ry="6" fill="#e0782f"/><path d="M8,-4 L20,-1 L10,4z" fill="#e0782f"/><path d="M10,-4 L12,-11 L15,-3z M14,-3 L17,-10 L18,-2z" fill="#b8541f"/><circle cx="19.5" cy="-1" r="1.3" fill="#222"/><rect x="-8" y="4" width="2.4" height="7" fill="#5a2a12"/><rect x="5" y="4" width="2.4" height="7" fill="#5a2a12"/></g>`; }
+  function goat(x, y, flip) { return `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(${flip ? -1 : 1} 1)"><ellipse rx="12" ry="7" fill="#a59d93" stroke="#5d564e" stroke-width=".8"/><path d="M9,-5 L17,-9 L19,-2 L11,1z" fill="#a59d93" stroke="#5d564e" stroke-width=".8"/><path d="M14,-9 Q10,-17 6,-14" fill="none" stroke="#4a443d" stroke-width="2"/><path d="M18,-2 L19,3" stroke="#e8e4dc" stroke-width="2"/><rect x="-8" y="5" width="2.4" height="8" fill="#4a443d"/><rect x="6" y="5" width="2.4" height="8" fill="#4a443d"/></g>`; }
+  function scene(e, T) {
+    const Kc = capOf(e), lush = clamp(Kc / 560, 0, 1.2), grazed = clamp((e.H + 1.3 * e.I) / Math.max(1, Kc * 1.15), 0, 1), green = clamp(lush * (1 - .7 * grazed), 0, 1);
+    const hot = clamp((e.temp - 22) / 14, 0, 1), cold = clamp((10 - e.temp) / 12, 0, 1), wet = clamp((e.rain - 1000) / 500, 0, 1), dry = clamp((600 - e.rain) / 400, 0, 1);
+    const mix = (a, b, t) => a.map((v, i) => Math.round(v + (b[i] - v) * t));
+    const gc = mix([170, 150, 90], [86, 160, 70], green), sky = mix(mix([124, 196, 240], [235, 170, 110], hot * .7), [170, 180, 196], wet * .8);
+    let s = `<rect width="1000" height="340" fill="rgb(${sky})" opacity=".55"/>`;
+    s += hot > .05 ? `<circle cx="90" cy="80" r="${34 + hot * 12}" fill="#ffd34d" opacity="${.6 + hot * .4}"/><circle cx="90" cy="80" r="${56 + hot * 30}" fill="#ffb347" opacity="${hot * .25}"/>` : `<circle cx="90" cy="80" r="30" fill="#fff4b0" opacity=".85"/>`;
+    const clouds = Math.round(2 + wet * 5 - dry * 2);
+    for (let i = 0; i < clouds; i++) { const x = (120 + i * 150 + T * 8 * (1 + i % 3)) % 1060 - 40, y = 50 + (i % 3) * 30; s += `<g opacity="${.75 + wet * .2}"><ellipse cx="${x}" cy="${y}" rx="46" ry="16" fill="${wet > .3 ? '#8d98a8' : '#fff'}"/><ellipse cx="${x + 20}" cy="${y - 10}" rx="26" ry="14" fill="${wet > .3 ? '#9aa5b5' : '#fff'}"/></g>`;
+      if (e.rain > 950) for (let k = 0; k < 6; k++) { const rx = x - 30 + k * 12, ry = y + 16 + ((T * 260 + k * 37) % 120); s += `<line x1="${rx}" y1="${ry}" x2="${rx - 3}" y2="${ry + 9}" stroke="#5b7fa8" stroke-width="1.4" opacity=".7"/>`; } }
+    if (cold > .2) for (let k = 0; k < 30; k++) { const x = hash(k) * 600, y = (hash(k + 50) * 330 + T * 30) % 330; s += `<circle cx="${x}" cy="${y}" r="1.8" fill="#fff" opacity=".8"/>`; }
+    s += `<path d="M0,335 Q150,300 300,328 T600,322 T1000,330 L1000,620 L0,620Z" fill="rgb(${gc})"/>`;
+    /* grass tufts and flowers: fewer when the meadow is grazed or dry */
+    const tufts = Math.round(40 * green);
+    for (let i = 0; i < tufts; i++) { const x = hash(i + 3) * 580 + 10, y = 345 + hash(i + 9) * 250; s += `<path d="M${x},${y} l-4,-12 M${x},${y} l0,-15 M${x},${y} l4,-12" stroke="rgb(${mix(gc, [40, 110, 50], .5)})" stroke-width="2" stroke-linecap="round"/>`; if (i % 6 === 0) s += `<circle cx="${x + 2}" cy="${y - 16}" r="2.4" fill="#ffe36b"/>`; }
+    if (dry > .4) for (let i = 0; i < 8; i++) { const x = 40 + hash(i + 70) * 520, y = 380 + hash(i + 90) * 200; s += `<path d="M${x},${y} l14,6 l10,-4 l12,5" fill="none" stroke="#8a6a3a" stroke-width="1.4" opacity=".6"/>`; }
+    /* animals, one icon for every 10 rabbits, 1 fox, 12 goats */
+    const nH = Math.min(40, Math.round(e.H / 10)), nP = Math.min(16, Math.round(e.P)), nI = Math.min(30, Math.round(e.I / 12));
+    const place = (i, salt, sp) => { const bx = 20 + hash(i * 7 + salt) * 540, by = 360 + hash(i * 13 + salt) * 230, w = Math.sin(T * sp + i * 1.7); return [bx + w * 18, by + Math.cos(T * sp * .7 + i) * 4, Math.cos(T * sp + i * 1.7) < 0]; };
+    const all = [];
+    for (let i = 0; i < nH; i++) { const [x, y, fl] = place(i, 1, .9); all.push([y, rabbit(x, y, fl)]); }
+    for (let i = 0; i < nI; i++) { const [x, y, fl] = place(i, 31, .5); all.push([y, goat(x, y, fl)]); }
+    for (let i = 0; i < nP; i++) { const [x, y, fl] = place(i, 17, 1.4); all.push([y, fox(x, y, fl)]); }
+    all.sort((a, b) => a[0] - b[0]).forEach(a => { s += a[1]; });
+    return s;
+  }
+  function draw(g, e, T, cfg) {
+    let s = scene(e, T);
+    const Kc = capOf(e), H = e.hist, n = 51;
+    const ser = [{ d: H.map(h => h.K), c: '#7ee06b', n: 'Capacity', dash: '5 4', w: 1.8 }, { d: H.map(h => h.H), c: '#f4efe4', n: 'Rabbits' }];
+    if (e.foxesOn || H.some(h => h.P > 0)) ser.push({ d: H.map(h => h.P * 10), c: '#ff9a4a', n: 'Foxes ×10' });
+    if (H.some(h => h.I > 0)) ser.push({ d: H.map(h => h.I), c: '#c9a6ff', n: 'Goats' });
+    s += SimLab.chart(640, 70, 330, 220, ser, { xs: Math.max(n, H.length), ymax: Math.max(700, ...H.map(h => Math.max(h.H, h.K, h.P * 10, h.I))) * 1.05, title: 'Populations by year', xlab: `year ${Math.floor(e.t)}`, marks: e.events.filter(v => v.at <= e.t).map(v => ({ i: v.at, t: v.short })) });
+    s += SimLab.hud(632, 362, 346, [['Year', `${f(e.t)} of ${cfg.years || 50}`], ['Rabbits', f(e.H), '#f4efe4'], ['Foxes', f(e.P), '#ff9a4a'], ...(e.I > 0 || H.some(h => h.I > 0) ? [['Invasive goats', f(e.I), '#c9a6ff']] : []), ['Carrying capacity (rabbits)', f(Kc), '#7ee06b'], ['Rain · temperature', `${e.rain} mm · ${e.temp} °C`]]);
+    if (e.log) s += `<g transform="translate(14 14)"><rect width="${Math.min(570, 18 + e.log.length * 7.1)}" height="30" rx="8" fill="#0b1020" fill-opacity=".74"/><text x="12" y="20" font-size="13" font-weight="700" fill="#ffd27a">${e.log}</text></g>`;
+    if (e.dead) s += `<g transform="translate(300 230)"><rect x="-250" y="-44" width="500" height="88" rx="14" fill="#2a0d0d" fill-opacity=".9" stroke="#ff6b6b"/><text y="-12" font-size="20" font-weight="800" fill="#ffb4b4" text-anchor="middle">Ecosystem collapsed in year ${Math.floor(e.t)}</text><text y="18" font-size="14" fill="#fff" text-anchor="middle">${e.dead}. Press Restart and try again.</text></g>`;
+    if (!e.run && !e.dead && e.t === 0) s += `<g transform="translate(300 230)"><rect x="-130" y="-22" width="260" height="44" rx="22" fill="#0b1020" fill-opacity=".75"/><text y="6" font-size="15" font-weight="700" fill="#fff" text-anchor="middle">Press ▶ Run to start time</text></g>`;
+    g.innerHTML = s;
+  }
+
+  /* ── the world runner: stage + controls + goal ── */
+  function world(R, def, cfg) {
+    const e = fresh(def); e.events = (cfg.events || []).map(v => Object.assign({}, v)); rec(e);
+    let T = 0, died = false;
+    const lock = cfg.lock || {};
+    const ctl = SimLab.panel(e, [
+      { k: 'rain', label: 'Rainfall per year', min: 150, max: 1500, step: 50, unit: ' mm', lock: lock.rain },
+      { k: 'temp', label: 'Average temperature', min: 0, max: 40, step: 1, unit: ' °C', lock: lock.temp },
+      { k: 'res', label: 'Meadow resources (food and space)', min: 50, max: 175, step: 5, unit: '%', lock: lock.res },
+      { btns: [{ id: 'run', label: '▶ Run', cls: 'primary', fn: () => { if (e.dead) return; e.run = !e.run; sync(); } }, { id: 'spd', label: 'Speed ×1', fn: () => { e.spd = e.spd === 1 ? 4 : 1; sync(); } }, { id: 'rs', label: 'Restart', fn: restart }] },
+      { html: `<div class="eco-pop"><span>Rabbits</span><button class="btn sm" data-ep="H-">−20</button><button class="btn sm" data-ep="H+">+20</button>${cfg.noFox ? '' : `<span>Foxes</span><button class="btn sm" data-ep="P-">−3</button><button class="btn sm" data-ep="P+">+3</button>`}${cfg.goats ? `<span>Goats</span><button class="btn sm" data-ep="I-">Remove 30</button>` : ''}</div>` }
+    ], k => { cfg.onChange && cfg.onChange(k, e); G && G.check(); });
+    function sync() { ctl.btn('run').textContent = e.run ? '❚❚ Pause' : '▶ Run'; ctl.btn('spd').textContent = 'Speed ×' + e.spd; ctl.sync(); }
+    function restart() { Object.assign(e, fresh(def), { events: (cfg.events || []).map(v => Object.assign({}, v)), spd: e.spd }); e.hist = []; rec(e); died = false; cfg.onRestart && cfg.onRestart(e); sync(); G && G.check(); }
+    $$('[data-ep]', ctl.box).forEach(b => b.onclick = () => { if (e.dead) return; const k = b.dataset.ep[0], up = b.dataset.ep[1] === '+';
+      const amt = { H: 20, P: 3, I: 30 }[k]; e[k] = Math.max(0, e[k] + (up ? amt : -amt)); if (k === 'P' && up) e.foxesOn = true; SND.tone(up ? 520 : 330, .12, 'triangle', .05); cfg.onPop && cfg.onPop(k, up, e); G && G.check(); });
+    const G = SimLab.goals(R, { items: () => cfg.goal(e), q: cfg.q, name: def.name, winMsg: cfg.winMsg });
+    const g = SimLab.stage(bg(), (g, dt) => {
+      T += dt;
+      if (e.run && !e.dead) {
+        e.acc += dt * 1.0 * e.spd;
+        while (e.acc >= .05 && e.run) {
+          e.acc -= .05; const before = Math.floor(e.t); step(e, .05); e.t = Math.round((e.t + .05) * 100) / 100;
+          e.events.forEach(v => { if (!v.done && e.t >= v.at) { v.done = true; v.fn(e); e.log = v.text; SND.tone(240, .3, 'sawtooth', .05, 160); sync(); } if (v.done && !v.ended && v.until && e.t >= v.until) { v.ended = true; v.end(e); e.log = v.endText || ''; sync(); } });
+          if (Math.floor(e.t) > before) { rec(e); cfg.onYear && cfg.onYear(e); G.check(); }
+          const lost = (e.H <= 0 && e.hist.some(h => h.H > 0)) ? 'All the rabbits died out' : (e.P <= 0 && e.foxesOn && !cfg.noFox && e.hist.some(h => h.P > 0)) ? 'The foxes died out' : '';
+          if (lost && cfg.mustSurvive) { e.dead = lost; e.run = false; sync(); SND.nope(); if (!died) { died = true; R.mistake(`Ecosystem collapsed (${lost.toLowerCase()})`, cfg.why || 'Every population needs food. Too many predators wipe out prey; too little food (drought, heat, competitors) starves them.'); } }
+          if (cfg.years && e.t >= cfg.years) { e.run = false; sync(); G.check(); }
+        }
+      }
+      draw(g, e, T, cfg);
+    });
+    sync(); void g;
+    return e;
+  }
+  const alive = e => e.H > 0 && (e.P > 0 || !e.foxesOn);
+
+  /* ── challenges ── */
+  const Q = {
+    cap: { q: 'The rabbits stopped growing at the dashed green line. That line is the meadow’s…', a: ['Carrying capacity: the most rabbits its food and space can support', 'Birth rate', 'Predator limit', 'Extinction point'], c: 0, e: 'Carrying capacity is the largest population an environment can support with its food, water and space. More rain grows more plants, so the line moves up; less rain moves it down.' },
+    cycle: { q: 'Look at the graph. Fox peaks come a little <b>after</b> rabbit peaks. Why?', a: ['Foxes need lots of rabbits to eat before more fox pups survive', 'Foxes and rabbits are born at the same time', 'Rabbits eat foxes', 'Rain makes foxes grow faster'], c: 0, e: 'Predators depend on prey. When rabbits are plentiful, more foxes survive and breed, so fox numbers rise a bit later. Then the foxes eat so many rabbits that rabbits fall, and the foxes follow.' },
+    heat: { q: 'Why did the heat wave and dry air put the foxes in danger, even though foxes don’t eat grass?', a: ['Less grass meant fewer rabbits, and foxes depend on rabbits', 'Foxes melt in the heat', 'Rabbits started eating foxes', 'Heat makes foxes reproduce faster'], c: 0, e: 'Energy flows from plants to rabbits to foxes. When the producers (plants) shrink, every level above them shrinks too.' },
+    goats: { q: 'Why did the invasive goats take over so quickly?', a: ['Nothing here eats them, and they compete with rabbits for the same food', 'They are bigger, so they live forever', 'Foxes prefer goats', 'Goats bring their own food'], c: 0, e: 'Invasive species often have no natural predators in their new home. They use up resources that native species need, so natives starve even though no one hunts them directly.' }
+  };
+  const C = (id, name, title, html, hint) => ({ id, name, title, html, hint });
+  const steps = [
+    C('cap', 'Carrying capacity', 'How many rabbits can a meadow hold?', 'Twenty rabbits move into an empty meadow with <b>no predators</b>. Press <b>▶ Run</b> and watch the graph for at least <b>15 years</b>.<br><br>Then move the <b>rainfall</b> slider by at least 300 mm and see what happens to the dashed green line and the rabbits.', 'The rabbits grow fast at first, then level off. What does the green line stand for?'),
+    C('cycle', 'Predators and prey', 'Add the foxes', 'Now <b>foxes</b> hunt the rabbits. Run the meadow for <b>30 years</b> without either species dying out.<br><br>Watch the graph: when do fox numbers peak compared with rabbit numbers?', 'If the foxes eat almost every rabbit, remove a few foxes. If the foxes are starving, add rabbits.'),
+    C('heat', 'Heat wave', 'Survive a heat wave', 'A long <b>heat wave</b> hits: <b>31 °C</b> and less rain, so far less grass grows. You can’t change the weather, but you can grow more food with the <b>meadow resources</b> slider (like planting or protecting more meadow), and add or remove animals.<br><br>Keep <b>both</b> species alive for <b>30 years</b>.', 'Watch the carrying capacity. If it drops too low, the rabbits can’t feed the foxes. Raise the meadow resources.'),
+    C('goats', 'Invasive species', 'Invasive goats', 'Someone released <b>feral goats</b>. Nothing in this meadow hunts them, and they eat the same plants as the rabbits.<br><br>Use <b>Remove 30</b> to control the goats and keep the rabbits and foxes alive for <b>30 years</b>.', 'Remove goats early, while there are still only a few. Check the purple line on the graph.'),
+    C('survive', '50-year challenge', 'Keep the ecosystem alive for 50 years', 'This is the big one. Over <b>50 years</b> the meadow faces a <b>drought</b>, <b>invasive goats</b> and a <b>heat wave</b>. Use everything you’ve learned: rainfall and temperature are set by nature, but you can manage meadow resources and every population.<br><br>Reach year 50 with rabbits <b>and</b> foxes still alive.', 'Speed ×4 makes the quiet years go faster. Pause when an event appears and plan your move.')
+  ];
+  const S = {
+    cap: R => { let moved = false, r0 = 900; world(R, { name: 'Carrying capacity', H: 20, P: 0, foxesOn: false }, { noFox: true, q: Q.cap, lock: { temp: true, res: true },
+      onChange: (k, e) => { if (k === 'rain' && Math.abs(e.rain - r0) >= 300) moved = true; },
+      goal: e => [[e.t >= 15, `Run for 15 years (year ${Math.floor(e.t)})`], [e.H > 0 && Math.abs(e.H - capOf(e)) / capOf(e) < .12 && e.t >= 8, 'See the rabbits level off at the carrying capacity'], [moved, 'Change the rainfall by 300 mm or more']] }); },
+    cycle: R => world(R, { name: 'Predators and prey', H: 150, P: 10 }, { q: Q.cycle, mustSurvive: true, years: 30, lock: { rain: true, temp: true, res: true },
+      goal: e => [[e.t >= 30 && alive(e), `Rabbits and foxes alive for 30 years (year ${Math.floor(e.t)})`], [e.hist.length > 12 && e.hist.some((h, i) => i > 2 && i < e.hist.length - 2 && h.H > e.hist[i - 1].H && h.H >= e.hist[i + 1].H), 'Spot a rabbit peak on the graph']] }),
+    heat: R => world(R, { name: 'Heat wave', H: 150, P: 10, temp: 31, rain: 700 }, { q: Q.heat, mustSurvive: true, years: 30, lock: { rain: true, temp: true },
+      why: 'In a heat wave fewer plants grow, so the carrying capacity falls. Raise the meadow resources so the rabbits (and the foxes that eat them) have enough food.',
+      goal: e => [[e.t >= 30 && alive(e), `Rabbits and foxes alive for 30 years (year ${Math.floor(e.t)})`]] }),
+    goats: R => world(R, { name: 'Invasive goats', H: 200, P: 14 }, { q: Q.goats, mustSurvive: true, years: 30, goats: true, lock: { rain: true, temp: true },
+      events: [{ at: 2, short: 'goats', text: 'Year 2: 12 feral goats were released!', fn: e => { e.I += 12; } }],
+      why: 'The goats ate the rabbits’ food. With fewer rabbits, the foxes starved. Remove invasive goats early.',
+      goal: e => [[e.t >= 30 && alive(e), `Rabbits and foxes alive for 30 years (year ${Math.floor(e.t)})`], [e.t >= 30 && e.I < 60, 'Keep the goats under 60 by year 30']] }),
+    survive: R => world(R, { name: '50-year challenge', H: 180, P: 12 }, { mustSurvive: true, years: 50, goats: true, lock: { rain: true, temp: true }, winMsg: 'Fifty years and the meadow is still alive!',
+      events: [{ at: 8, until: 17, short: 'drought', text: 'Year 8: a drought begins (400 mm of rain).', endText: 'Year 17: the drought is over.', fn: e => { e.rain = 400; }, end: e => { e.rain = 900; } },
+        { at: 21, short: 'goats', text: 'Year 21: invasive goats have arrived!', fn: e => { e.I += 15; } },
+        { at: 33, until: 40, short: 'heat', text: 'Year 33: a heat wave (30 °C).', endText: 'Year 40: temperatures are back to normal.', fn: e => { e.temp = 30; e.rain = 750; }, end: e => { e.temp = 18; e.rain = 900; } }],
+      goal: e => [[e.t >= 8 && alive(e), 'Get through the first quiet years'], [e.t >= 17 && alive(e), 'Survive the drought'], [e.t >= 33 && alive(e), 'Deal with the goats'], [e.t >= 50 && alive(e), `Reach year 50 (year ${Math.floor(e.t)})`]] })
+  };
+
+  function finale() { world({ next() {}, mistake() {} }, { name: 'Free play', H: 150, P: 10 }, { goats: true, goal: () => [[false, 'Free play: try any rainfall, temperature and population you like']] }); }
+
+  return makeLab({
+    noSetup: true, fit: true, bg: () => '',
+    fresh: () => ({}), steps, S,
+    finale() { finale(); },
+    finaleMsg: 'All five challenges done. The meadow is yours to experiment with while you answer the questions.',
+    verdicts: [['Ecosystem guardian', 'You kept the meadow alive through drought, heat and invaders.'], ['Almost there', 'Nice work. Look over the questions you missed below.'], ['Practice again', 'Run the challenges once more and watch how each change moves the carrying capacity.']], reviewLabel: 'Review these',
+    summary: () => 'You saw a population level off at its carrying capacity, watched predator–prey cycles, and protected a meadow from drought, heat and an invasive species for 50 years.',
+    quiz: [
+      { q: 'A pond can support about 200 frogs. This number is the pond’s…', a: ['Carrying capacity', 'Birth rate', 'Food chain', 'Biodiversity'], c: 0, e: 'Carrying capacity is the largest population an environment can support with the food, water and space it has.' },
+      { q: 'If most of the hawks in a field disappear, what will most likely happen to the mice first?', a: ['The mouse population will grow', 'The mice will die out', 'Nothing will change', 'The mice will start eating grass less'], c: 0, e: 'With fewer predators, more mice survive and reproduce. Later the mice may run short of food.' },
+      { q: 'Why do predator and prey populations often rise and fall in cycles?', a: ['Predators depend on prey for food, so their numbers follow the prey’s numbers', 'Both are born only in spring', 'Prey eat the predators when they are young', 'The weather changes every year'], c: 0, e: 'More prey → more predators survive → prey get eaten and decline → predators starve and decline → prey recover.' },
+      { q: 'An invasive plant spreads quickly in a new forest. What usually helps it spread?', a: ['It has no natural predators or diseases there', 'It needs more water than native plants', 'Native animals eat it first', 'It grows only in winter'], c: 0, e: 'Without the predators, diseases and competitors from its home range, an invasive species can outcompete native species for resources.' },
+      { q: 'A long drought reduces the grass in a grassland. Which change is most likely?', a: ['Fewer grazing animals, then fewer predators', 'More grazing animals', 'More predators right away', 'No change to the animals'], c: 0, e: 'Producers support every level of a food web. Less grass lowers the carrying capacity for grazers, and fewer grazers means less food for predators.' }
+    ],
+    meta: { id: 'ecosystem', short: 'Ecosystem Survival', title: 'Ecosystem Survival Simulator', courses: ['ms-life'], time: '25–35 min',
+      summary: 'Manage a meadow of rabbits and foxes. Change rainfall, temperature and resources, fight off invasive goats, and keep the ecosystem alive for 50 years.',
+      objective: 'Explain how resources set a carrying capacity, how predator and prey populations affect each other, and how disturbances such as drought and invasive species can make an ecosystem collapse.',
+      materials: ['A computer or tablet'], safety: ['No safety gear needed. This is a simulation.'],
+      ngss: [['MS-LS2-1', 'Analyze and interpret data to provide evidence for the effects of resource availability on organisms and populations of organisms in an ecosystem.'], ['MS-LS2-2', 'Construct an explanation that predicts patterns of interactions among organisms across multiple ecosystems.'], ['MS-LS2-4', 'Construct an argument supported by empirical evidence that changes to physical or biological components of an ecosystem affect populations.']],
+      thumb: big => labThumb('ecosystem', big) }
+  });
+})();
+
+/* ═══════════ MS Life Science: "Cell City: Build and Survive" (build a working cell from organelles) ═══════════
+   Every second of cell time:
+     membrane channels bring glucose in (and chloroplasts make it from sunlight in a plant cell)
+     mitochondria turn glucose into ATP; every organelle costs ATP to run
+     the nucleus holds the DNA instructions; ribosomes use them (and ATP) to make proteins,
+     which the ER and Golgi fold, package and ship. Proteins repair the cell's normal wear and tear.
+     lysosomes break down waste and destroy viruses; the vacuole stores water for dry times.
+   The cell dies when its health reaches 0 (no ATP, piled-up waste, viruses, or drying out all do damage). */
+const CellLab = (() => {
+  const K = Kit, f = SimLab.f, hash = SimLab.hash;
+  const ORG = [
+    ['nuc', 'Nucleus', 'city hall', 12, 1, 'Holds the DNA: the instructions for every protein. Without it, ribosomes have nothing to read.'],
+    ['chan', 'Membrane channel', 'city gates', 3, 6, 'Lets glucose and other materials into the cell through the cell membrane.'],
+    ['mito', 'Mitochondrion', 'power plant', 6, 8, 'Turns glucose and oxygen into ATP, the energy every part of the cell runs on.'],
+    ['ribo', 'Ribosomes', 'factories', 3, 6, 'Read the instructions from the nucleus and build proteins (this uses ATP).'],
+    ['er', 'Endoplasmic reticulum', 'assembly line', 6, 3, 'Folds new proteins and moves them through the cell.'],
+    ['golgi', 'Golgi apparatus', 'post office', 6, 2, 'Packages proteins and ships them to where they are needed.'],
+    ['lyso', 'Lysosome', 'recycling crew', 4, 6, 'Breaks down waste and worn-out parts, and destroys viruses that get in.'],
+    ['vac', 'Vacuole', 'water tower', 5, 3, 'Stores water, so the cell doesn’t dry out when water is scarce.'],
+    ['chloro', 'Chloroplast', 'solar farm', 7, 6, 'Plant cells only: uses sunlight to make glucose (photosynthesis).']
+  ];
+  const COST = Object.fromEntries(ORG.map(o => [o[0], o[3]])), MAX = Object.fromEntries(ORG.map(o => [o[0], o[4]]));
+  const fresh = o => { const e = Object.assign({ org: { nuc: 0, mito: 0, ribo: 0, er: 0, golgi: 0, lyso: 0, vac: 0, chloro: 0, chan: 0 }, G: 30, A: 60, Pr: 0, W: 0, V: 0, Wt: 100, HP: 100, made: 0, t: 0, vt: 0, run: false, spd: 1, dead: '', log: '', burn: 0, prod: 0,
+    env: { glu: 1, light: 0, o2: 1, vir: 0, dry: 0 } }, JSON.parse(JSON.stringify(o || {}))); e.org = Object.assign({ nuc: 0, mito: 0, ribo: 0, er: 0, golgi: 0, lyso: 0, vac: 0, chloro: 0, chan: 0 }, (o || {}).org); e.env = Object.assign({ glu: 1, light: 0, o2: 1, vir: 0, dry: 0 }, (o || {}).env); return e; };
+  const nOrg = e => Object.values(e.org).reduce((a, v) => a + v, 0), spent = e => Object.entries(e.org).reduce((a, [k, v]) => a + v * COST[k], 0);
+  function step(e, dt) {
+    const o = e.org, env = e.env, n = nOrg(e);
+    e.G = Math.min(30, e.G + (o.chan * 1.5 * env.glu + o.chloro * 2.0 * env.light) * dt);
+    const burn = Math.min(e.G, o.mito * 0.6 * env.o2 * dt); e.G -= burn; e.A += burn * 8; e.burn = burn / dt;
+    e.A -= (1 + 0.45 * n) * dt;
+    const share = 1 / (1 + e.V * 0.15);
+    let prod = o.nuc ? o.ribo * 0.5 * dt : 0; if (e.A <= 0) prod = 0; e.A -= prod * 1.2;
+    const cap = (o.er && o.golgi) ? Math.min(o.er * 1.2, o.golgi * 1.5) * dt : prod * 0.2;
+    const del = Math.min(prod * share, cap); e.Pr += del; e.made += del; e.prod = del / dt;
+    e.W = Math.max(0, e.W + burn * 0.5 - o.lyso * 0.6 * dt);
+    e.vt += env.vir * dt; while (e.vt >= 1) { e.vt -= 1; e.V += 1; }
+    e.V = Math.min(60, Math.max(0, e.V + (e.V * 0.12 * (o.ribo ? 1 : .3) - o.lyso * 0.3 * e.V / (e.V + 1)) * dt)); if (e.V < .2) e.V = 0;
+    e.Wt = env.dry ? Math.max(0, e.Wt - Math.max(0, 5 - o.vac * 1.5) * dt) : Math.min(100, e.Wt + 2 * dt);
+    let dmg = 0.5; if (e.A <= 0) dmg += 8; if (e.W > 60) dmg += (e.W - 60) * 0.15; dmg += e.V * 0.35; if (e.Wt < 25) dmg += 6;
+    let heal = 0; if (e.HP < 100 && e.Pr > 0) { const use = Math.min(e.Pr, 0.6 * dt); e.Pr -= use; heal = use / dt * 2.5; }
+    e.HP = clamp(e.HP + (heal - dmg) * dt, 0, 100); e.A = clamp(e.A, 0, 150); e.Pr = Math.min(150, e.Pr); e.W = Math.min(120, e.W); e.t += dt;
+  }
+  /* what's wrong right now, in plain words (the HUD shows the worst problems) */
+  function problems(e) {
+    const p = [];
+    if (e.A <= 1) p.push(e.G > 12 ? 'Out of ATP, but glucose is piling up' : 'Out of ATP and glucose');
+    else if (e.A < 35 && e.t > 1) p.push(e.G > 20 ? 'ATP running low, but glucose is piling up' : 'ATP running low');
+    if (e.W > 60) p.push('Waste is piling up');
+    if (e.V >= 1) p.push(`${Math.round(e.V)} virus${Math.round(e.V) === 1 ? '' : 'es'} inside`);
+    if (e.Wt < 40) p.push('Drying out');
+    if (!e.org.nuc && e.org.ribo) p.push('Ribosomes idle: no instructions');
+    if (e.HP < 100 && e.Pr < 1 && e.t > 3) p.push('No proteins for repairs');
+    return p;
+  }
+
+  /* ── drawing ── */
+  const CX = 330, CY = 325, RX = 292, RY = 236;
+  const inCell = (i, salt) => { const a = hash(i * 3 + salt) * Math.PI * 2, r = .35 + hash(i * 5 + salt) * .5; return [CX + Math.cos(a) * RX * r, CY + Math.sin(a) * RY * r]; };
+  const SPOT = { mito: [[150, 250], [520, 240], [180, 430], [470, 470], [560, 360], [120, 340], [400, 150], [260, 520]], lyso: [[230, 190], [450, 520], [560, 290], [130, 400], [330, 540], [610, 400]], chloro: [[170, 170], [500, 170], [100, 300], [600, 320], [210, 520], [420, 550]], vac: [[205, 330], [460, 420], [300, 470]], golgi: [[470, 330], [400, 450]], chan: [-2.6, -1.2, .3, 1.6, 2.4, -.4] };
+  function bg() {
+    return `<defs><radialGradient id="ccCyto" cx=".45" cy=".42" r=".7"><stop offset="0" stop-color="#e9f7f1"/><stop offset="1" stop-color="#c3e6da"/></radialGradient>
+      <radialGradient id="ccNuc" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#c7b6f5"/><stop offset="1" stop-color="#8e74d6"/></radialGradient>
+      <pattern id="ccDots" width="26" height="26" patternUnits="userSpaceOnUse"><circle cx="4" cy="4" r="1.4" fill="#fff" opacity=".18"/></pattern></defs>
+      <rect width="1000" height="620" fill="#173a4a"/><rect width="1000" height="620" fill="url(#ccDots)"/>`;
+  }
+  function draw(g, e, T, cfg) {
+    const o = e.org, L = cfg.labels !== false; let s = '';
+    const sick = 1 - e.HP / 100, dryF = clamp((60 - e.Wt) / 60, 0, 1);
+    const rx = RX * (1 - dryF * .08), ry = RY * (1 - dryF * .1);
+    if (cfg.plant || o.chloro) s += `<rect x="${CX - rx - 18}" y="${CY - ry - 18}" width="${rx * 2 + 36}" height="${ry * 2 + 36}" rx="60" fill="none" stroke="#7bb661" stroke-width="10" opacity=".85"/>`;
+    s += `<ellipse cx="${CX}" cy="${CY}" rx="${rx}" ry="${ry}" fill="url(#ccCyto)" stroke="${e.HP < 35 ? '#ff6b6b' : '#3f8f78'}" stroke-width="7"/>`;
+    if (sick > .3) s += `<ellipse cx="${CX}" cy="${CY}" rx="${rx}" ry="${ry}" fill="#8b5a3c" opacity="${(sick - .3) * .35}"/>`;
+    /* membrane channels */
+    for (let i = 0; i < o.chan; i++) { const a = SPOT.chan[i], x = CX + Math.cos(a) * rx, y = CY + Math.sin(a) * ry; s += `<g transform="translate(${x} ${y}) rotate(${a * 180 / Math.PI + 90})"><rect x="-11" y="-8" width="8" height="16" rx="3" fill="#2f7fd1"/><rect x="3" y="-8" width="8" height="16" rx="3" fill="#2f7fd1"/></g>`;
+      if (e.run && e.env.glu > .2) { const k = (T * .8 * e.env.glu + i * .37) % 1; s += `<circle cx="${x - Math.cos(a) * (k * 70 - 25)}" cy="${y - Math.sin(a) * (k * 70 - 25)}" r="4" fill="#ffcf3f" stroke="#c99a12"/>`; } }
+    /* vacuoles */
+    for (let i = 0; i < o.vac; i++) { const [x, y] = SPOT.vac[i], fill = .5 + .5 * e.Wt / 100; s += `<ellipse cx="${x}" cy="${y}" rx="${44 * fill}" ry="${34 * fill}" fill="#9fd3f5" stroke="#5aa5d6" stroke-width="2" opacity=".85"/>${L ? `<text x="${x}" y="${y + 4}" font-size="11" text-anchor="middle" fill="#245a80">vacuole</text>` : ''}`; }
+    /* ER bands hugging the nucleus, with ribosome dots */
+    for (let i = 0; i < o.er; i++) { const r = 92 + i * 16; s += `<path d="M${CX + r * .2},${CY - r} A${r},${r * .9} 0 0 1 ${CX + r * .2},${CY + r * .9}" fill="none" stroke="#e58fb0" stroke-width="7" stroke-dasharray="20 6" opacity=".9"/>`; }
+    for (let i = 0; i < o.ribo * 7; i++) { const onER = o.er && i % 2 === 0, a = -1.3 + hash(i + 40) * 2.6, r = onER ? 92 + (i % o.er) * 16 + 6 : 0; const [x, y] = onER ? [CX + Math.cos(a) * r * .9 + r * .12, CY + Math.sin(a) * r * .9] : inCell(i, 61);
+      s += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.2" fill="${o.nuc ? '#5b3fa8' : '#9a92b3'}"/>`; }
+    if (L && o.ribo) s += `<text x="${CX + 120}" y="${CY - 112}" font-size="11" fill="#5b3fa8">${o.er ? 'ER + ribosomes' : 'ribosomes'}</text>`;
+    else if (L && o.er) s += `<text x="${CX + 120}" y="${CY - 112}" font-size="11" fill="#b4517b">ER</text>`;
+    /* nucleus */
+    if (o.nuc) s += `<circle cx="${CX}" cy="${CY}" r="74" fill="url(#ccNuc)" stroke="#6a52b8" stroke-width="4"/><circle cx="${CX + 18}" cy="${CY - 10}" r="20" fill="#6a52b8" opacity=".7"/><path d="M${CX - 40},${CY + 20} q15,-20 30,0 t30,0" fill="none" stroke="#3d2a85" stroke-width="2.4"/>${L ? `<text x="${CX}" y="${CY + 52}" font-size="12" font-weight="700" text-anchor="middle" fill="#fff">nucleus</text>` : ''}`;
+    else s += `<circle cx="${CX}" cy="${CY}" r="74" fill="none" stroke="#3f8f78" stroke-width="2" stroke-dasharray="6 6" opacity=".6"/><text x="${CX}" y="${CY + 5}" font-size="12" text-anchor="middle" fill="#3f8f78">no nucleus</text>`;
+    /* Golgi */
+    for (let i = 0; i < o.golgi; i++) { const [x, y] = SPOT.golgi[i]; for (let k = 0; k < 4; k++) s += `<path d="M${x - 34 + k * 3},${y - 14 + k * 9} q34,-14 68,0" fill="none" stroke="#f0a43a" stroke-width="6" stroke-linecap="round"/>`; if (L) s += `<text x="${x}" y="${y + 34}" font-size="11" text-anchor="middle" fill="#a8681a">Golgi</text>`;
+      if (e.run && e.prod > .05) { const k = (T * .7 + i * .5) % 1; s += `<circle cx="${x + 34 + k * 90}" cy="${y - 10 - k * 40}" r="5" fill="#58b6e8" stroke="#2a7fb0"/>`; } }
+    /* mitochondria */
+    for (let i = 0; i < o.mito; i++) { const [x, y] = SPOT.mito[i], rot = hash(i + 9) * 180;
+      s += `<g transform="translate(${x} ${y}) rotate(${rot})"><ellipse rx="30" ry="15" fill="#f08a63" stroke="#b9512b" stroke-width="2.4"/><path d="M-20,0 q4,-10 8,0 t8,0 t8,0 t8,0 t8,0" fill="none" stroke="#b9512b" stroke-width="2"/></g>`;
+      if (e.run && e.burn > .05) { const k = (T * 1.6 + i * .3) % 1; s += `<path d="M${x + 6},${y - 18 - k * 30} l-6,9 h5 l-4,9 l10,-12 h-5 l4,-6z" fill="#ffd34d" opacity="${1 - k}"/>`; }
+      if (L && i === 0) s += `<text x="${x}" y="${y + 30}" font-size="11" text-anchor="middle" fill="#a8461f">mitochondrion</text>`; }
+    /* chloroplasts */
+    for (let i = 0; i < o.chloro; i++) { const [x, y] = SPOT.chloro[i]; s += `<g transform="translate(${x} ${y}) rotate(${hash(i + 3) * 60 - 30})"><ellipse rx="28" ry="16" fill="#69b84a" stroke="#3c7d2a" stroke-width="2.4"/>${[-14, -4, 6, 16].map(dx => `<rect x="${dx - 3}" y="-8" width="6" height="16" rx="2" fill="#2f6f22"/>`).join('')}</g>${L && i === 0 ? `<text x="${x}" y="${y + 30}" font-size="11" text-anchor="middle" fill="#2f6f22">chloroplast</text>` : ''}`; }
+    /* lysosomes */
+    for (let i = 0; i < o.lyso; i++) { const [x, y] = SPOT.lyso[i]; s += `<circle cx="${x}" cy="${y}" r="13" fill="#b07ae0" stroke="#7a45b0" stroke-width="2"/><circle cx="${x - 4}" cy="${y - 3}" r="2.4" fill="#e5d2f7"/><circle cx="${x + 4}" cy="${y + 3}" r="2" fill="#e5d2f7"/>${L && i === 0 ? `<text x="${x}" y="${y + 26}" font-size="11" text-anchor="middle" fill="#7a45b0">lysosome</text>` : ''}`; }
+    /* waste and viruses */
+    for (let i = 0; i < Math.min(40, Math.round(e.W / 3)); i++) { const [x, y] = inCell(i, 200); s += `<rect x="${x}" y="${y}" width="6" height="6" rx="1.5" fill="#7a5a3a" opacity=".75" transform="rotate(${hash(i) * 90} ${x} ${y})"/>`; }
+    for (let i = 0; i < Math.min(30, Math.round(e.V)); i++) { const [x, y] = inCell(i, 300), w = Math.sin(T * 3 + i) * 3; s += `<g transform="translate(${x + w} ${y})"><circle r="7" fill="#e5484d"/>${[0, 1, 2, 3, 4, 5].map(k => `<line x1="0" y1="0" x2="${Math.cos(k) * 11}" y2="${Math.sin(k) * 11}" stroke="#e5484d" stroke-width="2"/>`).join('')}</g>`; }
+    if (e.env.vir && e.run) for (let i = 0; i < 3; i++) { const a = T * .4 + i * 2.1, x = CX + Math.cos(a) * (rx + 40), y = CY + Math.sin(a) * (ry + 30); s += `<g transform="translate(${x} ${y})" opacity=".85"><circle r="7" fill="#e5484d"/>${[0, 1, 2, 3, 4, 5].map(k => `<line x1="0" y1="0" x2="${Math.cos(k) * 11}" y2="${Math.sin(k) * 11}" stroke="#e5484d" stroke-width="2"/>`).join('')}</g>`; }
+    if (e.env.light) s += `<g transform="translate(40 40)"><circle r="18" fill="#ffd34d"/>${[0, 1, 2, 3, 4, 5, 6, 7].map(k => `<line x1="${Math.cos(k * .785) * 24}" y1="${Math.sin(k * .785) * 24}" x2="${Math.cos(k * .785) * 32}" y2="${Math.sin(k * .785) * 32}" stroke="#ffd34d" stroke-width="3"/>`).join('')}</g>`;
+    /* HUD */
+    const bx = 668; let y = 34, hs = '';
+    hs += `<text x="${bx}" y="${y + 6}" font-size="14" font-weight="800" fill="#fff">Cell status · ${f(e.t)} min</text>`; y += 36;
+    const bars = [['Health', e.HP / 100, e.HP > 50 ? '#52d17c' : e.HP > 25 ? '#ffb347' : '#ff6b6b', f(e.HP) + '%'], ['ATP (energy)', e.A / 150, '#ffd34d', f(e.A)], ['Glucose inside', e.G / 30, '#ffcf3f', f(e.G)], ['Proteins ready', e.Pr / 60, '#58b6e8', f(e.Pr)], ['Waste', e.W / 100, e.W > 60 ? '#ff6b6b' : '#a07a52', f(e.W)]];
+    if (cfg.dry || e.env.dry) bars.push(['Water', e.Wt / 100, '#7cc4f0', f(e.Wt) + '%']);
+    bars.forEach(b => { hs += SimLab.bar(bx, y, 306, b[1], b[2], b[0], b[3]); y += 38; });
+    hs += `<text x="${bx}" y="${y + 2}" font-size="12" fill="#a9b6cc">Proteins made: <tspan fill="#fff" font-weight="700">${f(e.made)}</tspan> · Build points: <tspan fill="#fff" font-weight="700">${spent(e)}/${cfg.budget}</tspan></text>`; y += 24;
+    const pr = problems(e); hs += pr.length ? pr.slice(0, 3).map((t, i) => `<text x="${bx}" y="${y + i * 18}" font-size="12.5" font-weight="700" fill="#ff9a9a">⚠ ${t}</text>`).join('') : `<text x="${bx}" y="${y}" font-size="12.5" font-weight="700" fill="#7ee0a1">✓ No problems right now</text>`;
+    y += Math.max(1, Math.min(3, pr.length)) * 18;
+    s += `<rect x="${bx - 14}" y="14" width="336" height="${y - 14}" rx="12" fill="#0b1020" fill-opacity=".8"/>` + hs;
+    const envs = [e.env.glu < .5 ? 'Glucose outside: very low' : 'Glucose outside: normal', e.env.light ? 'Sunlight: on' : '', e.env.vir ? 'Viruses nearby' : '', e.env.dry ? 'Drought' : ''].filter(Boolean);
+    s += `<g transform="translate(${bx - 14} ${y + 10})"><rect width="336" height="${16 + envs.length * 18}" rx="10" fill="#0b1020" fill-opacity=".6"/>${envs.map((t, i) => `<text x="14" y="${22 + i * 18}" font-size="12" fill="#cfd8e8">${t}</text>`).join('')}</g>`;
+    if (e.log) s += `<g transform="translate(14 ${e.env.light ? 80 : 14})"><rect width="${Math.min(620, 20 + e.log.length * 7)}" height="30" rx="8" fill="#0b1020" fill-opacity=".8"/><text x="12" y="20" font-size="13" font-weight="700" fill="#ffd27a">${e.log}</text></g>`;
+    if (e.dead) s += `<g transform="translate(${CX} ${CY})"><rect x="-230" y="-40" width="460" height="80" rx="14" fill="#2a0d0d" fill-opacity=".92" stroke="#ff6b6b"/><text y="-8" font-size="19" font-weight="800" fill="#ffb4b4" text-anchor="middle">The cell died at ${f(e.t)} min</text><text y="20" font-size="13.5" fill="#fff" text-anchor="middle">${e.dead}. Press Restart and try again.</text></g>`;
+    else if (!e.run && e.t === 0) s += `<g transform="translate(${CX} 590)"><rect x="-200" y="-18" width="400" height="34" rx="17" fill="#0b1020" fill-opacity=".75"/><text y="4" font-size="13.5" font-weight="700" fill="#fff" text-anchor="middle">Build with the buttons, then press ▶ Run</text></g>`;
+    g.innerHTML = s;
+  }
+
+  /* ── the runner: stage, build panel, goal ── */
+  function city(R, def, cfg) {
+    const e = fresh(def); let T = 0, died = false;
+    const allow = cfg.allow || ORG.map(o => o[0]).filter(k => k !== 'chloro' && k !== 'vac');
+    const ctl = SimLab.panel(e, [
+      { html: `<div class="cc-build">${ORG.filter(o => allow.includes(o[0])).map(([k, n, nick, c]) => `<div class="cc-row" title="${n}"><span><b>${n}</b> <small>${nick} · ${c} pts</small></span><button class="btn sm" data-cm="${k}" aria-label="Remove ${n}">−</button><b class="cc-n" data-cn="${k}">0</b><button class="btn sm" data-cp="${k}" aria-label="Add ${n}">+</button></div>`).join('')}</div><div class="sim-note" id="ccInfo">Press <b>+</b> to add an organelle. You have <b>${cfg.budget}</b> build points.</div>` },
+      { btns: [{ id: 'run', label: '▶ Run', cls: 'primary', fn: () => { if (e.dead) return; e.run = !e.run; sync(); } }, { id: 'spd', label: 'Speed ×1', fn: () => { e.spd = e.spd === 1 ? 3 : 1; sync(); } }, { id: 'rs', label: 'Restart', fn: restart }] }
+    ]);
+    function sync() { ctl.btn('run').textContent = e.run ? '❚❚ Pause' : '▶ Run'; ctl.btn('spd').textContent = 'Speed ×' + e.spd;
+      $$('[data-cn]', ctl.box).forEach(x => { x.textContent = e.org[x.dataset.cn]; }); $$('[data-cp]', ctl.box).forEach(b => { const k = b.dataset.cp; b.disabled = e.org[k] >= MAX[k] || spent(e) + COST[k] > cfg.budget || (cfg.locked || []).includes(k); }); $$('[data-cm]', ctl.box).forEach(b => { const k = b.dataset.cm; b.disabled = !e.org[k] || (cfg.locked || []).includes(k); }); }
+    function restart() { Object.assign(e, fresh(cfg.restartTo ? cfg.restartTo() : def), { spd: e.spd }); died = false; cfg.onRestart && cfg.onRestart(e); sync(); G.check(); }
+    $$('[data-cp], [data-cm]', ctl.box).forEach(b => b.onclick = () => { const k = b.dataset.cp || b.dataset.cm, add = !!b.dataset.cp; if (e.dead) return;
+      if (add && (e.org[k] >= MAX[k] || spent(e) + COST[k] > cfg.budget)) return; if (!add && !e.org[k]) return;
+      e.org[k] += add ? 1 : -1; const o = ORG.find(x => x[0] === k); $('#ccInfo', ctl.box).innerHTML = `<b>${o[1]}</b> (${o[2]}): ${o[5]}`; SND.tone(add ? 620 : 300, .1, 'triangle', .05); sync(); cfg.onBuild && cfg.onBuild(e, k, add); G.check(); });
+    const G = SimLab.goals(R, { items: () => cfg.goal(e), q: cfg.q, name: def.name, winMsg: cfg.winMsg });
+    SimLab.stage(bg(), (g, dt) => {
+      T += dt;
+      if (e.run && !e.dead) {
+        let left = dt * e.spd; while (left > 1e-6) { const h = Math.min(.05, left); left -= h; const t0 = e.t; step(e, h);
+          (cfg.phases || []).forEach(ph => { if (t0 < ph.at && e.t >= ph.at) { Object.assign(e.env, ph.env); e.log = ph.text; SND.tone(240, .3, 'sawtooth', .05, 160); } });
+          if (e.HP <= 0) { e.dead = e.A <= 0 ? 'It ran out of energy (ATP)' : e.V > 5 ? 'Viruses took over' : e.Wt < 25 ? 'It dried out' : e.W > 60 ? 'Waste poisoned it' : 'It couldn’t repair itself'; e.run = false; SND.nope(); sync();
+            if (!died) { died = true; R.mistake(`Cell died (${e.dead.toLowerCase()})`, cfg.why || 'Each organelle has a job. Check which bar ran out or piled up, and add the organelle that fixes it.'); } break; }
+          if (cfg.until && e.t >= cfg.until) { e.run = false; sync(); break; } }
+        if (Math.floor(e.t * 2) !== Math.floor((e.t - dt * e.spd) * 2)) G.check();
+      }
+      draw(g, e, T, cfg);
+    });
+    sync();
+    return { e, G, ctl, sync, restart };
+  }
+
+  /* ── challenges ── */
+  const Q = {
+    power: { q: 'Which organelle turned glucose into ATP for your cell?', a: ['Mitochondrion', 'Nucleus', 'Golgi apparatus', 'Vacuole'], c: 0, e: 'Mitochondria carry out cellular respiration: glucose + oxygen → carbon dioxide + water + energy (ATP). They are the cell’s power plants.' },
+    protein: { q: 'Put the protein trip in order: where does a protein’s journey start?', a: ['Instructions in the nucleus → ribosome builds it → ER folds it → Golgi ships it', 'Golgi builds it → nucleus ships it → ribosome stores it', 'Mitochondria build it → vacuole ships it', 'ER reads the DNA → lysosome builds it'], c: 0, e: 'DNA in the nucleus carries the instructions. Ribosomes build the protein, the ER folds and moves it, and the Golgi packages and ships it.' },
+    virus: { q: 'How did lysosomes help your cell survive the viruses?', a: ['They broke down the viruses before the viruses could take over', 'They made more ATP', 'They copied the virus DNA', 'They stored extra water'], c: 0, e: 'Lysosomes are full of digestive enzymes. They break down waste, worn-out parts and invaders. Viruses hijack ribosomes to copy themselves, so destroying them quickly matters.' }
+  };
+  const C = (id, name, title, html, hint) => ({ id, name, title, html, hint });
+  const steps = [
+    C('power', 'Power up', 'Power up Cell City', 'Your cell is an empty city. Every part costs <b>build points</b>, and every part uses energy (ATP) to run.<br><br>Build a cell that makes its own energy: add a <b>nucleus</b>, then the parts that bring glucose in and turn it into ATP. Press <b>▶ Run</b> and get ATP up to <b>120</b> while keeping the cell alive for <b>30 minutes</b>.', 'Glucose comes in through membrane channels. Mitochondria turn it into ATP.'),
+    C('protein', 'Protein factory', 'Build a protein factory', 'Cells need proteins for repairs, signals and much more. Build a cell that delivers <b>60 proteins</b>.<br><br>Watch the <b>Proteins made</b> counter. If it barely moves, something in the protein path is missing.', 'A protein needs instructions (nucleus), a builder (ribosomes), an assembly line (ER) and a post office (Golgi). And all of them need ATP.'),
+    C('virus', 'Virus attack', 'Survive a virus attack', 'Viruses are circling. One gets in about every <b>5 minutes</b>, then copies itself using your ribosomes.<br><br>Keep the cell alive for <b>60 minutes</b>.', 'Lysosomes destroy viruses. Two may not be enough once they start multiplying.'),
+    C('diagnose', 'Cell doctor', 'Be the cell doctor', 'Two sick cells come in. For each one, press <b>▶ Run</b>, read the status panel, and <b>diagnose</b> what’s wrong. Then <b>fix it</b> (you get a few extra build points) and keep it alive for <b>20 minutes</b>.', 'Compare the bars: glucose piling up while ATP is empty means glucose isn’t being used.'),
+    C('survive', 'Survive the city', 'Keep the cell alive as things get harder', 'This cell is a <b>plant cell</b>, so chloroplasts and a big vacuole are available. Over <b>100 minutes</b> the glucose outside <b>runs out</b>, then <b>viruses</b> attack, then a <b>drought</b> hits.<br><br>You have <b>110</b> build points and can rebuild at any time (pause first if you need to think).', 'Chloroplasts make glucose when outside glucose runs low. Vacuoles store water for the drought. Lysosomes stop viruses.')
+  ];
+  const CASES = [
+    { name: 'Patient A', org: { nuc: 1, mito: 1, chan: 4, ribo: 4, er: 1, golgi: 1, lyso: 2 }, A: 40, G: 30, right: 0, fixed: e => e.A > 40 && e.org.mito >= 3 },
+    { name: 'Patient B', org: { nuc: 0, mito: 3, chan: 3, ribo: 4, er: 1, golgi: 1, lyso: 2 }, HP: 70, right: 3, fixed: e => e.org.nuc === 1 && e.made > 3 },
+    { name: 'Patient C', org: { nuc: 1, mito: 4, chan: 4, ribo: 3, er: 1, golgi: 1, lyso: 0 }, W: 70, right: 2, fixed: e => e.org.lyso >= 3 && e.W < 58 }
+  ];
+  const DX = ['Not enough mitochondria to turn glucose into ATP', 'Not enough membrane channels: glucose can’t get in', 'No lysosomes: waste is piling up', 'No nucleus: ribosomes have no instructions'];
+  const S = {
+    power: R => city(R, { name: 'Power up' }, { budget: 40, q: Q.power, allow: ['nuc', 'chan', 'mito', 'ribo', 'lyso'],
+      goal: e => [[e.org.nuc === 1, 'Add a nucleus'], [e.A >= 120, `ATP up to 120 (now ${f(e.A)})`], [e.t >= 30 && e.HP > 0, `Alive for 30 minutes (${f(e.t)})`]] }),
+    protein: R => city(R, { name: 'Protein factory', A: 100 }, { budget: 75, q: Q.protein, allow: ['nuc', 'chan', 'mito', 'ribo', 'er', 'golgi', 'lyso'],
+      goal: e => [[e.org.nuc && e.org.ribo, 'Nucleus and ribosomes'], [e.org.er && e.org.golgi, 'ER and Golgi'], [e.made >= 60, `Deliver 60 proteins (${f(e.made)})`]] }),
+    virus: R => city(R, { name: 'Virus attack', A: 120, G: 50, env: { vir: .2 } }, { budget: 80, q: Q.virus, until: 60, allow: ['nuc', 'chan', 'mito', 'ribo', 'er', 'golgi', 'lyso'],
+      why: 'Viruses hijack the ribosomes to copy themselves. Lysosomes destroy them, so build enough lysosomes before the viruses multiply.',
+      goal: e => [[e.t >= 60 && e.HP > 0, `Alive at 60 minutes (${f(e.t)})`]] }),
+    diagnose: R => {
+      const order = [CASES[0], Math.random() < .5 ? CASES[1] : CASES[2]]; let ci = 0, dx = [false, false], fx = [false, false], fixAt = null;
+      const mk = c => ({ name: c.name, org: c.org, A: c.A != null ? c.A : 80, G: c.G != null ? c.G : 30, HP: c.HP || 100, W: c.W || 0 });
+      const extra = () => Object.entries(order[ci].org).reduce((a, [k, v]) => a + v * COST[k], 0) + 14;
+      const cfg = { budget: extra(), allow: ['nuc', 'chan', 'mito', 'ribo', 'er', 'golgi', 'lyso'], locked: ORG.map(o => o[0]), restartTo: () => mk(order[ci]),
+        goal: e => [[dx[0], `${order[0].name}: diagnosed`], [fx[0], `${order[0].name}: fixed and alive 20 minutes`], [dx[1], `${order[1].name}: diagnosed`], [fx[1], `${order[1].name}: fixed and alive 20 minutes`]],
+        onBuild: () => {} };
+      const w = city(R, mk(order[0]), cfg);
+      const box = LabUI.html(''); box.className = 'cc-dx';
+      const ask = () => { box.innerHTML = `<div class="pl-lab">Diagnosis for ${order[ci].name}</div><div class="quiz"><div class="opts">${DX.map((t, i) => `<button class="opt" data-dx="${i}">${t}</button>`).join('')}</div></div>`;
+        $$('[data-dx]', box).forEach(b => b.onclick = () => { const i = +b.dataset.dx;
+          if (i === order[ci].right) { b.classList.add('right'); $$('[data-dx]', box).forEach(x => x.disabled = true); dx[ci] = true; SND.ok(); cfg.locked = []; w.sync(); K.msg('Right diagnosis. Now fix the cell and keep it alive for 20 minutes.', 'ok', 3500); w.G.check(); fixAt = null; }
+          else { b.classList.add('wrong'); b.disabled = true; R.mistake('Wrong diagnosis: ' + order[ci].name, 'Read the status bars: ' + DX[order[ci].right] + '.'); K.msg('Not that one. Look at which bar is empty or piling up.', 'bad', 3500); } }); };
+      ask();
+      K.loop(() => { if (!box.isConnected) return false; const e = w.e;
+        if (dx[ci] && !fx[ci] && e.run) { if (order[ci].fixed(e) && e.HP > 0) { if (fixAt == null) fixAt = e.t; if (e.t - fixAt >= 20) { fx[ci] = true; SND.ok(); K.sparkle({ x: CX, y: CY }, 30);
+          if (ci === 0) { ci = 1; K.msg(`${order[0].name} is healthy! Here comes ${order[1].name}.`, 'ok', 3500); cfg.budget = extra(); cfg.locked = ORG.map(o => o[0]); w.restart(); ask(); } w.G.check(); } } else fixAt = null; } });
+    },
+    survive: R => city(R, { name: 'Survive the city', A: 100, G: 40 }, { budget: 110, plant: true, dry: true, until: 100, allow: ORG.map(o => o[0]), winMsg: 'Your cell survived everything!',
+      phases: [{ at: 20, text: '20 min: the glucose outside is running out, for good! But the sun is shining.', env: { glu: .02, light: 1 } }, { at: 45, text: '45 min: viruses are attacking!', env: { vir: .22 } }, { at: 60, text: '60 min: drought! Water is scarce (viruses still around).', env: { dry: 1, vir: .12 } }],
+      why: 'Read the warning: a glucose shortage needs chloroplasts, viruses need lysosomes, and a drought needs vacuoles to store water.',
+      goal: e => [[e.t >= 20 && e.HP > 0, 'Get the city running (20 min)'], [e.t >= 45 && e.HP > 0, 'Survive the glucose shortage'], [e.t >= 60 && e.HP > 0, 'Survive the viruses'], [e.t >= 100 && e.HP > 0, `Survive the drought (${f(e.t)} of 100 min)`]] })
+  };
+  function finale() { city({ next() {}, mistake() {} }, { name: 'Free build', A: 100 }, { budget: 140, plant: true, allow: ORG.map(o => o[0]), goal: () => [[false, 'Free build: try any city you like']] }); }
+
+  return makeLab({
+    noSetup: true, fit: true, bg: () => '',
+    fresh: () => ({}), steps, S,
+    finale() { finale(); },
+    finaleMsg: 'All challenges done. Build any cell you like while you answer the questions.',
+    verdicts: [['City planner', 'You built cells that power themselves, make proteins and fight off trouble.'], ['Almost there', 'Nice work. Look over the questions you missed below.'], ['Practice again', 'Run the challenges once more and read what each organelle does.']], reviewLabel: 'Review these',
+    summary: () => 'You built a working cell, followed proteins from the nucleus to the Golgi, defended against viruses, diagnosed sick cells and kept a plant cell alive through shortage, viruses and drought.',
+    quiz: [
+      { q: 'Which organelle contains the cell’s DNA?', a: ['Nucleus', 'Mitochondrion', 'Ribosome', 'Lysosome'], c: 0, e: 'The nucleus holds the DNA, the instructions for making every protein the cell needs.' },
+      { q: 'A cell has plenty of glucose but almost no ATP. What is the most likely problem?', a: ['Too few working mitochondria', 'Too many lysosomes', 'No cell wall', 'Too much water'], c: 0, e: 'Mitochondria turn glucose into ATP. If glucose piles up while ATP stays low, the cell can’t use its fuel.' },
+      { q: 'Which organelles are found in plant cells but not animal cells?', a: ['Chloroplasts and a cell wall', 'Mitochondria and ribosomes', 'Nucleus and Golgi', 'Lysosomes and ER'], c: 0, e: 'Plant cells have chloroplasts for photosynthesis and a cell wall for support. They usually also have one large central vacuole.' },
+      { q: 'What do ribosomes make?', a: ['Proteins', 'Glucose', 'DNA', 'Water'], c: 0, e: 'Ribosomes read the instructions copied from DNA and link amino acids into proteins.' },
+      { q: 'Why does a cell need a cell membrane with channels?', a: ['To control what enters and leaves the cell', 'To make ATP', 'To store DNA', 'To digest waste'], c: 0, e: 'The cell membrane is selectively permeable: channels and transport proteins let needed materials like glucose in and keep others out.' }
+    ],
+    meta: { id: 'cellcity', short: 'Cell City', title: 'Cell City: Build and Survive', courses: ['ms-life'], time: '25–35 min',
+      summary: 'Build a working cell from organelles. Manage energy and proteins, fight off viruses, diagnose sick cells, and keep a plant cell alive as conditions get harder.',
+      objective: 'Describe the job of each major organelle and explain how they work together as a system to keep a cell alive.',
+      materials: ['A computer or tablet'], safety: ['No safety gear needed. This is a simulation.'],
+      ngss: [['MS-LS1-2', 'Develop and use a model to describe the function of a cell as a whole and ways the parts of cells contribute to the function.'], ['MS-LS1-1', 'Conduct an investigation to provide evidence that living things are made of cells.'], ['CCC 4', 'Systems and system models: organelles work together as parts of a system.']],
+      thumb: big => labThumb('cellcity', big) }
+  });
+})();
+
+/* ═══════════ MS Earth Science: "Volcano Engineer" (control a volcano's magma and predict its eruption) ═══════════
+   Viscosity (how thick the magma is) rises with silica and falls with temperature:
+     log₁₀ viscosity (Pa·s) ≈ 2 + 0.16·(silica % − 50) + 0.008·(1150 − temperature °C)
+   Thick magma traps gas bubbles, so pressure builds until it blasts out. Eruption size on the
+   Volcanic Explosivity Index (VEI 0–8):  VEI ≈ round(0.45·log viscosity + 0.7·gas % − 1), from 0 to 7.
+   That puts basalt (Kīlauea) near VEI 0, andesite and dacite (Mount St. Helens) at 3–5, and gassy rhyolite (Pinatubo) at 6. */
+const VolcanoLab = (() => {
+  const K = Kit, f = SimLab.f, hash = SimLab.hash;
+  const logVis = v => 2 + 0.16 * (v.si - 50) + 0.008 * (1150 - v.temp);
+  const veiOf = v => clamp(Math.round(0.45 * logVis(v) + 0.7 * v.gas - 1), 0, 7);
+  const rockOf = si => si < 52 ? 'Basaltic' : si < 63 ? 'Andesitic' : si < 69 ? 'Dacitic' : 'Rhyolitic';
+  const feel = lv => lv < 2.5 ? 'runny, like warm syrup' : lv < 4 ? 'like honey' : lv < 5.5 ? 'like peanut butter' : lv < 7 ? 'like cold toothpaste' : 'stiff, like tar';
+  const STYLE = ['Hawaiian: gentle lava flows', 'Strombolian: lava fountains and bursts', 'Vulcanian: short explosive blasts', 'Vulcanian: strong blasts and ash', 'Peléan / Plinian: huge ash column', 'Plinian: towering eruption column', 'Ultra-Plinian: catastrophic', 'Ultra-Plinian: supereruption scale'];
+  const PLUME = ['under 0.1 km', '0.1–1 km', '1–5 km', '3–15 km', '10–25 km', 'over 25 km', 'over 25 km', 'over 25 km'];
+  const fresh = o => Object.assign({ si: 50, temp: 1150, gas: 2, er: null, hist: [], T: 0 }, o);
+
+  /* ── drawing ── */
+  const GY = 430;
+  function bg() { return `<defs><linearGradient id="vSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5d8fc9"/><stop offset="1" stop-color="#d7e7f5"/></linearGradient>
+    <linearGradient id="vRock" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6b5442"/><stop offset="1" stop-color="#3b2c22"/></linearGradient></defs>
+    <rect width="1000" height="620" fill="url(#vSky)"/><rect y="${GY}" width="1000" height="190" fill="url(#vRock)"/>
+    ${[468, 512, 556].map((y, i) => `<path d="M0,${y} Q250,${y - 8 + i * 4} 500,${y + 4} T1000,${y - 2}" fill="none" stroke="#2a1f18" stroke-opacity=".35" stroke-width="2"/>`).join('')}`; }
+  const magmaCol = t => { const k = clamp((t - 700) / 550, 0, 1), a = [122, 29, 10], b = [255, 176, 46]; return `rgb(${a.map((v, i) => Math.round(v + (b[i] - v) * k))})`; };
+  function cone(v) { const k = clamp((v.si - 45) / 30, 0, 1), top = GY - 110 - 150 * k, half = 400 - 180 * k;
+    /* a point on the slope: sd = −1 (left) or 1 (right), t from 0 (crater) to 1 (base); the same curve as the cone's outline */
+    const at = (sd, t) => { const a = [470 + sd * 22, top], b = [470 + sd * half * .45, GY - 30], c2 = [470 + sd * half, GY], u = 1 - t; return [u * u * a[0] + 2 * u * t * b[0] + t * t * c2[0], u * u * a[1] + 2 * u * t * b[1] + t * t * c2[1]]; };
+    return { top, half, k, at, path: `M${470 - half},${GY} Q${470 - half * .45},${GY - 30} ${470 - 22},${top} L${470 + 22},${top} Q${470 + half * .45},${GY - 30} ${470 + half},${GY}Z` }; }
+  function draw(g, v, dt, cfg) {
+    v.T += dt; const T = v.T, c = cone(v), lv = logVis(v), mc = magmaCol(v.temp); let s = '';
+    s += `<path d="${c.path}" fill="#7d6a58" stroke="#4e3f33" stroke-width="3"/>`;
+    for (let i = 1; i < 4; i++) s += `<path d="M${470 - c.half * (1 - i * .2)},${GY - 4} Q470,${c.top + (GY - c.top) * i * .2} ${470 + c.half * (1 - i * .2)},${GY - 4}" fill="none" stroke="#5e4c3d" stroke-width="2" opacity=".4"/>`;
+    /* chamber and conduit */
+    s += `<ellipse cx="470" cy="560" rx="160" ry="44" fill="${mc}" stroke="#2a1208" stroke-width="3"/><rect x="462" y="${c.top}" width="16" height="${560 - c.top - 30}" fill="${mc}" stroke="#2a1208" stroke-width="2"/>`;
+    /* bubbles: more gas, more bubbles; thick magma holds them (slow and bigger) */
+    const nb = Math.round(v.gas * 9), speed = clamp(60 / (1 + Math.max(0, lv - 1.5) * 1.4), 4, 60), size = 2 + clamp(lv - 2, 0, 6) * .45;
+    for (let i = 0; i < nb; i++) { const x = 330 + hash(i) * 280, y0 = 590 - hash(i + 7) * 50, y = y0 - ((T * speed + hash(i + 3) * 50) % 50); s += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(size * (.7 + hash(i + 2) * .6)).toFixed(1)}" fill="#fff4d6" opacity=".55"/>`; }
+    for (let i = 0; i < Math.round(v.gas * 2); i++) { const y = 520 - ((T * speed * 2 + i * 41) % (520 - c.top)); s += `<circle cx="${470 + Math.sin(i + T) * 3}" cy="${y.toFixed(1)}" r="${size.toFixed(1)}" fill="#fff4d6" opacity=".55"/>`; }
+    /* eruption */
+    const er = v.er;
+    if (er) { er.t += dt; const P = clamp(er.t / er.build, 0, 1), go = er.t > er.build, tt = er.t - er.build, vei = er.vei;
+      if (!go) { s += `<g transform="translate(470 ${c.top - 26})"><text font-size="13" font-weight="800" text-anchor="middle" fill="#ffd27a" stroke="#1a0c06" stroke-width="3" paint-order="stroke">pressure building ${Math.round(P * 100)}%</text></g>`;
+        if (vei >= 2) s += `<path d="${c.path}" fill="none" stroke="#ff8a3d" stroke-width="${2 + P * 4}" opacity="${P * .8}" transform="translate(${Math.sin(T * 40) * P * 2} 0)"/>`; }
+      else if (vei <= 1) { /* gentle: fountain and flows */
+        const fh = 30 + vei * 60; for (let i = 0; i < 26; i++) { const a = (hash(i) - .5) * (.6 + vei * .5), k = ((tt * 1.3 + hash(i + 5)) % 1), x = 470 + Math.sin(a) * k * fh * 1.6, y = c.top - (Math.cos(a) * fh * k - 90 * k * k); s += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${3 + hash(i) * 3}" fill="${hash(i + 1) > .5 ? '#ffd34d' : '#ff6a1a'}"/>`; }
+        const L = clamp(tt / 4, 0, 1) * .97; [-1, 1].forEach(sd => { const pts = [...Array(13)].map((_, i) => c.at(sd, L * i / 12)).map(q => `${q[0].toFixed(1)},${(q[1] - 4).toFixed(1)}`).join(' '); s += `<polyline points="${pts}" fill="none" stroke="#ff6a1a" stroke-width="${10 - L * 3}" stroke-linecap="round" stroke-linejoin="round"/><polyline points="${pts}" fill="none" stroke="#ffd34d" stroke-width="3" stroke-linecap="round" opacity=".8"/>`; }); }
+      else { /* explosive: ash column, bombs, pyroclastic flows */
+        const H = Math.min(c.top - 20, 40 + vei * 52), rise = clamp(tt / 2.5, 0, 1), top = c.top - H * rise;
+        for (let i = 0; i < 18 + vei * 6; i++) { const k = hash(i + 11), y = c.top - H * rise * k, w = 18 + k * (30 + vei * 12) + Math.sin(T * 2 + i) * 6, x = 470 + (hash(i + 3) - .5) * w; s += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(14 + k * (12 + vei * 5)).toFixed(1)}" fill="${['#5b5650', '#77716a', '#8f8982'][i % 3]}" opacity=".85"/>`; }
+        if (vei >= 4 && rise > .7) for (let i = 0; i < 12; i++) { const k = i / 11, sp = (rise - .7) / .3 * (90 + vei * 40); s += `<ellipse cx="${(470 + (k - .5) * 2 * sp).toFixed(1)}" cy="${(top + Math.sin(i) * 6).toFixed(1)}" rx="${40 + vei * 6}" ry="${16 + vei * 2}" fill="#6d6761" opacity=".8"/>`; }
+        for (let i = 0; i < 6 + vei * 2; i++) { const a = (hash(i + 20) - .5) * 2.4, k = (tt * .7 + hash(i + 30)) % 1, x = 470 + Math.sin(a) * k * 260, y = c.top - Math.cos(a) * 200 * k + 300 * k * k; if (y < GY) s += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4" fill="#2d2622"/>`; }
+        if (vei >= 4) { const L = clamp((tt - 1) / 3, 0, 1); [-1, 1].forEach(sd => { for (let i = 0; i < 6; i++) { const q = c.at(sd, L * (i + 1) / 6); s += `<circle cx="${q[0].toFixed(1)}" cy="${(q[1] - 14 - i * 2).toFixed(1)}" r="${18 + i * 3}" fill="#8a837b" opacity=".75"/>`; } }); }
+        s += `<text x="${470 + 120}" y="${Math.max(40, top + 10)}" font-size="13" font-weight="700" fill="#fff" stroke="#1a1410" stroke-width="3" paint-order="stroke">ash column ${PLUME[vei]}</text>`; }
+      if (go && !er.done && tt > 4.5) { er.done = true; cfg.onErupt && cfg.onErupt(er); }
+    }
+    /* HUD: magma readouts and the VEI scale */
+    s += SimLab.hud(14, 14, 290, [['Magma type', rockOf(v.si)], ['Silica', f(v.si) + ' %'], ['Temperature', f(v.temp) + ' °C'], ['Dissolved gas', f(v.gas, 1) + ' %'], ['Viscosity', `10^${f(lv, 1)} Pa·s`, '#ffd27a'], ['Feels', feel(lv), '#ffd27a']], 'Magma');
+    const vx = 870, vy = 40; s += `<g transform="translate(${vx} ${vy})"><rect x="-14" y="-12" width="128" height="${8 * 30 + 40}" rx="10" fill="#0b1020" fill-opacity=".74"/><text x="0" y="8" font-size="13" font-weight="800" fill="#fff">VEI scale</text>`;
+    for (let i = 7; i >= 0; i--) { const y = 20 + (7 - i) * 30, on = er && er.t > er.build && er.vei === i; s += `<rect x="0" y="${y}" width="${30 + i * 9}" height="22" rx="5" fill="${['#ffd34d', '#ffbe3d', '#ffa13a', '#ff8236', '#f2622f', '#d9482b', '#b33124', '#86201b'][i]}" opacity="${on ? 1 : .35}" ${on ? 'stroke="#fff" stroke-width="2.5"' : ''}/><text x="6" y="${y + 16}" font-size="12" font-weight="800" fill="#1a0c06">${i}</text>`; }
+    s += `</g>`;
+    if (er && er.t > er.build) s += `<g transform="translate(14 ${GY - 92})"><rect width="350" height="76" rx="10" fill="#0b1020" fill-opacity=".8"/><text x="12" y="24" font-size="15" font-weight="800" fill="#ffd27a">VEI ${er.vei} · ${er.vei <= 1 ? 'effusive' : 'explosive'}</text><text x="12" y="46" font-size="12.5" fill="#fff">${STYLE[er.vei]}</text><text x="12" y="65" font-size="12" fill="#a9b6cc">Ash column ${PLUME[er.vei]}${er.label ? ' · ' + er.label : ''}</text></g>`;
+    if (cfg.cards) s += cfg.cards(v);
+    g.innerHTML = s;
+  }
+
+  /* ── the runner ── */
+  function lab(R, def, cfg) {
+    const v = fresh(def), lock = cfg.lock || {};
+    const ctl = SimLab.panel(v, [
+      { k: 'si', label: 'Silica content (SiO₂)', min: 45, max: 75, step: 1, unit: ' %', lock: lock.si },
+      { k: 'temp', label: 'Magma temperature', min: 700, max: 1250, step: 10, unit: ' °C', lock: lock.temp },
+      { k: 'gas', label: 'Dissolved gas (water vapor, CO₂)', min: .5, max: 6, step: .1, fmt: x => f(x, 1) + ' %', lock: lock.gas },
+      ...(cfg.extra ? [{ html: cfg.extra }] : []),
+      { btns: [{ id: 'go', label: 'Build pressure and erupt', cls: 'primary', fn: erupt }, ...(cfg.btns || [])] }
+    ], () => { if (v.er && v.er.done) v.er = null; cfg.onChange && cfg.onChange(v); G.check(); });
+    function erupt() { if (v.er && !v.er.done) return; if (cfg.before && cfg.before(v) === false) return; const vei = veiOf(v);
+      v.er = { t: 0, build: 1.2 + clamp(logVis(v) - 2, 0, 6) * .35, vei, si: v.si, temp: v.temp, gas: v.gas, done: false, label: cfg.label ? cfg.label(v) : '' };
+      SND.tone(80, 1.2, 'sawtooth', .05, 40); K.after(v.er.build * 1000, () => { if (vei <= 1) SND.noise(.6, 900, .1, .5); else { SND.crash(); SND.noise(1.4, 500, .2, 1.2); } }); }
+    const G = SimLab.goals(R, { items: () => cfg.goal(v), q: cfg.q, name: def.name, winMsg: cfg.winMsg });
+    SimLab.stage(bg(), (g, dt) => draw(g, v, dt, Object.assign(cfg, { onErupt: er => { v.hist.push(er); cfg.after && cfg.after(er, v); G.check(); } })));
+    return { v, ctl, G };
+  }
+
+  /* ── challenges ── */
+  const Q = {
+    silica: { q: 'What happened to the magma as you added more silica?', a: ['It got thicker (more viscous)', 'It got runnier', 'It got hotter', 'Nothing changed'], c: 0, e: 'Silica links up into long chains in the melt. More silica means more chains tangling together, so the magma flows less easily: higher viscosity.' },
+    gas: { q: 'Why did the gas-rich, thick magma explode instead of flowing?', a: ['Thick magma traps gas bubbles, so pressure builds until it blasts out', 'Gas makes magma cooler', 'Gas turns into lava', 'Thick magma has no gas at all'], c: 0, e: 'In runny magma, bubbles rise and escape gently. In thick magma they can’t escape, so pressure builds until the magma shatters into ash and blasts out, like shaking a soda bottle.' },
+    temp: { q: 'With the same silica and gas, how did cooling the magma change the eruption?', a: ['Cooler magma was thicker, so the eruption was more explosive', 'Cooler magma was runnier and gentler', 'Temperature had no effect', 'Cooler magma had no gas'], c: 0, e: 'Hot magma flows more easily. As magma cools, it gets more viscous, traps more gas and erupts more explosively.' },
+    predict: { q: 'Which clue was the best sign that a volcano would erupt explosively?', a: ['High silica and lots of dissolved gas', 'Low silica and high temperature', 'A wide, gently sloping shape', 'Very little gas'], c: 0, e: 'High silica (and lower temperature) makes magma viscous, and lots of dissolved gas gives it the pressure to explode. Steep stratovolcanoes are usually built by this kind of magma.' }
+  };
+  const C = (id, name, title, html, hint) => ({ id, name, title, html, hint });
+  const steps = [
+    C('silica', 'Silica and viscosity', 'Silica makes magma thick', 'Viscosity is how much a liquid resists flowing: honey is more viscous than water.<br><br>Start with low-silica magma and press <b>Build pressure and erupt</b> to see a <b>gentle lava flow</b>. Then raise the <b>silica</b> until the magma is at least <b>10⁶ Pa·s</b> (like cold toothpaste) and watch how the volcano’s shape changes too.', 'Viscosity is shown as a power of ten: 10⁶ is a million times thicker than 10⁰.'),
+    C('gas', 'Gas pressure', 'Gas pressure', 'This dacite magma (like Mount St. Helens) has fixed silica and temperature. Only the <b>dissolved gas</b> changes.<br><br>Make one eruption that stays <b>VEI 3 or lower</b>, and one that reaches <b>VEI 5 or higher</b>.', 'Try the gas slider near 1 %, then near 6 %.'),
+    C('temp', 'Temperature', 'Hot magma vs cool magma', 'Silica (60 %) and gas (3 %) are fixed. Erupt <b>hot</b> magma (<b>1150 °C or more</b>) and <b>cool</b> magma (<b>850 °C or less</b>), then compare the viscosity and the VEI.', 'Watch the viscosity readout as you drag the temperature slider.'),
+    C('predict', 'Predict the eruption', 'Which volcano will explode?', 'Three volcanoes are rumbling. Use their <b>magma data</b> (on the stage) to <b>predict</b> which one will be the <b>most explosive</b>, and how big its eruption will be. Then test all three.', 'Explosive eruptions need thick magma (high silica, cooler) and lots of gas.')
+  ];
+  const MYST = [{ n: 'Volcano A', si: 49, temp: 1180, gas: 1.0, shape: 'wide, gentle slopes' }, { n: 'Volcano B', si: 61, temp: 980, gas: 3.0, shape: 'steep cone' }, { n: 'Volcano C', si: 73, temp: 780, gas: 4.5, shape: 'steep, lava dome' }];
+  const S = {
+    silica: R => { let flow = false, thick = false;
+      lab(R, { name: 'Silica and viscosity', si: 48, temp: 1100, gas: 1.2 }, { q: Q.silica, lock: { temp: true, gas: true },
+        onChange: v => { if (logVis(v) >= 6) thick = true; },
+        after: er => { if (er.vei <= 1) flow = true; },
+        goal: v => [[flow, 'Erupt a gentle lava flow (VEI 0–1)'], [thick || logVis(v) >= 6, `Raise the viscosity to 10⁶ Pa·s or more (now 10^${f(logVis(v), 1)})`]] }); },
+    gas: R => { let lo = null, hi = null;
+      lab(R, { name: 'Gas pressure', si: 66, temp: 900, gas: 2 }, { q: Q.gas, lock: { si: true, temp: true },
+        after: er => { if (er.vei <= 3) lo = er; if (er.vei >= 5) hi = er; },
+        goal: () => [[!!lo, lo ? `Low-gas eruption: VEI ${lo.vei} at ${f(lo.gas, 1)} % gas` : 'An eruption of VEI 3 or lower'], [!!hi, hi ? `High-gas eruption: VEI ${hi.vei} at ${f(hi.gas, 1)} % gas` : 'An eruption of VEI 5 or higher']] }); },
+    temp: R => { let hot = null, cool = null;
+      lab(R, { name: 'Temperature', si: 60, temp: 1000, gas: 3 }, { q: Q.temp, lock: { si: true, gas: true },
+        after: er => { if (er.temp >= 1150) hot = er; if (er.temp <= 850) cool = er; },
+        goal: () => [[!!hot, hot ? `Hot (${hot.temp} °C): VEI ${hot.vei}` : 'Erupt at 1150 °C or hotter'], [!!cool, cool ? `Cool (${cool.temp} °C): VEI ${cool.vei}` : 'Erupt at 850 °C or cooler']] }); },
+    predict: R => {
+      const order = MYST.map((m, i) => i).sort(() => Math.random() - .5).map(i => MYST[i]).map((m, i) => Object.assign({}, m, { n: 'Volcano ' + 'ABC'[i] }));
+      const truth = order.map(m => veiOf(m)), most = truth.indexOf(Math.max(...truth)); let pick = null, size = null, tested = new Set(), cur = 0;
+      const bands = [[0, 1, 'VEI 0–1: gentle lava flows'], [2, 3, 'VEI 2–3: moderate blasts'], [4, 5, 'VEI 4–5: large explosive'], [6, 8, 'VEI 6 or more: huge']];
+      const W = lab(R, Object.assign({ name: 'Predict' }, order[0]), { q: Q.predict, lock: { si: true, temp: true, gas: true }, label: () => order[cur].n,
+        extra: `<div class="sim-pick" id="vnPick">${order.map((m, i) => `<button class="btn sm ${i === 0 ? 'on' : ''}" data-vn="${i}">${m.n}</button>`).join('')}</div>
+          <div class="sim-note" id="vnPred"></div>`,
+        before: () => { if (pick == null || size == null) { K.msg('Make your prediction first: which volcano, and how big?', 'bad', 3200); return false; } },
+        after: er => { tested.add(cur); if (tested.size === 3) { const ok = pick === most; const okSize = truth[most] >= bands[size][0] && truth[most] <= bands[size][1];
+          K.msg(ok && okSize ? `Correct! ${order[most].n} erupted at VEI ${truth[most]}.` : `${order[most].n} was the most explosive, at VEI ${truth[most]}.`, ok && okSize ? 'ok' : 'bad', 5000);
+          if (!ok) R.mistake('Predicted the wrong volcano', 'The most explosive magma has the most silica, the lowest temperature and the most gas.');
+          else if (!okSize) R.mistake('Predicted the wrong eruption size', `It reached VEI ${truth[most]}. Very viscous, gas-rich magma makes the biggest eruptions.`); } },
+        cards: () => `<g transform="translate(322 14)"><rect width="520" height="116" rx="10" fill="#0b1020" fill-opacity=".8"/><text x="14" y="22" font-size="13" font-weight="800" fill="#fff">Magma data</text>
+          ${order.map((m, i) => `<g transform="translate(${14 + i * 170} 44)"><text font-size="12.5" font-weight="800" fill="${i === cur ? '#ffd27a' : '#fff'}">${m.n}${tested.has(i) ? ` · VEI ${truth[i]}` : ''}</text><text y="18" font-size="11.5" fill="#cfd8e8">${m.si} % silica · ${m.temp} °C</text><text y="34" font-size="11.5" fill="#cfd8e8">${f(m.gas, 1)} % dissolved gas</text><text y="50" font-size="11.5" fill="#cfd8e8">${m.shape}</text></g>`).join('')}</g>`,
+        goal: () => [[pick != null && size != null, 'Predict the most explosive volcano and its size'], [tested.size === 3, `Erupt all three to test it (${tested.size}/3)`]] });
+      const paint = () => { $('#vnPred').innerHTML = `<b>Your prediction.</b> Most explosive: ${order.map((m, i) => `<button class="btn sm ${pick === i ? 'on' : ''}" data-pk="${i}" ${pick != null && tested.size ? 'disabled' : ''}>${m.n}</button>`).join(' ')}<br>Its size: ${bands.map((b, i) => `<button class="btn sm ${size === i ? 'on' : ''}" data-sz="${i}" ${pick != null && size != null && tested.size ? 'disabled' : ''}>${b[2]}</button>`).join(' ')}`;
+        $$('[data-pk]').forEach(b => b.onclick = () => { pick = +b.dataset.pk; paint(); W.G.check(); }); $$('[data-sz]').forEach(b => b.onclick = () => { size = +b.dataset.sz; paint(); W.G.check(); }); };
+      paint();
+      $$('[data-vn]').forEach(b => b.onclick = () => { if (W.v.er && !W.v.er.done) return; cur = +b.dataset.vn; Object.assign(W.v, { si: order[cur].si, temp: order[cur].temp, gas: order[cur].gas, er: null }); W.ctl.sync(); $$('[data-vn]').forEach(x => x.classList.toggle('on', x === b)); });
+    }
+  };
+  function finale() { lab({ next() {}, mistake() {} }, { name: 'Free play', si: 60, temp: 1000, gas: 3 }, { goal: () => [[false, 'Free play: design any magma and erupt it']] }); }
+
+  return makeLab({
+    noSetup: true, fit: true, bg: () => '',
+    fresh: () => ({}), steps, S,
+    finale() { finale(); },
+    finaleMsg: 'All challenges done. Design any volcano you like while you answer the questions.',
+    verdicts: [['Volcano engineer', 'You can read magma data and predict how a volcano will erupt.'], ['Almost there', 'Nice work. Look over the questions you missed below.'], ['Practice again', 'Run the challenges once more and watch the viscosity readout.']], reviewLabel: 'Review these',
+    summary: () => 'You linked silica, temperature and gas to viscosity and eruption size, and predicted which volcano would erupt most explosively.',
+    quiz: [
+      { q: 'Which magma is the most viscous?', a: ['High silica, low temperature', 'Low silica, high temperature', 'Low silica, low gas', 'High temperature, high gas'], c: 0, e: 'Silica makes magma thick and heat makes it runny, so high-silica, cooler magma is the most viscous.' },
+      { q: 'Hawaiian volcanoes like Kīlauea usually have gentle lava flows because their magma is…', a: ['Low in silica and very hot, so gas escapes easily', 'High in silica and very gassy', 'Cold and stiff', 'Made of ash'], c: 0, e: 'Basaltic magma is low in silica and hot, so it flows easily and bubbles escape without building much pressure.' },
+      { q: 'What does the VEI (Volcanic Explosivity Index) measure?', a: ['How explosive an eruption is (erupted volume and ash column height)', 'The temperature of lava', 'How old a volcano is', 'How many earthquakes happen'], c: 0, e: 'VEI runs from 0 (gentle lava flows) to 8 (supereruptions). Each step up means about ten times more material erupted.' },
+      { q: 'Scientists notice a volcano’s gas emissions rising and the ground swelling. What does this most likely mean?', a: ['Magma and gas pressure are building underground', 'The volcano is going extinct', 'The magma is cooling and becoming runnier', 'Nothing important'], c: 0, e: 'Swelling ground and more gas are signs that magma is rising and pressure is building, so an eruption may be coming.' },
+      { q: 'Why are steep, cone-shaped stratovolcanoes often more dangerous than wide shield volcanoes?', a: ['Their thick, gassy magma tends to erupt explosively', 'They are always taller than mountains', 'They only erupt lava', 'They have no magma chamber'], c: 0, e: 'Stratovolcanoes are built by viscous, silica-rich magma that traps gas, leading to explosive eruptions with ash and pyroclastic flows.' }
+    ],
+    meta: { id: 'volcano', short: 'Volcano Engineer', title: 'Volcano Engineer', courses: ['ms-earth'], time: '20–30 min',
+      summary: 'Control a volcano’s silica, temperature and gas. Watch viscosity change, compare gentle lava flows with explosive ash columns, and predict which volcano will explode.',
+      objective: 'Explain how silica content, temperature and dissolved gas affect magma viscosity and eruption style, and use magma data to predict an eruption’s explosivity.',
+      materials: ['A computer or tablet'], safety: ['No safety gear needed. This is a simulation.'],
+      ngss: [['MS-ESS3-2', 'Analyze and interpret data on natural hazards to forecast future catastrophic events and inform the development of technologies to mitigate their effects.'], ['MS-ESS2-2', 'Construct an explanation based on evidence for how geoscience processes have changed Earth’s surface at varying time and spatial scales.'], ['SEP 4', 'Analyzing and interpreting data: use magma data to predict eruption size.']],
+      thumb: big => labThumb('volcano', big) }
+  });
+})();
+
+/* ═══════════ MS Earth Science: "Weather Forecast Command Center" (a weather map, a storm and a city to protect) ═══════════
+   A simple forecast model:
+     wind speed at the city (km/h) ≈ 2.4 × (1025 − central pressure)          air rushes from high to low pressure
+     dew point ≈ air temperature − (100 − relative humidity) ÷ 5                (°C, a common rule of thumb)
+     cloud base ≈ 125 m × (temperature − dew point)                              rising air cools until it reaches the dew point
+     lift (m) ≈ 60 × (1025 − pressure) + 100 × front temperature difference     low pressure and fronts push air upward
+   Lift above the cloud base makes clouds; much more lift makes rain; a lot of lift at a strong front makes thunderstorms.
+   In the Northern Hemisphere, winds circle a low counterclockwise and spiral in toward its center. */
+const WeatherLab = (() => {
+  const K = Kit, f = SimLab.f, hash = SimLab.hash;
+  const TA = 22; /* warm-air temperature at the city, °C */
+  function model(w) {
+    const dP = 1025 - w.p, wind = Math.max(3, 2.4 * dP), td = TA - (100 - w.rh) / 5, base = Math.max(0, 125 * (TA - td)), lift = Math.max(0, 60 * dP + 100 * w.grad), over = lift - base;
+    let cat = over < 0 ? 0 : over < 800 ? 1 : over < 1800 ? 2 : over < 3000 ? 3 : w.grad >= 12 ? 4 : 3;
+    if (cat === 4 && wind >= 80) cat = 5;
+    return { dP, wind, td, base, lift, over, cat, hurricane: wind >= 119 };
+  }
+  const CAT = ['Clear skies', 'Clouds, no rain', 'Light rain', 'Heavy rain', 'Thunderstorms', 'Severe storm: damaging winds'];
+  const CATC = ['#7ee0a1', '#cfd8e8', '#8fc2ff', '#4f8ff7', '#ffb347', '#ff6b6b'];
+  const fresh = o => Object.assign({ p: 1013, rh: 60, grad: 8, Lx: 230, Ly: 300, T: 0 }, o);
+  const CITY = [500, 330];
+  const compass = deg => ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'][Math.round(((deg % 360) + 360) % 360 / 45) % 8];
+  /* wind direction at a point: counterclockwise around the low, turned 25° inward. Returns the direction the wind blows TOWARD (screen angle) */
+  const windAt = (w, x, y) => { const dx = x - w.Lx, dy = y - w.Ly, a = Math.atan2(dy, dx); return a - Math.PI / 2 - .44; };
+  const fromDeg = (w, x, y) => { const a = windAt(w, x, y), tx = Math.cos(a), ty = Math.sin(a); return (Math.atan2(-tx, ty) * 180 / Math.PI + 360) % 360; }; /* meteorological "from" direction, 0 = north */
+
+  function bg() { return `<defs><linearGradient id="wxSea" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#3f7fb8"/><stop offset="1" stop-color="#2a5f94"/></linearGradient></defs>
+    <rect width="1000" height="620" fill="#98b56f"/><path d="M590,0 Q560,120 600,220 T575,420 T620,620 L1000,620 L1000,0Z" fill="url(#wxSea)"/>
+    ${[...Array(18)].map((_, i) => `<path d="M${30 + hash(i) * 520},${40 + hash(i + 9) * 540} q14,-10 28,0" fill="none" stroke="#7d9b5a" stroke-width="2" opacity=".6"/>`).join('')}
+    <path d="M60,500 Q160,470 250,520 T430,560" fill="none" stroke="#6fa8d8" stroke-width="5" opacity=".8"/>`; }
+  function arrow(x, y, a, len, col, wdt = 2.2) { const x2 = x + Math.cos(a) * len, y2 = y + Math.sin(a) * len; return `<line x1="${x.toFixed(1)}" y1="${y.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${col}" stroke-width="${wdt}" stroke-linecap="round"/><path d="M${x2.toFixed(1)},${y2.toFixed(1)} l${(Math.cos(a + 2.6) * 7).toFixed(1)},${(Math.sin(a + 2.6) * 7).toFixed(1)} l${(Math.cos(a - 2.6) * 7 - Math.cos(a + 2.6) * 7).toFixed(1)},${(Math.sin(a - 2.6) * 7 - Math.sin(a + 2.6) * 7).toFixed(1)}z" fill="${col}"/>`; }
+  function draw(g, w, dt, cfg) {
+    w.T += dt; const T = w.T, M = model(w), Lx = w.Lx, Ly = w.Ly; let s = '';
+    /* high pressure */
+    s += `<g opacity=".8">${[60, 110].map(r => `<ellipse cx="840" cy="90" rx="${r * 1.3}" ry="${r}" fill="none" stroke="#fff" stroke-width="1.5" opacity=".55"/>`).join('')}</g><text x="840" y="100" font-size="34" font-weight="900" fill="#2f6fd6" text-anchor="middle" stroke="#fff" stroke-width="3" paint-order="stroke">H</text><text x="840" y="122" font-size="11" fill="#fff" text-anchor="middle">1030 hPa</text>`;
+    /* isobars around the low: one every 4 hPa up to 1024; closer together = steeper pressure gradient */
+    const rings = Math.max(1, Math.floor(M.dP / 4)); for (let k = 1; k <= rings; k++) { const r = 18 + k * (300 / (rings + 1)); s += `<ellipse cx="${Lx}" cy="${Ly}" rx="${r * 1.25}" ry="${r}" fill="none" stroke="#fff" stroke-width="1.4" opacity="${.65 - k * .02}"/>`; if (k % 2 === 0 || rings < 5) s += `<text x="${Lx + r * 1.25 * .7}" y="${Ly - r * .7}" font-size="10" fill="#fff" opacity=".85">${Math.round(w.p + k * 4)}</text>`; }
+    /* fronts from the low: cold (blue, triangles) and warm (red, half circles); stronger temperature difference = bolder */
+    const fa = clamp(.25 + w.grad / 25, .25, 1);
+    const cf = [...Array(7)].map((_, i) => [Lx - 10 - i * 18, Ly + 20 + i * 40 + i * i * 2]), wf = [...Array(6)].map((_, i) => [Lx + 20 + i * 42, Ly + 14 + i * 10 + i * i]);
+    s += `<polyline points="${cf.map(q => q.join(',')).join(' ')}" fill="none" stroke="#2f6fd6" stroke-width="4" opacity="${fa}"/>${cf.slice(1).map(q => `<path d="M${q[0]},${q[1]} l-12,-4 l2,12z" fill="#2f6fd6" opacity="${fa}"/>`).join('')}`;
+    s += `<polyline points="${wf.map(q => q.join(',')).join(' ')}" fill="none" stroke="#e5484d" stroke-width="4" opacity="${fa}"/>${wf.slice(1).map(q => `<path d="M${q[0] - 6},${q[1]} a6,6 0 0 1 12,0z" fill="#e5484d" opacity="${fa}"/>`).join('')}`;
+    /* clouds and rain: around the low and along the fronts, when the air rises past its cloud base */
+    if (M.cat >= 1) { const n = 8 + M.cat * 5, dark = M.cat >= 3;
+      for (let i = 0; i < n; i++) { const on = i % 3, base = on === 0 ? [Lx, Ly] : on === 1 ? cf[i % cf.length] : wf[i % wf.length], x = base[0] + (hash(i) - .5) * 90 + Math.sin(T * .3 + i) * 6, y = base[1] + (hash(i + 4) - .5) * 60;
+        s += `<g opacity="${.6 + M.cat * .06}"><ellipse cx="${x}" cy="${y}" rx="${26 + M.cat * 4}" ry="${14 + M.cat * 2}" fill="${dark ? '#6c7686' : '#f4f6fa'}"/><ellipse cx="${x + 16}" cy="${y - 8}" rx="${16 + M.cat * 2}" ry="${11 + M.cat}" fill="${dark ? '#7b8595' : '#fff'}"/></g>`;
+        if (M.cat >= 2) for (let k = 0; k < M.cat; k++) { const rx = x - 18 + k * 12, ry = y + 14 + ((T * 140 + k * 13 + i * 7) % 26); s += `<line x1="${rx}" y1="${ry}" x2="${rx - 3}" y2="${ry + 7}" stroke="#2f6fd6" stroke-width="1.6"/>`; }
+        if (M.cat >= 4 && (Math.floor(T * 3 + i) % 9 === 0)) s += `<path d="M${x},${y + 8} l-8,16 h7 l-6,16 l16,-22 h-8 l6,-10z" fill="#ffe36b"/>`; } }
+    /* wind arrows on a grid: speed shown by length and color */
+    for (let gx = 40; gx < 600; gx += 70) for (let gy = 40; gy < 600; gy += 70) { const d = Math.hypot((gx - Lx) / 1.25, gy - Ly); if (d < 30) continue; const k = clamp(1 - Math.abs(d - 120) / 320, .15, 1), sp = M.wind * k, len = 10 + Math.min(34, sp / 4);
+      s += arrow(gx, gy, windAt(w, gx, gy), len, sp > 100 ? '#ff6b6b' : sp > 60 ? '#ffb347' : '#ffffff', 1.8); }
+    s += `<text x="${Lx}" y="${Ly + 12}" font-size="38" font-weight="900" fill="#e5484d" text-anchor="middle" stroke="#fff" stroke-width="3" paint-order="stroke">L</text><text x="${Lx}" y="${Ly + 30}" font-size="11" font-weight="700" fill="#fff" text-anchor="middle" stroke="#1a2333" stroke-width="3" paint-order="stroke">${f(w.p)} hPa</text>`;
+    /* the city */
+    const [cx, cy] = CITY, sway = M.wind > 80 ? Math.sin(T * 8) * clamp((M.wind - 80) / 40, 0, 1) * 8 : 0;
+    s += `<g transform="translate(${cx} ${cy})"><circle r="44" fill="#fff" opacity=".18"/>${[[-30, 18, 26], [-14, 10, 38], [2, 14, 30], [16, 8, 46], [32, 16, 24]].map(([x, wd, h]) => `<rect x="${x - wd / 2}" y="${10 - h}" width="${wd}" height="${h}" fill="#3d4a66" stroke="#202a3e"/>`).join('')}
+      <path d="M-40,12 l0,-14 l${sway},-10" stroke="#2f6f22" stroke-width="3" fill="none"/><circle cx="${-40 + sway}" cy="-12" r="7" fill="#3c8f3a"/><text y="34" font-size="12" font-weight="800" fill="#fff" text-anchor="middle" stroke="#1a2333" stroke-width="3" paint-order="stroke">${cfg.cityName || 'Harbor City'}</text></g>`;
+    if (cfg.protect) s += cfg.protect(w, M);
+    /* readouts */
+    const from = fromDeg(w, cx, cy), hide = typeof cfg.hideCat === 'function' ? cfg.hideCat() : cfg.hideCat, ban = typeof cfg.banner === 'function' ? cfg.banner() : cfg.banner;
+    s += `<g transform="translate(652 150)"><rect width="334" height="${cfg.trend ? 300 : 318}" rx="12" fill="#0b1020" fill-opacity=".82"/><text x="16" y="26" font-size="14" font-weight="800" fill="#fff">${cfg.cityName || 'Harbor City'} station</text>
+      ${[['Air pressure (low center)', f(w.p) + ' hPa'], ['Pressure difference to the high', f(1030 - w.p) + ' hPa'], ['Wind at the city', `${f(M.wind)} km/h from the ${compass(from)}`], ['Humidity', f(w.rh) + ' %'], ['Air temperature', TA + ' °C'], ['Dew point', f(M.td, 1) + ' °C'], ['Cloud base', M.over < 0 && M.lift < M.base ? `${f(M.base)} m (air rises ${f(M.lift)} m)` : f(M.base) + ' m'], ['Front temperature difference', f(w.grad) + ' °C']].map((r, i) => `<text x="16" y="${54 + i * 22}" font-size="12" fill="#a9b6cc">${r[0]}</text><text x="318" y="${54 + i * 22}" font-size="12.5" font-weight="700" fill="#fff" text-anchor="end" style="font-family:var(--f-mono)">${r[1]}</text>`).join('')}
+      <rect x="16" y="${54 + 8 * 22 - 4}" width="302" height="40" rx="8" fill="${CATC[M.cat]}" fill-opacity=".2" stroke="${CATC[M.cat]}"/><text x="28" y="${54 + 8 * 22 + 21}" font-size="14" font-weight="800" fill="${CATC[M.cat]}">${hide ? 'Forecast: use the data!' : CAT[M.cat]}</text>
+      ${M.hurricane && !hide ? `<text x="16" y="${54 + 8 * 22 + 56}" font-size="12.5" font-weight="800" fill="#ff6b6b">⚠ Hurricane-force winds (119+ km/h)</text>` : ''}</g>`;
+    /* compass rose at the city station */
+    s += `<g transform="translate(948 182) scale(.7)"><circle r="30" fill="#0b1020" fill-opacity=".7" stroke="#fff" stroke-opacity=".4"/><text y="-17" font-size="10" fill="#fff" text-anchor="middle">N</text>${arrow(-Math.sin(from * Math.PI / 180) * -22, Math.cos(from * Math.PI / 180) * -22, Math.atan2(Math.cos(from * Math.PI / 180), -Math.sin(from * Math.PI / 180)), 34, '#ffd27a', 3)}</g>`;
+    if (cfg.trend) s += cfg.trend(w);
+    if (ban) s += `<g transform="translate(14 14)"><rect width="${Math.min(570, 20 + ban.length * 7.2)}" height="30" rx="8" fill="#0b1020" fill-opacity=".8"/><text x="12" y="20" font-size="13" font-weight="700" fill="#ffd27a">${ban}</text></g>`;
+    g.innerHTML = s;
+  }
+
+  function lab(R, def, cfg) {
+    const w = fresh(def), lock = cfg.lock || {};
+    const ctl = SimLab.panel(w, [
+      { k: 'p', label: 'Pressure at the center of the low', min: 960, max: 1022, step: 1, unit: ' hPa', lock: lock.p },
+      { k: 'rh', label: 'Relative humidity', min: 10, max: 100, step: 1, unit: ' %', lock: lock.rh },
+      { k: 'grad', label: 'Temperature difference across the front', min: 0, max: 30, step: 1, unit: ' °C', lock: lock.grad },
+      ...(cfg.extra ? [{ html: cfg.extra }] : [])
+    ], k => { cfg.onChange && cfg.onChange(w, model(w), k); G.check(); });
+    const G = SimLab.goals(R, { items: () => cfg.goal(w, model(w)), q: cfg.q, name: def.name, winMsg: cfg.winMsg });
+    SimLab.stage(bg(), (g, dt) => draw(g, w, dt, cfg));
+    return { w, ctl, G };
+  }
+
+  const Q = {
+    wind: { q: 'Why did the wind get stronger as the low’s pressure dropped?', a: ['A bigger pressure difference pushes air harder from high to low pressure', 'Low pressure makes air heavier', 'The sun heats the wind', 'Winds blow from low to high pressure'], c: 0, e: 'Air moves from high pressure toward low pressure. The bigger the difference (and the closer together the isobars), the faster it moves. In the Northern Hemisphere it curves into a counterclockwise spiral.' },
+    clouds: { q: 'Why did raising the humidity make clouds and rain?', a: ['Moist air reaches its dew point sooner as it rises and cools, so water vapor condenses', 'Humid air is hotter', 'Humidity raises the air pressure', 'Clouds are made of humidity sensors'], c: 0, e: 'Rising air cools. When it cools to its dew point, water vapor condenses into cloud droplets. Moist air has a dew point close to its temperature, so clouds form at a lower height and rain is more likely.' },
+    fronts: { q: 'Why does a strong cold front cause thunderstorms?', a: ['Dense cold air pushes warm, moist air up quickly, so it cools and condenses fast', 'Cold air holds more water than warm air', 'Fronts lower the humidity', 'Warm air sinks under cold air'], c: 0, e: 'Cold air is denser. When it plows into warm, moist air, the warm air is forced upward fast. That rapid lifting builds tall cumulonimbus clouds with heavy rain, lightning and strong winds.' }
+  };
+  const C = (id, name, title, html, hint) => ({ id, name, title, html, hint });
+  const steps = [
+    C('wind', 'Pressure and wind', 'Pressure makes the wind', 'The <b>L</b> marks a low-pressure center; the white rings are <b>isobars</b> (lines of equal pressure, every 4 hPa).<br><br>Lower the pressure at the center until the winds at the city reach <b>60 km/h</b>. Watch the isobars and the wind arrows. Then raise it above <b>1015 hPa</b> to calm things down.', 'Lower pressure means a bigger difference from the high, so more isobars squeezed together.'),
+    C('clouds', 'Humidity and clouds', 'From humid air to rain', 'Pressure and the front are fixed. Change only the <b>humidity</b>.<br><br>First find <b>clear skies</b>. Then make it <b>rain</b>. Watch the <b>dew point</b> and the <b>cloud base</b>: clouds form when rising air cools down to its dew point.', 'Clouds need the air to rise higher than the cloud base. Higher humidity lowers the cloud base.'),
+    C('fronts', 'Fronts', 'Temperature gradients and fronts', 'A front is where warm air meets cold air. Humidity and pressure are fixed. Change the <b>temperature difference</b> across the front.<br><br>First make a <b>weak front</b> (5 °C or less) and read the forecast. Then build a front strong enough for <b>thunderstorms</b>.', 'The bigger the temperature difference, the harder the cold air shoves the warm air upward.'),
+    C('forecast', 'Storm forecast', 'Forecast the storm and protect the city', 'A storm is heading for <b>Harbor City</b>. You have readings from the last two days. Use the <b>trends</b> to set the sliders to what you expect for <b>Day 3</b> (your forecast model), then make your <b>forecast</b> and choose how to <b>protect the city</b>.<br><br>When you’re ready, press <b>Play Day 3</b>.', 'Pressure is dropping about 14 hPa a day. Humidity and the front are both increasing too.')
+  ];
+  const S = {
+    wind: R => { let strong = false, calm = false;
+      lab(R, { name: 'Pressure and wind', p: 1012, rh: 55, grad: 6 }, { q: Q.wind, lock: { rh: true, grad: true },
+        onChange: (w, M) => { if (M.wind >= 60) strong = true; if (strong && w.p > 1015) calm = true; },
+        goal: (w, M) => [[strong, `Winds of 60 km/h at the city (now ${f(M.wind)} km/h)`], [calm, 'Then raise the pressure above 1015 hPa']] }); },
+    clouds: R => { let clear = false, rain = false;
+      lab(R, { name: 'Humidity and clouds', p: 1004, rh: 40, grad: 8 }, { q: Q.clouds, lock: { p: true, grad: true },
+        onChange: (w, M) => { if (M.cat === 0) clear = true; if (M.cat >= 2) rain = true; },
+        goal: (w, M) => [[clear || M.cat === 0, 'Clear skies'], [rain, `Rain (now: ${CAT[M.cat].toLowerCase()})`]] }); },
+    fronts: R => { let weak = false, storm = false;
+      lab(R, { name: 'Fronts', p: 997, rh: 85, grad: 10 }, { q: Q.fronts, lock: { p: true, rh: true },
+        onChange: (w, M) => { if (w.grad <= 5) weak = true; if (M.cat >= 4) storm = true; },
+        goal: (w, M) => [[weak, 'A weak front: 5 °C or less'], [storm, `Thunderstorms (now: ${CAT[M.cat].toLowerCase()})`]] }); },
+    forecast: R => {
+      const DAYS = [{ d: 'Day 1', p: 1012, rh: 62, grad: 8, Lx: 120, Ly: 230 }, { d: 'Day 2', p: 998, rh: 78, grad: 15, Lx: 260, Ly: 270 }], D3 = { d: 'Day 3', p: 984, rh: 92, grad: 22, Lx: 430, Ly: 300 };
+      const truth = model(D3).cat, ACT = [['warn', 'Issue a storm warning', 1], ['secure', 'Secure loose objects and boats', 1], ['sand', 'Sandbag the river banks', 1], ['shelter', 'Open emergency shelters', 1], ['picnic', 'Hold the harbor festival as planned', 0], ['nothing', 'Do nothing: it will pass', 0]];
+      let fc = null, acts = new Set(), played = false, okAll = false, playing = false;
+      const W = lab(R, Object.assign({ name: 'Storm forecast' }, DAYS[1]), {
+        banner: () => played ? 'Day 3: the storm reaches Harbor City.' : playing ? 'Day 3 is coming…' : 'Day 2, evening: the storm is still west of the city.', hideCat: () => !played,
+        extra: `<div class="sim-note"><b>Your forecast for Day 3</b><div class="sim-pick" id="wxFc">${CAT.map((c, i) => `<button class="btn sm" data-fc="${i}">${c}</button>`).join('')}</div></div>
+          <div class="sim-note"><b>Protect the city</b> (choose all that fit your forecast)<div class="sim-pick" id="wxAct">${ACT.map(a => `<button class="btn sm" data-ac="${a[0]}">${a[1]}</button>`).join('')}</div></div>
+          <div class="row"><button class="btn primary" id="wxPlay">Play Day 3</button></div>`,
+        trend: () => `<g transform="translate(652 14)"><rect width="334" height="128" rx="12" fill="#0b1020" fill-opacity=".82"/><text x="16" y="24" font-size="13" font-weight="800" fill="#fff">Readings so far</text>
+          <text x="16" y="46" font-size="11.5" fill="#a9b6cc"><tspan>Day</tspan><tspan x="80">Pressure</tspan><tspan x="160">Humidity</tspan><tspan x="240">Front ΔT</tspan></text>
+          ${[...DAYS, ...(played ? [D3] : [])].map((d, i) => `<text x="16" y="${68 + i * 20}" font-size="12.5" fill="#fff" style="font-family:var(--f-mono)"><tspan>${d.d}</tspan><tspan x="80">${d.p} hPa</tspan><tspan x="160">${d.rh} %</tspan><tspan x="240">${d.grad} °C</tspan></text>`).join('')}
+          ${played ? '' : `<text x="16" y="108" font-size="12" fill="#ffd27a">Day 3: ? (your forecast)</text>`}</g>`,
+        protect: (w, M) => { if (!played) return ''; const [cx, cy] = CITY; const good = okAll; return `<g transform="translate(${cx} ${cy + 64})"><rect x="-110" y="-16" width="220" height="30" rx="15" fill="${good ? '#1f7a4a' : '#7a1f1f'}" opacity=".9"/><text y="5" font-size="13" font-weight="800" fill="#fff" text-anchor="middle">${good ? '✓ City protected' : '✗ City not ready'}</text></g>`; },
+        goal: () => [[fc != null, 'Make a forecast for Day 3'], [acts.size > 0, 'Choose how to protect the city'], [okAll, 'Protect the city from the storm']] });
+      const paint = () => { $$('[data-fc]').forEach(b => b.classList.toggle('on', +b.dataset.fc === fc)); $$('[data-ac]').forEach(b => b.classList.toggle('on', acts.has(b.dataset.ac))); };
+      $$('[data-fc]').forEach(b => b.onclick = () => { if (playing) return; fc = +b.dataset.fc; paint(); W.G.check(); });
+      $$('[data-ac]').forEach(b => b.onclick = () => { if (playing) return; const k = b.dataset.ac; acts.has(k) ? acts.delete(k) : acts.add(k); paint(); W.G.check(); });
+      $('#wxPlay').onclick = () => {
+        if (playing) return; if (fc == null || !acts.size) { K.msg('Make a forecast and choose at least one action first.', 'bad', 3200); return; }
+        playing = true; const w = W.w, start = { p: w.p, rh: w.rh, grad: w.grad, Lx: w.Lx, Ly: w.Ly }; let k = 0;
+        K.loop(dt => { if (!$('#wxPlay')) return false; k = Math.min(1, k + dt / 4); ['p', 'rh', 'grad', 'Lx', 'Ly'].forEach(q => { w[q] = start[q] + (D3[q] - start[q]) * k; }); W.ctl.sync();
+          if (k >= 1) { played = true; playing = false; w.p = D3.p; w.rh = D3.rh; w.grad = D3.grad; W.ctl.sync();
+            const needed = ACT.filter(a => a[2]).map(a => a[0]), bad = [...acts].some(a => !ACT.find(x => x[0] === a)[2]), have = needed.filter(a => acts.has(a)).length;
+            const fcOK = Math.abs(fc - truth) <= 0 || (truth === 5 && fc === 4), actOK = !bad && have >= 3;
+            okAll = fcOK && actOK;
+            if (!fcOK) R.mistake('Wrong forecast', `Day 3 brought: ${CAT[truth]}. Pressure kept falling (bigger winds), humidity rose and the front got stronger.`);
+            if (!actOK) R.mistake('City not fully protected', 'A severe storm calls for a warning, securing loose objects, sandbags against flooding and open shelters. Don’t hold outdoor events.');
+            K.msg(okAll ? `Day 3: ${CAT[truth]}. Your forecast and preparations protected the city!` : `Day 3: ${CAT[truth]}. ${!fcOK ? 'The forecast was off. ' : ''}${!actOK ? 'The city wasn’t fully prepared. ' : ''}Change your choices and play Day 3 again.`, okAll ? 'ok' : 'bad', 6500);
+            W.G.check(); if (!okAll) K.after(2600, () => { Object.assign(w, DAYS[1]); played = false; W.ctl.sync(); }); return false; } });
+      };
+    }
+  };
+  function finale() { lab({ next() {}, mistake() {} }, { name: 'Free play' }, { goal: () => [[false, 'Free play: build any weather you like']] }); }
+
+  return makeLab({
+    noSetup: true, fit: true, bg: () => '',
+    fresh: () => ({}), steps, S,
+    finale() { finale(); },
+    finaleMsg: 'Forecast complete. Experiment with the weather map while you answer the questions.',
+    verdicts: [['Chief meteorologist', 'You read pressure, humidity and fronts and protected the city.'], ['Almost there', 'Nice work. Look over the questions you missed below.'], ['Practice again', 'Run the challenges once more and watch the dew point and isobars.']], reviewLabel: 'Review these',
+    summary: () => 'You linked pressure differences to wind, humidity and dew point to clouds and rain, fronts to thunderstorms, and used trends to forecast a storm.',
+    quiz: [
+      { q: 'Air always moves from…', a: ['High pressure toward low pressure', 'Low pressure toward high pressure', 'Cold places toward the equator only', 'The ocean toward land only'], c: 0, e: 'Air flows from higher to lower pressure. The bigger the pressure difference over a distance, the stronger the wind.' },
+      { q: 'On a weather map, isobars that are very close together mean…', a: ['Strong winds', 'Calm winds', 'Clear skies', 'High humidity'], c: 0, e: 'Close isobars mean the pressure changes quickly over a short distance, a steep pressure gradient, which drives strong winds.' },
+      { q: 'A barometer shows the air pressure falling quickly. What weather is most likely coming?', a: ['Stormy weather', 'Clear, calm weather', 'No change', 'A heat wave with no clouds'], c: 0, e: 'Rapidly falling pressure means a low-pressure system is approaching, which often brings clouds, rain and wind.' },
+      { q: 'What happens when rising air cools to its dew point?', a: ['Water vapor condenses into cloud droplets', 'The air gets hotter', 'The wind stops', 'The air pressure rises'], c: 0, e: 'At the dew point the air is saturated, so water vapor condenses on tiny particles and forms clouds.' },
+      { q: 'In the Northern Hemisphere, winds around a low-pressure center blow…', a: ['Counterclockwise, spiraling inward', 'Clockwise, spiraling outward', 'Straight into the center', 'Straight away from the center'], c: 0, e: 'Earth’s rotation (the Coriolis effect) turns the inflowing air, so winds spiral counterclockwise into a Northern Hemisphere low.' }
+    ],
+    meta: { id: 'weather', short: 'Weather Command', title: 'Weather Forecast Command Center', courses: ['ms-earth'], time: '25–35 min',
+      summary: 'Become a meteorologist. Change air pressure, humidity and fronts on a live weather map, track the wind, and forecast a major storm to protect a city.',
+      objective: 'Explain how pressure differences cause wind, how humidity and rising air form clouds and precipitation, how fronts cause storms, and use data trends to make a forecast.',
+      materials: ['A computer or tablet'], safety: ['No safety gear needed. This is a simulation.'],
+      ngss: [['MS-ESS2-5', 'Collect data to provide evidence for how the motions and complex interactions of air masses result in changes in weather conditions.'], ['MS-ESS3-2', 'Analyze and interpret data on natural hazards to forecast future catastrophic events and inform the development of technologies to mitigate their effects.'], ['MS-ESS2-4', 'Develop a model to describe the cycling of water through Earth’s systems driven by energy from the sun and the force of gravity.']],
+      thumb: big => labThumb('weather', big) }
+  });
+})();
+
+/* ═══════════ MS Physical Science: "Chemistry Lab: Reaction Detective" (mix solutions, read the evidence, solve a mystery) ═══════════
+   Evidence of a chemical reaction: a precipitate (a solid forms), a gas (bubbles), a temperature change, or a color change.
+   Every reaction here is real, and the balanced equations are shown after each mix. The limiting-reactant challenge uses
+   baking soda (NaHCO₃, 84 g/mol) and vinegar (about 5 % acetic acid, so 0.000833 mol per mL): 1 mol of each makes 1 mol of CO₂,
+   about 24 L at room temperature. */
+const ReactionLab = (() => {
+  const K = Kit, f = SimLab.f, hash = SimLab.hash;
+  const CH = {
+    agno3: { n: 'Silver nitrate', fm: 'AgNO₃', c: '#e8f0f5' }, nacl: { n: 'Sodium chloride', fm: 'NaCl', c: '#e8f0f5' }, cuso4: { n: 'Copper(II) sulfate', fm: 'CuSO₄', c: '#3d8fe0' },
+    naoh: { n: 'Sodium hydroxide', fm: 'NaOH', c: '#e8f0f5' }, fecl3: { n: 'Iron(III) chloride', fm: 'FeCl₃', c: '#e0a43a' }, hcl: { n: 'Hydrochloric acid', fm: 'HCl', c: '#e8f0f5' },
+    na2co3: { n: 'Sodium carbonate', fm: 'Na₂CO₃', c: '#e8f0f5' }, cacl2: { n: 'Calcium chloride', fm: 'CaCl₂', c: '#e8f0f5' }, mg: { n: 'Magnesium ribbon', fm: 'Mg', c: '#c9ccd2', solid: true },
+    vin: { n: 'Vinegar', fm: 'CH₃COOH', c: '#f3eedc' }, soda: { n: 'Baking soda', fm: 'NaHCO₃', c: '#ffffff', solid: true }, h2o2: { n: 'Hydrogen peroxide + yeast', fm: 'H₂O₂', c: '#eef6fb' }
+  };
+  /* what happens for each pair (keys sorted). ppt = color of the solid, gas, dT = temperature change (°C), col = new liquid color */
+  const RX = {
+    'agno3+nacl': { ppt: '#f4f4f4', pn: 'white', eq: 'AgNO₃ + NaCl → AgCl(s) + NaNO₃', type: 'Double replacement' },
+    'agno3+cacl2': { ppt: '#f4f4f4', pn: 'white', eq: '2AgNO₃ + CaCl₂ → 2AgCl(s) + Ca(NO₃)₂', type: 'Double replacement' },
+    'agno3+fecl3': { ppt: '#f0eee6', pn: 'white', eq: '3AgNO₃ + FeCl₃ → 3AgCl(s) + Fe(NO₃)₃', type: 'Double replacement' },
+    'agno3+na2co3': { ppt: '#f3ecc4', pn: 'pale yellow', eq: '2AgNO₃ + Na₂CO₃ → Ag₂CO₃(s) + 2NaNO₃', type: 'Double replacement' },
+    'agno3+hcl': { ppt: '#f4f4f4', pn: 'white', eq: 'AgNO₃ + HCl → AgCl(s) + HNO₃', type: 'Double replacement' },
+    'agno3+naoh': { ppt: '#6b5a43', pn: 'brown', eq: '2AgNO₃ + 2NaOH → Ag₂O(s) + 2NaNO₃ + H₂O', type: 'Double replacement' },
+    'cuso4+naoh': { ppt: '#4aa3e8', pn: 'light blue', col: '#cfe4f5', eq: 'CuSO₄ + 2NaOH → Cu(OH)₂(s) + Na₂SO₄', type: 'Double replacement' },
+    'fecl3+naoh': { ppt: '#9a4a1c', pn: 'rust-brown', col: '#f2e2c8', eq: 'FeCl₃ + 3NaOH → Fe(OH)₃(s) + 3NaCl', type: 'Double replacement' },
+    'cacl2+naoh': { ppt: '#f4f4f4', pn: 'faint white cloudiness', faint: true, eq: 'CaCl₂ + 2NaOH → Ca(OH)₂(s) + 2NaCl (only slightly)', type: 'Double replacement' },
+    'cacl2+na2co3': { ppt: '#f8f8f8', pn: 'white', eq: 'CaCl₂ + Na₂CO₃ → CaCO₃(s) + 2NaCl', type: 'Double replacement' },
+    'cuso4+na2co3': { ppt: '#5fb3a8', pn: 'blue-green', col: '#d3ecf0', eq: 'CuSO₄ + Na₂CO₃ → CuCO₃(s) + Na₂SO₄', type: 'Double replacement' },
+    'fecl3+na2co3': { ppt: '#9a4a1c', pn: 'rust-brown', gas: 'CO₂', fizz: .4, eq: '2FeCl₃ + 3Na₂CO₃ + 3H₂O → 2Fe(OH)₃(s) + 6NaCl + 3CO₂(g)', type: 'Double replacement' },
+    'hcl+na2co3': { gas: 'CO₂', fizz: 1, eq: 'Na₂CO₃ + 2HCl → 2NaCl + H₂O + CO₂(g)', type: 'Double replacement' },
+    'hcl+naoh': { dT: 7, eq: 'HCl + NaOH → NaCl + H₂O', type: 'Double replacement (neutralization)' },
+    'hcl+mg': { gas: 'H₂', fizz: 1, dT: 9, eq: 'Mg + 2HCl → MgCl₂ + H₂(g)', type: 'Single replacement' },
+    'soda+vin': { gas: 'CO₂', fizz: 1.3, dT: -4, eq: 'NaHCO₃ + CH₃COOH → CH₃COONa + H₂O + CO₂(g)', type: 'Double replacement' },
+    'hcl+soda': { gas: 'CO₂', fizz: 1.2, dT: -2, eq: 'NaHCO₃ + HCl → NaCl + H₂O + CO₂(g)', type: 'Double replacement' },
+    'cuso4+mg': { ppt: '#b8682e', pn: 'reddish-brown copper metal', col: '#bcd8ee', dT: 6, eq: 'Mg + CuSO₄ → MgSO₄ + Cu(s)', type: 'Single replacement' },
+    'h2o2+h2o2': {}, 'mg+vin': { gas: 'H₂', fizz: .35, dT: 2, eq: 'Mg + 2CH₃COOH → Mg(CH₃COO)₂ + H₂(g)', type: 'Single replacement' }
+  };
+  const SOLO = { h2o2: { gas: 'O₂', fizz: 1.1, dT: 3, eq: '2H₂O₂ → 2H₂O + O₂(g)', type: 'Decomposition', note: 'Yeast is a catalyst: it speeds up the reaction without being used up.' } };
+  const key = (a, b) => [a, b].sort().join('+');
+  const react = (a, b) => (a === b && SOLO[a]) ? SOLO[a] : RX[key(a, b)] && Object.keys(RX[key(a, b)]).length ? RX[key(a, b)] : null;
+  const obsOf = r => !r ? ['No visible change'] : [r.ppt ? `${r.faint ? '' : 'A '}${r.pn}${r.faint ? '' : ' precipitate (solid) forms'}` : '', r.gas ? `Bubbles of gas (${r.gas})` : '', r.dT ? `Temperature ${r.dT > 0 ? 'rises' : 'drops'} ${Math.abs(r.dT)} °C (${r.dT > 0 ? 'exothermic' : 'endothermic'})` : '', r.col ? 'The liquid changes color' : ''].filter(Boolean);
+
+  /* ── drawing ── */
+  function bg() { return `<defs><linearGradient id="rxWall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#26394f"/><stop offset="1" stop-color="#1b2a3c"/></linearGradient></defs>
+    <rect width="1000" height="620" fill="url(#rxWall)"/>${[...Array(9)].map((_, i) => `<line x1="0" y1="${40 + i * 50}" x2="1000" y2="${40 + i * 50}" stroke="#fff" stroke-opacity=".03"/>`).join('')}
+    <rect y="520" width="1000" height="100" fill="#3b3f46"/><rect y="516" width="1000" height="8" fill="#5a606a"/>`; }
+  function tube(x, y, liq, mix, T, scale = 1) { /* a big test tube with liquid, precipitate and bubbles */
+    const w = 70 * scale, h = 300 * scale, lv = .62; let s = `<g transform="translate(${x} ${y})">`;
+    s += `<path d="M${-w / 2},0 V${h - w / 2} A${w / 2},${w / 2} 0 0 0 ${w / 2},${h - w / 2} V0" fill="rgba(255,255,255,.06)" stroke="#cfe0f2" stroke-width="3"/>`;
+    const top = h * (1 - lv);
+    s += `<path d="M${-w / 2 + 3},${top} V${h - w / 2} A${w / 2 - 3},${w / 2 - 3} 0 0 0 ${w / 2 - 3},${h - w / 2} V${top}Z" fill="${liq}" opacity=".85"/>`;
+    if (mix) { const k = clamp(mix.t / 2.5, 0, 1), r = mix.r;
+      if (r && r.ppt) { const settle = clamp((mix.t - 1.2) / 3, 0, 1), n = r.faint ? 14 : 46; for (let i = 0; i < n; i++) { const px = (hash(i) - .5) * (w - 14), py0 = top + 10 + hash(i + 3) * (h - top - 40), py = py0 + (h - w / 2 - py0) * settle * (.6 + hash(i + 5) * .4); s += `<circle cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="${(2 + hash(i + 7) * 2.6) * scale}" fill="${r.ppt}" opacity="${(r.faint ? .45 : .9) * k}"/>`; }
+        if (!r.faint && settle > .3) s += `<ellipse cx="0" cy="${h - w / 2 + 8 * scale}" rx="${w / 2 - 8}" ry="${10 * scale * settle}" fill="${r.ppt}" opacity=".95"/>`; }
+      if (r && r.gas) { const n = Math.round(24 * r.fizz * clamp(1.4 - mix.t / 12, .3, 1)); for (let i = 0; i < n; i++) { const by = h - w / 2 - ((T * 120 * (.6 + hash(i) * .8) + hash(i + 1) * h) % (h - top - 10)); s += `<circle cx="${((hash(i + 2) - .5) * (w - 18)).toFixed(1)}" cy="${by.toFixed(1)}" r="${(2 + hash(i + 4) * 3) * scale}" fill="none" stroke="#fff" stroke-width="1.4" opacity=".8"/>`; }
+        s += `<path d="M${-12 * scale},${-6 - (T * 40 % 30)} q6,-10 12,0 t12,0" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="2"/>`; }
+      if (mix.solid === 'mg') { const eat = r && r.gas ? clamp(mix.t / 14, 0, .8) : 0; s += `<rect x="${-4 * scale}" y="${top - 40}" width="${8 * scale}" height="${(h - top) * (1 - eat)}" fill="#c9ccd2" stroke="#8a8f97"/>`; if (r && r.ppt && r.pn.startsWith('reddish')) s += `<rect x="${-6 * scale}" y="${top + 20}" width="${12 * scale}" height="${(h - top - 80) * clamp(mix.t / 5, 0, 1)}" fill="#b8682e" opacity=".85"/>`; }
+    }
+    return s + `</g>`;
+  }
+  function thermo(x, y, temp) { const k = clamp((temp - 10) / 30, 0, 1); return `<g transform="translate(${x} ${y})"><rect x="-8" y="0" width="16" height="200" rx="8" fill="#eef3f8" stroke="#9aa5b1" stroke-width="2"/><circle cx="0" cy="210" r="16" fill="#e5484d"/><rect x="-4" y="${200 - 190 * k}" width="8" height="${190 * k + 10}" fill="#e5484d"/>${[10, 20, 30, 40].map(t => `<line x1="8" y1="${200 - (t - 10) / 30 * 190}" x2="16" y2="${200 - (t - 10) / 30 * 190}" stroke="#cfe0f2"/><text x="20" y="${204 - (t - 10) / 30 * 190}" font-size="10" fill="#cfe0f2">${t}</text>`).join('')}<text x="0" y="-10" font-size="13" font-weight="800" fill="#fff" text-anchor="middle" style="font-family:var(--f-mono)">${f(temp, 1)} °C</text></g>`; }
+  function bottles(list, sel) { return list.map((k, i) => { const c = CH[k], x = 50 + i * (900 / list.length) + 900 / list.length / 2 - 40, on = sel.includes(k); return `<g transform="translate(${x} 34)"><rect x="-20" y="${on ? -6 : 0}" width="40" height="64" rx="8" fill="${c.c}" fill-opacity=".85" stroke="${on ? '#ffd27a' : '#cfe0f2'}" stroke-width="${on ? 3 : 1.5}"/><rect x="-9" y="${on ? -18 : -12}" width="18" height="12" rx="3" fill="#3d4a66"/><rect x="-18" y="${on ? 18 : 24}" width="36" height="22" fill="#fff"/><text x="0" y="${on ? 33 : 39}" font-size="9.5" font-weight="800" text-anchor="middle" fill="#1a2333">${c.fm}</text></g>`; }).join(''); }
+
+  /* ── the mixing bench, used by several challenges ── */
+  function bench(R, cfg) {
+    const st = { a: null, b: null, mix: null, T: 0, temp: 21, log: [] };
+    const list = cfg.list;
+    const ctl = SimLab.panel(st, [{ html: `<div class="sim-note"><b>Pick two chemicals</b>, then press Mix.</div><div class="sim-pick">${list.map(k => `<button class="btn sm" data-rx="${k}">${CH[k].fm} <small>${CH[k].n}</small></button>`).join('')}</div>` },
+      { btns: [{ id: 'mix', label: 'Mix', cls: 'primary', fn: mix }, { id: 'clr', label: 'Clean the tube', fn: () => { st.mix = null; st.a = st.b = null; st.temp = 21; paint(); } }] }]);
+    function paint() { $$('[data-rx]', ctl.box).forEach(b => b.classList.toggle('on', b.dataset.rx === st.a || b.dataset.rx === st.b)); }
+    $$('[data-rx]', ctl.box).forEach(b => b.onclick = () => { const k = b.dataset.rx; if (st.mix) { st.mix = null; st.temp = 21; st.a = st.b = null; }
+      if (st.a === k) st.a = null; else if (st.b === k) st.b = null; else if (!st.a) st.a = k; else if (!st.b) st.b = k; else { st.a = st.b; st.b = k; } paint(); SND.tone(500, .06, 'triangle', .04); });
+    function mix() {
+      if (!st.a || (!st.b && !SOLO[st.a])) { K.msg('Pick two chemicals first.', 'bad', 2500); return; }
+      const b = st.b || st.a, r = react(st.a, b); st.mix = { t: 0, r, a: st.a, b, solid: CH[st.a].solid ? st.a : CH[b].solid ? b : null }; st.temp = 21;
+      if (r && r.gas) SND.noise(1.2, 3000, .06, 1); else SND.tone(420, .2, 'sine', .05);
+      cfg.onMix && cfg.onMix(st.mix, st); G && G.check();
+    }
+    const G = cfg.goal ? SimLab.goals(R, { items: () => cfg.goal(st), q: cfg.q, name: cfg.name, winMsg: cfg.winMsg }) : null;
+    SimLab.stage(bg(), (g, dt) => { st.T += dt; let s = bottles(list, [st.a, st.b].filter(Boolean));
+      if (st.mix) { st.mix.t += dt; const r = st.mix.r; if (r && r.dT) st.temp += (21 + r.dT - st.temp) * Math.min(1, dt * .9); }
+      const liq = st.mix ? (st.mix.r && st.mix.r.col ? st.mix.r.col : CH[st.mix.solid === st.mix.a ? st.mix.b : st.mix.a].c) : st.a ? CH[st.a].c : 'rgba(255,255,255,.05)';
+      s += tube(300, 170, liq, st.mix, st.T) + thermo(400, 230, st.temp);
+      const r = st.mix ? st.mix.r : null, obs = st.mix && st.mix.t > .8 ? obsOf(r) : [];
+      s += `<g transform="translate(520 150)"><rect width="460" height="${st.mix ? 200 : 90}" rx="12" fill="#0b1020" fill-opacity=".8"/><text x="16" y="28" font-size="15" font-weight="800" fill="#fff">${st.mix ? `${CH[st.mix.a].fm}${st.mix.b !== st.mix.a ? ' + ' + CH[st.mix.b].fm : ''}` : st.a ? `${CH[st.a].fm}${st.b ? ' + ' + CH[st.b].fm : ' + ?'}` : 'Pick two chemicals'}</text>
+        ${st.mix ? `<text x="16" y="54" font-size="12" font-weight="800" fill="#ffd27a">OBSERVATIONS</text>${(obs.length ? obs : ['Watching…']).map((o, i) => `<text x="16" y="${76 + i * 20}" font-size="13" fill="#fff">• ${o}</text>`).join('')}
+          ${st.mix.t > 2.5 && r && r.eq && !cfg.hideEq ? `<text x="16" y="168" font-size="12" font-weight="800" fill="#7ee0a1">EQUATION</text><text x="16" y="188" font-size="13.5" fill="#fff" style="font-family:var(--f-mono)">${r.eq}</text>` : ''}` : `<text x="16" y="56" font-size="13" fill="#a9b6cc">Choose two bottles in the panel, then press Mix.</text>`}</g>`;
+      if (cfg.extraDraw) s += cfg.extraDraw(st);
+      g.innerHTML = s; });
+    return { st, ctl, G };
+  }
+
+  /* ── challenges ── */
+  const Q = {
+    observe: { q: 'A solid suddenly appears when two clear liquids are mixed. This solid is called a…', a: ['Precipitate', 'Solvent', 'Catalyst', 'Mixture'], c: 0, e: 'A precipitate is an insoluble solid that forms from a reaction between solutions. It is strong evidence that a new substance was made.' },
+    balance: { q: 'Why must a chemical equation be balanced?', a: ['Atoms are not created or destroyed, so mass is conserved', 'To make the reaction faster', 'Because products are always heavier', 'So both sides have the same number of molecules'], c: 0, e: 'In a chemical reaction atoms are only rearranged. The law of conservation of mass says the same atoms (and the same total mass) must be on both sides.' },
+    limiting: { q: 'In your best balloon, what decided how much CO₂ was made?', a: ['The reactant that ran out first (the limiting reactant)', 'The reactant left over', 'The size of the flask', 'The color of the vinegar'], c: 0, e: 'Once the limiting reactant is used up the reaction stops, no matter how much of the other reactant is left (the excess reactant).' }
+  };
+  const C = (id, name, title, html, hint) => ({ id, name, title, html, hint });
+  const steps = [
+    C('observe', 'Mix and observe', 'Look for evidence', 'Chemical reactions leave <b>evidence</b>: a <b>precipitate</b> (a solid appears), <b>gas</b> bubbles, a <b>temperature change</b>, or a <b>color change</b>.<br><br>Mix pairs of chemicals and find all three kinds of evidence. Read the thermometer and the observations.', 'Try copper sulfate with sodium hydroxide, an acid with a carbonate, and an acid with a base.'),
+    C('types', 'Reaction types', 'Name the reaction type', 'Every reaction rearranges atoms in a pattern:<br><b>Synthesis</b> A + B → AB · <b>Decomposition</b> AB → A + B · <b>Single replacement</b> A + BC → AC + B · <b>Double replacement</b> AB + CD → AD + CB.<br><br>Run each reaction, read its equation, and classify it.', 'Count the reactants and products. Does one element swap places, or do two compounds trade partners?'),
+    C('balance', 'Balance equations', 'Balance the equations', 'Use the <b>coefficients</b> (the big numbers in front) to balance each equation so every element has the <b>same number of atoms</b> on both sides. You can’t change the small subscripts: that would change the substance.', 'Balance one element at a time. Leave hydrogen and oxygen for last.'),
+    C('limiting', 'Limiting reactant', 'Inflate the balloon: the limiting reactant', 'Baking soda and vinegar make CO₂ gas that fills a balloon. Choose the amounts, react them, and say which one <b>ran out first</b>.<br><br>Then find amounts that react <b>completely</b>, with almost nothing left over (within 10 %).', 'About 7 g of baking soda reacts with 100 mL of vinegar.'),
+    C('unknown', 'Mystery substance', 'Identify the unknown', 'The label fell off a bottle. It is one of: <b>NaCl, CuSO₄, Na₂CO₃, FeCl₃ or CaCl₂</b>. Test it with the test reagents, compare your results with the reference table in the panel, then make your identification.', 'Each unknown gives a different pattern of results. Look at its color too.')
+  ];
+  const S = {
+    observe: R => { const seen = new Set(); let n = 0;
+      bench(R, { name: 'Mix and observe', q: Q.observe, list: ['agno3', 'nacl', 'cuso4', 'naoh', 'hcl', 'na2co3', 'vin', 'soda'],
+        onMix: m => { n++; const r = m.r; if (r && r.ppt) seen.add('ppt'); if (r && r.gas) seen.add('gas'); if (r && r.dT) seen.add('temp'); },
+        goal: () => [[seen.has('ppt'), 'Make a precipitate'], [seen.has('gas'), 'Make a gas'], [seen.has('temp'), 'Make the temperature change']] }); },
+    types: R => {
+      const ITEMS = [['mg+o2', 'Synthesis', '2Mg + O₂ → 2MgO', 'Magnesium burns in oxygen with a blinding white light.'], ['h2o2', 'Decomposition', '2H₂O₂ → 2H₂O + O₂(g)', 'Hydrogen peroxide breaks apart; yeast speeds it up.'], ['cuso4+mg', 'Single replacement', 'Mg + CuSO₄ → MgSO₄ + Cu(s)', 'Magnesium pushes copper out of the solution.'], ['agno3+nacl', 'Double replacement', 'AgNO₃ + NaCl → AgCl(s) + NaNO₃', 'The two compounds trade partners.']].sort(() => Math.random() - .5);
+      const TYPES = ['Synthesis', 'Decomposition', 'Single replacement', 'Double replacement']; let i = 0; const done = [];
+      const B = bench(R, { name: 'Reaction types', list: ['mg', 'cuso4', 'agno3', 'nacl', 'h2o2'], hideEq: false,
+        extraDraw: st => st.burn ? (() => { st.burn += 1 / 60; const k = clamp(1 - Math.abs(st.burn - 1.2) / 1.2, 0, 1); return `<circle cx="300" cy="200" r="${60 + k * 60}" fill="#fff" opacity="${k * .85}"/><circle cx="300" cy="200" r="${150 + k * 80}" fill="#fffbe0" opacity="${k * .3}"/><text x="300" y="480" font-size="15" font-weight="800" fill="#fff" text-anchor="middle">2Mg + O₂ → 2MgO (white ash)</text>`; })() : '' });
+      const box = LabUI.html(''); box.className = 'pl-goal';
+      const show = () => { const it = ITEMS[i]; box.innerHTML = `<div class="pl-lab">Reaction ${i + 1} of 4</div><div class="small">${it[3]}</div><div style="font-family:var(--f-mono);font-size:14px;margin:6px 0">${it[2]}</div>${it[0] === 'mg+o2' ? '<button class="btn sm" id="rxBurn">Burn the magnesium ribbon</button>' : '<div class="small muted">Run it on the bench: pick the chemicals and press Mix.</div>'}<div class="quiz"><div class="opts">${TYPES.map((t, j) => `<button class="opt" data-ty="${j}">${t}</button>`).join('')}</div></div>
+          <div class="small">${done.map(d => `✓ ${d}`).join('<br>')}</div>`;
+        if ($('#rxBurn')) $('#rxBurn').onclick = () => { B.st.burn = .01; B.st.mix = null; SND.noise(1.4, 6000, .1, 1); };
+        $$('[data-ty]', box).forEach(b => b.onclick = () => { const j = +b.dataset.ty;
+          if (TYPES[j] === it[1]) { b.classList.add('right'); SND.ok(); done.push(`${it[2]}: ${it[1]}`); i++; B.st.burn = 0; if (i >= ITEMS.length) { box.innerHTML = `<div class="pl-lab">All four classified</div><div class="small">${done.map(d => `✓ ${d}`).join('<br>')}</div>`; K.msg('All four reaction types identified!', 'ok', 2500); R.next(2400); } else K.after(900, show); }
+          else { b.classList.add('wrong'); b.disabled = true; R.mistake(`Wrong reaction type: ${it[2]}`, `${it[2]} is ${it[1].toLowerCase()}.`); K.msg('Not that type. Compare the equation with the patterns at the top.', 'bad', 3200); } }); };
+      show(); },
+    balance: R => {
+      const EQ = [{ L: [['Mg', { Mg: 1 }], ['HCl', { H: 1, Cl: 1 }]], Rt: [['MgCl₂', { Mg: 1, Cl: 2 }], ['H₂', { H: 2 }]] },
+        { L: [['H₂O₂', { H: 2, O: 2 }]], Rt: [['H₂O', { H: 2, O: 1 }], ['O₂', { O: 2 }]] },
+        { L: [['CuSO₄', { Cu: 1, S: 1, O: 4 }], ['NaOH', { Na: 1, O: 1, H: 1 }]], Rt: [['Cu(OH)₂', { Cu: 1, O: 2, H: 2 }], ['Na₂SO₄', { Na: 2, S: 1, O: 4 }]] },
+        { L: [['Fe', { Fe: 1 }], ['O₂', { O: 2 }]], Rt: [['Fe₂O₃', { Fe: 2, O: 3 }]] }];
+      let ei = 0, co = null; const solved = [];
+      const reset = () => { const e = EQ[ei]; co = [...e.L.map(() => 1), ...e.Rt.map(() => 1)]; };
+      const tally = side => { const e = EQ[ei], t = {}; (side === 'L' ? e.L : e.Rt).forEach((sp, j) => { const c = co[side === 'L' ? j : e.L.length + j]; for (const el in sp[1]) t[el] = (t[el] || 0) + sp[1][el] * c; }); return t; };
+      const balanced = () => { const a = tally('L'), b = tally('R'); const els = new Set([...Object.keys(a), ...Object.keys(b)]); return [...els].every(el => a[el] === b[el]); };
+      const minimal = () => { const g = (x, y) => y ? g(y, x % y) : x; return co.reduce(g) === 1; };
+      reset();
+      const box = LabUI.html(''); box.className = 'sim-ctl';
+      const G = SimLab.goals(R, { items: () => EQ.slice(0, 3).map((e, j) => [solved.includes(j), `Equation ${j + 1}${solved.includes(j) ? ' balanced' : ''}`]).concat([[solved.includes(3), 'Bonus-level equation 4']]), q: Q.balance, name: 'Balancing' });
+      const paint = () => { const e = EQ[ei]; const sp = [...e.L, ...e.Rt];
+        box.innerHTML = `<div class="sim-note"><b>Equation ${ei + 1} of ${EQ.length}</b>: set the coefficients.</div><div class="rx-co">${sp.map((s, j) => `${j === e.L.length ? '<b class="rx-arr">→</b>' : j ? '<b>+</b>' : ''}<span class="rx-sp"><button class="btn sm" data-cd="${j}">−</button><b class="rx-n">${co[j]}</b><button class="btn sm" data-cu="${j}">+</button><span>${s[0]}</span></span>`).join('')}</div><div class="row"><button class="btn primary" id="rxChk">Check</button></div>`;
+        $$('[data-cu]', box).forEach(b => b.onclick = () => { co[+b.dataset.cu] = Math.min(9, co[+b.dataset.cu] + 1); paint(); });
+        $$('[data-cd]', box).forEach(b => b.onclick = () => { co[+b.dataset.cd] = Math.max(1, co[+b.dataset.cd] - 1); paint(); });
+        $('#rxChk', box).onclick = () => { if (balanced() && minimal()) { solved.push(ei); SND.ok(); K.sparkle({ x: 500, y: 200 }, 30); K.msg('Balanced!', 'ok', 1800); if (ei < EQ.length - 1) { ei++; reset(); K.after(700, paint); } G.check(); }
+          else if (balanced()) K.msg('Balanced, but use the smallest whole numbers (divide them all by the same number).', 'bad', 3800);
+          else { R.mistake('Unbalanced equation', 'Count each element on both sides; every count must match.'); K.msg('Not balanced yet. Check the atom counts on the stage.', 'bad', 3000); } }; };
+      paint();
+      const COL = { Mg: '#c9ccd2', H: '#f4f4f4', Cl: '#7ee06b', O: '#ff6b6b', Cu: '#d98b4a', S: '#ffd34d', Na: '#9b7cff', Fe: '#b9733a' };
+      SimLab.stage(bg(), (g) => { const e = EQ[ei], a = tally('L'), b = tally('R'), els = [...new Set([...Object.keys(a), ...Object.keys(b)])]; let s = '';
+        const sp = [...e.L, ...e.Rt]; let x = 500 - sp.length * 85; s += `<g transform="translate(0 110)">${sp.map((q, j) => { const t = `${j === e.L.length ? '→ ' : j ? '+ ' : ''}${co[j] > 1 ? co[j] : ''}${q[0]}`; const out = `<text x="${x}" y="0" font-size="34" font-weight="800" fill="#fff">${t}</text>`; x += t.length * 19 + 22; return out; }).join('')}</g>`;
+        /* atom tally: left vs right, one row per element, drawn as atoms */
+        s += `<g transform="translate(110 200)"><rect x="-30" y="-20" width="840" height="${40 + els.length * 54}" rx="14" fill="#0b1020" fill-opacity=".72"/><text x="0" y="6" font-size="13" font-weight="800" fill="#a9b6cc">ATOMS</text><text x="230" y="6" font-size="13" font-weight="800" fill="#a9b6cc">REACTANTS (left)</text><text x="560" y="6" font-size="13" font-weight="800" fill="#a9b6cc">PRODUCTS (right)</text>`;
+        els.forEach((el, i) => { const y = 40 + i * 54, ok = a[el] === b[el]; s += `<text x="0" y="${y + 6}" font-size="18" font-weight="800" fill="${ok ? '#7ee0a1' : '#ff9a9a'}">${ok ? '✓' : '✗'} ${el}</text>`;
+          [[a[el] || 0, 230], [b[el] || 0, 560]].forEach(([n, x0]) => { for (let k = 0; k < Math.min(n, 16); k++) s += `<circle cx="${x0 + k * 19}" cy="${y}" r="8" fill="${COL[el]}" stroke="#0b1020"/>`; s += `<text x="${x0 + Math.min(n, 16) * 19 + 8}" y="${y + 5}" font-size="14" font-weight="800" fill="#fff">${n}</text>`; }); });
+        s += `</g>`; g.innerHTML = s; });
+    },
+    limiting: R => {
+      const st = { g: 4, ml: 100 }; let trial = null, named = new Set(), exact = false, ans = null;
+      const calc = () => { const nb = st.g / 84, na = st.ml * .000833, n = Math.min(nb, na); return { nb, na, n, co2: n * 24000, lim: nb < na ? 'soda' : 'vin', left: nb < na ? `${f((na - n) / .000833)} mL of vinegar` : `${f((nb - n) * 84, 1)} g of baking soda`, ratio: Math.abs(nb - na) / Math.max(nb, na) }; };
+      const ctl = SimLab.panel(st, [{ k: 'g', label: 'Baking soda (NaHCO₃)', min: 1, max: 12, step: .5, fmt: v => f(v, 1) + ' g' }, { k: 'ml', label: 'Vinegar (5 % acetic acid)', min: 20, max: 200, step: 10, unit: ' mL' },
+        { btns: [{ id: 'go', label: 'React!', cls: 'primary', fn: () => { trial = Object.assign({ t: 0 }, calc(), { g: st.g, ml: st.ml }); ans = null; paintQ(); SND.noise(1.5, 2500, .06, 1.2); } }] },
+        { html: '<div id="rxLim"></div>' }], () => { trial = null; paintQ(); });
+      const G = SimLab.goals(R, { items: () => [[named.has('soda'), 'A trial where baking soda runs out first'], [named.has('vin'), 'A trial where vinegar runs out first'], [exact, 'Both used up, almost nothing left (within 10 %)']], q: Q.limiting, name: 'Limiting reactant' });
+      function paintQ() { const el = $('#rxLim', ctl.box); if (!el) return; if (!trial || trial.t < 0) { el.innerHTML = ''; return; }
+        el.innerHTML = `<div class="sim-note"><b>Which reactant ran out first?</b><div class="sim-pick"><button class="btn sm" data-lim="soda">Baking soda</button><button class="btn sm" data-lim="vin">Vinegar</button><button class="btn sm" data-lim="both">Both at once</button></div><div id="rxLimA" class="small"></div></div>`;
+        $$('[data-lim]', el).forEach(b => b.onclick = () => { if (ans) return; const pick = b.dataset.lim, near = trial.ratio <= .1, right = near ? (pick === 'both' || pick === trial.lim) : pick === trial.lim; ans = pick;
+          b.classList.add(right ? 'right' : 'wrong');
+          $('#rxLimA', el).innerHTML = right ? `Yes. ${near ? 'Both were almost completely used up!' : `Left over: <b>${trial.left}</b>.`}` : `Not quite: ${trial.lim === 'soda' ? 'baking soda' : 'vinegar'} ran out first. Left over: ${trial.left}.`;
+          if (right) { if (!near) named.add(trial.lim); else { exact = true; named.add(trial.lim); } SND.ok(); } else R.mistake('Wrong limiting reactant', 'Compare moles: baking soda g ÷ 84 vs vinegar mL × 0.000833. The smaller one runs out first.'); G.check(); }); }
+      SimLab.stage(bg(), (g, dt) => { const c = trial || calc(); if (trial) trial.t += dt; const k = trial ? clamp(trial.t / 3, 0, 1) : 0; let s = '';
+        const vol = trial ? c.co2 * k : 0, r = 20 + Math.sqrt(vol) * 2.2;
+        s += `<g transform="translate(330 0)"><path d="M-70,520 L-30,330 L-30,250 L30,250 L30,330 L70,520Z" fill="rgba(255,255,255,.07)" stroke="#cfe0f2" stroke-width="3"/><path d="M-60,515 L-38,${420 - st.ml * .4} L38,${420 - st.ml * .4} L60,515Z" fill="#f3eedc" opacity=".7"/>`;
+        if (trial) { for (let i = 0; i < Math.round(30 * (1 - k * .8)); i++) s += `<circle cx="${(hash(i) - .5) * 70}" cy="${500 - ((dt + i * 23 + trial.t * 90 * (1 + hash(i))) % (90 + st.ml * .4))}" r="3" fill="none" stroke="#fff" opacity=".7"/>`;
+          if (k > .9 && ans && c.lim === 'vin' && c.ratio > .1) s += `<ellipse cx="0" cy="508" rx="42" ry="${Math.min(14, 3 + (c.nb - c.n) * 84 * 1.4)}" fill="#fff"/><text x="0" y="560" font-size="12" fill="#fff" text-anchor="middle">leftover baking soda</text>`; }
+        else s += `<ellipse cx="0" cy="${515 - Math.min(10, st.g)}" rx="${18 + st.g * 2}" ry="${4 + st.g}" fill="#fff" opacity=".9"/>`;
+        s += `<path d="M-14,250 Q0,${250 - r * .4} 14,250" fill="#e5484d" stroke="#a52a2e"/><ellipse cx="0" cy="${250 - r}" rx="${r * .85}" ry="${r}" fill="#e5484d" stroke="#a52a2e" stroke-width="2" opacity=".92"/></g>`;
+        s += SimLab.hud(560, 140, 400, [['Baking soda', `${f(st.g, 1)} g = ${f(st.g / 84, 4)} mol`], ['Vinegar (acetic acid)', `${st.ml} mL = ${f(st.ml * .000833, 4)} mol`], ...(trial && k > .9 ? [['CO₂ made', `${f(c.n, 4)} mol ≈ ${f(c.co2)} mL`, '#ffd27a'], ['Left over', !ans ? 'answer the question first' : c.ratio <= .1 ? 'almost nothing!' : c.left, '#ffd27a']] : [['CO₂ made', trial ? 'reacting…' : 'press React!']])], 'NaHCO₃ + CH₃COOH → CH₃COONa + H₂O + CO₂');
+        s += `<text x="560" y="${trial && k > .9 ? 300 : 260}" font-size="12.5" fill="#a9b6cc">1 mol of baking soda reacts with exactly 1 mol of acetic acid.</text>`;
+        g.innerHTML = s; });
+    },
+    unknown: R => {
+      const POOL = ['nacl', 'cuso4', 'na2co3', 'fecl3', 'cacl2'], X = POOL[Math.floor(Math.random() * POOL.length)], TESTS = ['agno3', 'naoh', 'hcl', 'na2co3'];
+      const done = {}; let solved = false;
+      const ref = `<table class="sim-tbl"><tr><th>Unknown</th>${TESTS.map(t => `<th>+ ${CH[t].fm}</th>`).join('')}</tr>${POOL.map(u => `<tr><td><b>${CH[u].fm}</b></td>${TESTS.map(t => { const r = u === t ? null : react(u, t); return `<td>${!r ? '—' : r.ppt && r.gas ? r.pn.split(' ')[0] + ' ppt + fizz' : r.ppt ? (r.faint ? 'faint cloud' : r.pn + ' ppt') : r.gas ? 'fizzes' : r.dT ? 'warms' : '—'}</td>`; }).join('')}</tr>`).join('')}</table>`;
+      const st = { mix: null, T: 0, temp: 21, test: null };
+      const ctl = SimLab.panel(st, [{ html: `<div class="sim-note"><b>Test the unknown</b> with:</div><div class="sim-pick">${TESTS.map(t => `<button class="btn sm" data-ut="${t}">+ ${CH[t].fm}</button>`).join('')}</div><details class="sim-note"><summary><b>Reference table</b> (what each known substance does)</summary>${ref}</details>
+        <div class="sim-note"><b>Your identification</b><div class="sim-pick">${POOL.map(u => `<button class="btn sm" data-id="${u}">${CH[u].fm}</button>`).join('')}</div></div>` }]);
+      $$('[data-ut]', ctl.box).forEach(b => b.onclick = () => { const t = b.dataset.ut; st.test = t; st.mix = { t: 0, r: X === t ? null : react(X, t), a: X, b: t }; st.temp = 21; SND.tone(420, .2, 'sine', .05); });
+      $$('[data-id]', ctl.box).forEach(b => b.onclick = () => { if (solved) return; const u = b.dataset.id;
+        if (Object.keys(done).length < 2) { K.msg('Run at least two tests before you decide.', 'bad', 3000); return; }
+        if (u === X) { solved = true; b.classList.add('on'); SND.ok(); K.sparkle({ x: 300, y: 300 }, 40); K.msg(`Correct! The unknown is ${CH[X].n} (${CH[X].fm}).`, 'ok', 4000); G.check(); }
+        else { b.disabled = true; R.mistake('Wrong identification', 'Match your test results to the reference table row by row.'); K.msg('That doesn’t match all your results. Check the reference table.', 'bad', 3500); } });
+      const G = SimLab.goals(R, { items: () => [[Object.keys(done).length >= 2, `Run at least two tests (${Object.keys(done).length} done)`], [solved, 'Identify the unknown']], name: 'Mystery', winMsg: 'Case solved!' });
+      SimLab.stage(bg(), (g, dt) => { st.T += dt; let s = '';
+        s += `<g transform="translate(120 70)"><rect x="-26" y="0" width="52" height="80" rx="9" fill="${CH[X].c}" fill-opacity=".85" stroke="#cfe0f2" stroke-width="2"/><rect x="-11" y="-14" width="22" height="14" rx="3" fill="#3d4a66"/><rect x="-22" y="28" width="44" height="26" fill="#fff"/><text x="0" y="47" font-size="18" font-weight="900" text-anchor="middle" fill="#e5484d">X</text><text x="0" y="104" font-size="12" text-anchor="middle" fill="#fff">unknown</text></g>`;
+        if (st.mix) { st.mix.t += dt; const r = st.mix.r; if (r && r.dT) st.temp += (21 + r.dT - st.temp) * Math.min(1, dt * .9); if (st.mix.t > 1.5 && !done[st.test]) { done[st.test] = obsOf(r).join('; '); G.check(); } }
+        s += tube(300, 170, st.mix ? (st.mix.r && st.mix.r.col ? st.mix.r.col : CH[X].c) : CH[X].c, st.mix, st.T) + thermo(400, 230, st.temp);
+        s += `<g transform="translate(520 120)"><rect width="460" height="${46 + TESTS.length * 46}" rx="12" fill="#0b1020" fill-opacity=".8"/><text x="16" y="28" font-size="15" font-weight="800" fill="#fff">Lab notebook: unknown X</text>
+          ${TESTS.map((t, i) => `<text x="16" y="${60 + i * 46}" font-size="13" font-weight="800" fill="#ffd27a">X + ${CH[t].fm}</text><text x="16" y="${78 + i * 46}" font-size="12.5" fill="${done[t] ? '#fff' : '#7d8aa0'}">${done[t] ? done[t].slice(0, 62) : 'not tested yet'}</text>`).join('')}</g>`;
+        g.innerHTML = s; });
+    }
+  };
+  function finale() { bench({ next() {}, mistake() {} }, { list: ['agno3', 'nacl', 'cuso4', 'naoh', 'fecl3', 'hcl', 'na2co3', 'cacl2', 'mg', 'vin', 'soda', 'h2o2'] }); }
+
+  return makeLab({
+    noSetup: true, fit: true, bg: () => '',
+    fresh: () => ({}), steps, S,
+    finale() { finale(); },
+    finaleMsg: 'Case closed. The whole chemical shelf is open while you answer the questions.',
+    verdicts: [['Reaction detective', 'You read the evidence, named the reactions, balanced them and solved the mystery.'], ['Almost there', 'Nice work. Look over the questions you missed below.'], ['Practice again', 'Run the challenges once more and read the observations carefully.']], reviewLabel: 'Review these',
+    summary: () => 'You found the evidence of chemical reactions, classified reaction types, balanced equations, found the limiting reactant and identified an unknown substance.',
+    quiz: [
+      { q: 'Which is NOT evidence of a chemical reaction?', a: ['Ice melting into water', 'A gas forming when two liquids mix', 'A solid forming when two solutions mix', 'A temperature change during mixing'], c: 0, e: 'Melting is a physical change: the substance (water) stays the same. Gas, a precipitate, or a temperature or color change point to new substances forming.' },
+      { q: 'In the reaction 2H₂ + O₂ → 2H₂O, how many hydrogen atoms are on each side?', a: ['4', '2', '1', '6'], c: 0, e: '2H₂ means 2 molecules with 2 hydrogen atoms each: 4. On the right, 2H₂O also has 2 × 2 = 4 hydrogen atoms.' },
+      { q: 'Zn + CuSO₄ → ZnSO₄ + Cu is an example of…', a: ['Single replacement', 'Synthesis', 'Decomposition', 'Double replacement'], c: 0, e: 'One element (zinc) replaces another (copper) in a compound: A + BC → AC + B.' },
+      { q: 'A reaction makes the beaker feel cold. The reaction is…', a: ['Endothermic: it absorbs heat', 'Exothermic: it releases heat', 'Not a chemical reaction', 'Nuclear'], c: 0, e: 'Endothermic reactions take in thermal energy from the surroundings, so the container feels cold (like baking soda and vinegar).' },
+      { q: 'When 10 g of reactant A and 2 g of reactant B react, B runs out first. B is the…', a: ['Limiting reactant', 'Excess reactant', 'Catalyst', 'Product'], c: 0, e: 'The limiting reactant is used up first and decides how much product forms. A is left over: it is the excess reactant.' }
+    ],
+    meta: { id: 'reactions', short: 'Reaction Detective', title: 'Chemistry Lab: Reaction Detective', courses: ['ms-phys'], time: '30–40 min',
+      summary: 'Mix virtual chemicals, observe precipitates, gases and temperature changes, classify and balance reactions, find the limiting reactant, and identify an unknown substance.',
+      objective: 'Use evidence (precipitate, gas, temperature or color change) to identify chemical reactions, classify reaction types, balance equations to show conservation of mass, and identify a limiting reactant.',
+      materials: ['A computer or tablet'], safety: ['No safety gear needed in the simulation. In a real lab, silver nitrate, acids and sodium hydroxide need goggles and gloves.'],
+      ngss: [['MS-PS1-2', 'Analyze and interpret data on the properties of substances before and after the substances interact to determine if a chemical reaction has occurred.'], ['MS-PS1-5', 'Develop and use a model to describe how the total number of atoms does not change in a chemical reaction and thus mass is conserved.'], ['MS-PS1-6', 'Undertake a design project to construct, test, and modify a device that either releases or absorbs thermal energy by chemical processes.']],
+      thumb: big => labThumb('reactions', big) }
+  });
+})();
+
+/* ═══════════ MS Physical Science: "Roller Coaster Physics" (engineer a coaster with energy) ═══════════
+   Energy bookkeeping along the track (s = distance traveled):
+     total energy = PE + KE + thermal,  PE = m·g·h,  KE = ½·m·v²,  thermal (friction) = μ·m·g·s  (s counted from the end of the station, where a chain pushes the car)
+   so v = √(2·(g·H₁ − g·h − μ·g·s) + v₀²). Mass cancels out: heavy and light cars go the same speed.
+   The car makes it over a hill only while v² > 0, and stays on the loop only if v² ≥ g·r at the top.
+   Riders feel n = 1 + v²/(R·g) g's at the bottom of a curve (R = 20 m for the dips, 2r for a teardrop loop);
+   more than 5 g is unsafe. */
+const CoasterLab = (() => {
+  const K = Kit, f = SimLab.f, g0 = 9.8, RV = 20, GMAX = 5, V0 = 2;
+  const fresh = o => Object.assign({ h1: 30, ang: 50, h2: 0, r: 0, mu: 0, m: 500, run: null, T: 0 }, o);
+  /* the track as points every 0.25 m: [x, y, s, kind] */
+  function build(c) {
+    const P = [], push = (x, y, k) => { const l = P[P.length - 1], s = l ? l[2] + Math.hypot(x - l[0], y - l[1]) : 0; P.push([x, y, s, k]); };
+    const line = (x0, y0, x1, y1, k) => { const n = Math.max(1, Math.ceil(Math.hypot(x1 - x0, y1 - y0) / .25)); for (let i = 1; i <= n; i++) push(x0 + (x1 - x0) * i / n, y0 + (y1 - y0) * i / n, k); };
+    push(0, c.h1, 'station'); line(0, c.h1, 8, c.h1, 'station');
+    let x = 8 + c.h1 / Math.tan(c.ang * Math.PI / 180); line(8, c.h1, x, 0, 'drop'); const marks = [{ x, k: 'dip1' }];
+    line(x, 0, x + 12, 0, 'flat'); x += 12;
+    if (c.h2 > 0) { const run = c.h2 / Math.tan(35 * Math.PI / 180); line(x, 0, x + run, c.h2, 'up'); marks.push({ x: x + run + 2, k: 'crest' }); line(x + run, c.h2, x + run + 4, c.h2, 'crest'); line(x + run + 4, c.h2, x + 2 * run + 4, 0, 'down'); x += 2 * run + 4; marks.push({ x, k: 'dip2' }); line(x, 0, x + 10, 0, 'flat'); x += 10; }
+    if (c.r > 0) { const cx = x, n = Math.ceil(2 * Math.PI * c.r / .25); for (let i = 1; i <= n; i++) { const p = i / n * 2 * Math.PI; push(cx + c.r * Math.sin(p) + i / n * 3, c.r - c.r * Math.cos(p), Math.abs(p - Math.PI) < .1 ? 'top' : 'loop'); } x += 3; marks.push({ x, k: 'loop' }); }
+    line(x, 0, x + 12, 0, 'flat'); x += 12; line(x, 0, x + 26, 0, 'brake');
+    return { P, marks, len: P[P.length - 1][2], xmax: x + 26 };
+  }
+  /* energy per kg at distance s, and what the ride does */
+  function ride(c, tr) {
+    const E0 = g0 * c.h1 + V0 * V0 / 2; let stall = null, fell = null, vmax = 0, gmax = 1, gAt = '';
+    for (const p of tr.P) { const v2 = 2 * (E0 - g0 * p[1] - c.mu * g0 * Math.max(0, p[2] - 8)); if (p[3] === 'brake') break;
+      if (v2 <= 0) { stall = p; break; } const v = Math.sqrt(v2); if (v > vmax) vmax = v;
+      if (p[3] === 'top' && !fell && v2 < g0 * c.r) fell = p; }
+    const vAtX = (xx, k) => { const p = tr.P.find(q => q[0] >= xx - .01 && q[3] !== 'station'); if (!p) return 0; return Math.sqrt(Math.max(0, 2 * (E0 - g0 * p[1] - c.mu * g0 * Math.max(0, p[2] - 8)))); };
+    const reach = p => !stall || p[2] < stall[2];
+    tr.marks.forEach(mk => { const p = tr.P.find(q => q[0] >= mk.x - .01); if (!p || !reach(p) || mk.k === 'crest') return; const v = vAtX(mk.x); const n = 1 + v * v / ((mk.k === 'loop' ? Math.max(1, 2 * c.r) : RV) * g0); if (n > gmax) { gmax = n; gAt = mk.k === 'loop' ? 'loop entry' : mk.k === 'dip1' ? 'bottom of the first drop' : 'bottom of hill 2'; } });
+    return { E0, stall, fell, vmax, gmax, gAt, done: !stall && !fell, safe: !fell && gmax <= GMAX };
+  }
+  const st = (c, tr, s) => { /* state at distance s */ let i = Math.min(tr.P.length - 1, Math.max(0, Math.round(s / .25))); while (i > 0 && tr.P[i][2] > s) i--; while (i < tr.P.length - 1 && tr.P[i + 1][2] <= s) i++; const p = tr.P[i]; return p; };
+
+  function bg() { return `<defs><linearGradient id="rcSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb37a"/><stop offset=".55" stop-color="#ffd9a8"/><stop offset="1" stop-color="#fff0d8"/></linearGradient></defs>
+    <rect width="1000" height="620" fill="url(#rcSky)"/><circle cx="520" cy="96" r="46" fill="#fff4c9" opacity=".9"/><path d="M0,560 Q200,520 420,548 T1000,540 L1000,620 L0,620Z" fill="#7cb26a"/><rect y="566" width="1000" height="54" fill="#5f9a52"/>`; }
+  function draw(gEl, c, dt, cfg) {
+    c.T += dt; const tr = c.tr, R = c.rd, sc = Math.min(940 / tr.xmax, 300 / Math.max(20, c.h1, c.h2, 2 * c.r)), X = x => 30 + x * sc, Y = y => 560 - y * sc; let s = '';
+    /* supports and track */
+    for (let i = 0; i < tr.P.length; i += 24) { const p = tr.P[i]; if (p[3] !== 'loop' && p[3] !== 'top' && p[1] > 1) s += `<line x1="${X(p[0])}" y1="${Y(p[1])}" x2="${X(p[0])}" y2="560" stroke="#8a6d55" stroke-width="2.5"/>`; }
+    const pts = tr.P.filter((_, i) => i % 2 === 0).map(p => `${X(p[0]).toFixed(1)},${Y(p[1]).toFixed(1)}`).join(' ');
+    s += `<polyline points="${pts}" fill="none" stroke="#3b2f2a" stroke-width="7" stroke-linejoin="round"/><polyline points="${pts}" fill="none" stroke="#e5484d" stroke-width="3" stroke-linejoin="round"/>`;
+    const bk = tr.P.filter(p => p[3] === 'brake'); s += `<line x1="${X(bk[0][0])}" y1="${Y(0) - 2}" x2="${X(bk[bk.length - 1][0])}" y2="${Y(0) - 2}" stroke="#ffd34d" stroke-width="5" stroke-dasharray="6 6"/><text x="${X(bk[0][0]) + 4}" y="${Y(0) + 18}" font-size="11" fill="#2a3d22">brakes</text>`;
+    s += `<text x="${X(8) + 8}" y="${Y(c.h1) - 8}" font-size="12" font-weight="800" fill="#3b2f2a">${c.h1} m</text>`;
+    if (c.h2 > 0) { const cr = tr.P.find(p => p[3] === 'crest'); s += `<text x="${X(cr[0]) + 6}" y="${Y(c.h2) - 12}" font-size="12" font-weight="800" fill="#3b2f2a">${c.h2} m</text>`; }
+    /* the car */
+    const run = c.run; let here = tr.P[0], v = V0, sNow = 0;
+    if (run) {
+      if (!run.end) { run.s += Math.max(.5, run.v) * dt * (cfg.fast ? 2 : 1); const p = st(c, tr, run.s), v2 = 2 * (R.E0 - g0 * p[1] - c.mu * g0 * Math.max(0, p[2] - 8));
+        if (R.fell && p[2] >= R.fell[2]) { run.end = 'fell'; run.s = R.fell[2]; }
+        else if (R.stall && p[2] >= R.stall[2] - .3) { run.end = 'stall'; run.s = R.stall[2] - .3; }
+        else if (p[3] === 'brake') { run.v = Math.max(0, run.v - 9 * dt); if (run.v <= 0) run.end = 'done'; }
+        else run.v = Math.sqrt(Math.max(.01, v2));
+        if (run.end) { cfg.onEnd && cfg.onEnd(run.end, R, c); SND[run.end === 'done' ? 'ok' : 'nope'](); } }
+      here = st(c, tr, run.s); sNow = here[2]; v = run.end === 'stall' ? 0 : run.v;
+    }
+    const i0 = tr.P.indexOf(here), nx = tr.P[Math.min(tr.P.length - 1, i0 + 2)], pv = tr.P[Math.max(0, i0 - 2)], ang = Math.atan2(-(nx[1] - pv[1]), nx[0] - pv[0]) * 180 / Math.PI, inLoop = here[3] === 'loop' || here[3] === 'top';
+    const wob = run && run.end === 'fell' ? Math.min(60, (c.T - (run.fellT || (run.fellT = c.T))) * 120) : 0;
+    s += `<g transform="translate(${X(here[0])} ${Y(here[1]) + wob}) rotate(${ang})"><g transform="translate(0 ${inLoop && Math.abs(ang) > 90 ? 8 : -8})"><rect x="-16" y="-10" width="32" height="14" rx="5" fill="#2f6fd6" stroke="#173a75" stroke-width="2"/><circle cx="-6" cy="-14" r="4.2" fill="#ffcf9a"/><circle cx="7" cy="-14" r="4.2" fill="#ffcf9a"/><circle cx="-10" cy="5" r="3.4" fill="#222"/><circle cx="10" cy="5" r="3.4" fill="#222"/></g></g>`;
+    /* energy bars (per the chosen mass) */
+    const h = here[1], m = c.m, PE = m * g0 * h, KE = .5 * m * v * v, TH = m * c.mu * g0 * Math.max(0, sNow - 8), TOT = m * R.E0, kJ = x => f(x / 1000, 1) + ' kJ';
+    s += `<g transform="translate(20 20)"><rect width="300" height="152" rx="10" fill="#0b1020" fill-opacity=".78"/><text x="12" y="22" font-size="13" font-weight="800" fill="#fff">Energy (mass ${m} kg)</text>
+      ${SimLab.bar(12, 48, 276, PE / TOT, '#4f8ff7', 'Potential (PE = mgh)', kJ(PE))}${SimLab.bar(12, 82, 276, KE / TOT, '#ff9a3c', 'Kinetic (KE = ½mv²)', kJ(KE))}${SimLab.bar(12, 116, 276, TH / TOT, '#e5484d', 'Thermal (friction)', kJ(TH))}<text x="12" y="144" font-size="11.5" fill="#a9b6cc">Total stays ${kJ(TOT)}</text></g>`;
+    const ms = run && run.end ? { done: '✓ Completed the track!', stall: '✗ Stalled: not enough energy', fell: '✗ Too slow at the top of the loop: unsafe!' }[run.end] : '';
+    s += SimLab.hud(680, 20, 300, [['Speed', `${f(v, 1)} m/s (${f(v * 3.6)} km/h)`], ['Height', f(h, 1) + ' m'], ['Top speed (design)', f(R.vmax, 1) + ' m/s', '#ffd27a'], ['Max g-force (design)', `${f(R.gmax, 1)} g${R.gmax > GMAX ? ' ⚠' : ''}`, R.gmax > GMAX ? '#ff6b6b' : '#7ee0a1'], ['Friction μ', f(c.mu, 2)]], 'Ride data');
+    if (ms) s += `<g transform="translate(500 210)"><rect x="-220" y="-22" width="440" height="40" rx="20" fill="${run.end === 'done' ? '#1f7a4a' : '#7a1f1f'}" opacity=".9"/><text y="5" font-size="15" font-weight="800" fill="#fff" text-anchor="middle">${ms}</text></g>`;
+    gEl.innerHTML = s;
+  }
+
+  function lab(R, def, cfg) {
+    const c = fresh(def), lock = cfg.lock || {}; const rebuild = () => { c.tr = build(c); c.rd = ride(c, c.tr); }; rebuild();
+    const ctl = SimLab.panel(c, [
+      { k: 'h1', label: 'Lift hill height H₁', min: 10, max: 70, step: 1, unit: ' m', lock: lock.h1 },
+      { k: 'ang', label: 'First drop slope', min: 30, max: 80, step: 1, unit: '°', lock: lock.ang },
+      { k: 'h2', label: 'Second hill height (0 = none)', min: 0, max: 60, step: 1, unit: ' m', lock: lock.h2 },
+      { k: 'r', label: 'Loop radius (0 = no loop)', min: 0, max: 18, step: 1, unit: ' m', lock: lock.r },
+      { k: 'mu', label: 'Friction μ (wheels and air)', min: 0, max: .06, step: .005, fmt: v => f(v, 3), lock: lock.mu },
+      { k: 'm', label: 'Car mass (with riders)', min: 200, max: 1000, step: 50, unit: ' kg', lock: lock.m },
+      ...(cfg.extra ? [{ html: cfg.extra }] : []),
+      { btns: [{ id: 'go', label: 'Release the car', cls: 'primary', fn: go }, { id: 'rs', label: 'Reset', fn: () => { c.run = null; } }] }
+    ], () => { if (c.r > 0 && c.r < 4) c.r = 4; rebuild(); c.run = null; ctl.sync(); cfg.onChange && cfg.onChange(c); G.check(); });
+    function go() { if (c.run && !c.run.end) return; if (cfg.before && cfg.before(c) === false) return; c.run = { s: 0, v: V0 }; SND.tone(300, .4, 'triangle', .05, 600); }
+    const G = SimLab.goals(R, { items: () => cfg.goal(c), q: cfg.q, name: def.name, winMsg: cfg.winMsg });
+    SimLab.stage(bg(), (g, dt) => draw(g, c, dt, Object.assign(cfg, { onEnd: (how, rd, cc) => { cfg.after && cfg.after(how, rd, cc); G.check(); } })));
+    return { c, ctl, G };
+  }
+
+  const Q = {
+    pe: { q: 'At the very bottom of the first drop (no friction), where did the potential energy go?', a: ['It all became kinetic energy', 'It disappeared', 'It became mass', 'It stayed as potential energy'], c: 0, e: 'Energy is conserved. As the car loses height it loses PE and gains the same amount of KE. With no friction, PE at the top = KE at the bottom.' },
+    speed: { q: 'Why did the heavy car and the light car reach the same speed?', a: ['Mass cancels: mgh = ½mv² gives v = √(2gh)', 'Heavy cars have more friction', 'The track pushes light cars harder', 'They didn’t: heavy cars are always faster'], c: 0, e: 'A heavier car has more PE, but it also needs more energy to move. In mgh = ½mv², the m is on both sides, so v = √(2gh) depends only on the height.' },
+    friction: { q: 'With friction on, the total energy still stayed the same. Where did the “lost” energy go?', a: ['Into thermal energy (heat) in the wheels, track and air', 'It was destroyed', 'Back into potential energy', 'Into the car’s mass'], c: 0, e: 'Friction transforms kinetic energy into thermal energy. Energy is never destroyed, but thermal energy can’t lift the car back up a hill, so the first hill must be taller than the rest.' }
+  };
+  const C = (id, name, title, html, hint) => ({ id, name, title, html, hint });
+  const steps = [
+    C('pe', 'Energy at the top', 'Energy at the top', 'The car (500 kg) sits on a <b>30 m</b> lift hill. Calculate its <b>gravitational potential energy</b>: <b>PE = m × g × h</b>, with g = 9.8 m/s².<br><br>Enter your answer, then release the car and watch PE turn into KE.', '500 × 9.8 × 30 = ? Give the answer in joules (J).'),
+    C('speed', 'Speed at the bottom', 'Predict the speed', 'Set the lift hill to <b>45 m</b>. With no friction, all the PE becomes KE at the bottom: <b>mgh = ½mv²</b>, so <b>v = √(2gh)</b>.<br><br>Predict the top speed, test it, then run it again with a <b>different mass</b>.', '2 × 9.8 × 45 = 882. The square root of 882 is about 29.7.'),
+    C('friction', 'Friction', 'Friction steals energy', 'Now friction is on and there’s a <b>35 m</b> second hill. Release the car and see what happens. Then <b>change the lift hill</b> until the car makes it all the way to the brakes.', 'Friction turns some energy into heat over every meter, so the first hill must be taller than the second, with some to spare.'),
+    C('design', 'Fastest safe coaster', 'Build the fastest safe roller coaster', 'Design challenge! Your coaster must have a <b>loop</b> and a <b>second hill</b>, with friction on. It must:<br>• make it to the brakes<br>• stay on the loop (fast enough at the top)<br>• never go over <b>5 g</b><br>• reach a <b>top speed of 26 m/s or more</b>', 'A steeper first drop is shorter, so less energy is lost to friction. Too much height means too many g’s at the bottom.')
+  ];
+  const S = {
+    pe: R => { let ok = false, ran = false;
+      const W = lab(R, { name: 'Energy at the top', h1: 30, ang: 50 }, { q: Q.pe, lock: { h1: true, h2: true, r: true, mu: true, m: true },
+        extra: `<div class="sim-in"><label for="rcPE">PE at the top =</label><input type="number" id="rcPE" placeholder="joules"><span>J</span><button class="btn sm" id="rcPEc">Check</button></div>`,
+        after: () => { ran = true; }, goal: () => [[ok, 'Calculate PE = mgh at the top'], [ran, 'Release the car and watch the energy change']] });
+      $('#rcPEc').onclick = () => { const v = parseFloat($('#rcPE').value), t = 500 * 9.8 * 30; if (!(v > 0)) return; if (Math.abs(v - t) / t < .02) { ok = true; SND.ok(); K.msg(`Right: 500 × 9.8 × 30 = ${t.toLocaleString()} J (147 kJ).`, 'ok', 4000); }
+        else { R.mistake('PE calculation off', 'PE = m × g × h = 500 kg × 9.8 m/s² × 30 m = 147,000 J.'); K.msg(Math.abs(v - t / 1000) < 2 ? 'That’s in kilojoules. Give it in joules.' : 'Not quite. Multiply mass × 9.8 × height.', 'bad', 3500); } W.G.check(); }; },
+    speed: R => { let pred = null, ok = false, masses = new Set();
+      const W = lab(R, { name: 'Speed at the bottom', h1: 30, ang: 55 }, { q: Q.speed, lock: { h2: true, r: true, mu: true },
+        extra: `<div class="sim-in"><label for="rcV">Predicted top speed =</label><input type="number" id="rcV" step=".1" placeholder="m/s"><span>m/s</span></div>`,
+        before: c => { if (c.h1 !== 45) { K.msg('Set the lift hill to 45 m first.', 'bad', 3000); return false; } const v = parseFloat($('#rcV').value); if (!(v > 0)) { K.msg('Enter your predicted speed first.', 'bad', 3000); return false; } pred = v; },
+        after: (how, rd, c) => { const err = Math.abs(pred - rd.vmax) / rd.vmax; if (err <= .05) { ok = true; masses.add(c.m); K.msg(`Top speed ${f(rd.vmax, 1)} m/s. You predicted ${f(pred, 1)}: ${f(err * 100, 1)}% off.`, 'ok', 4500); }
+          else { R.mistake('Speed prediction off', 'v = √(2gh) = √(2 × 9.8 × 45) ≈ 29.7 m/s.'); K.msg(`Top speed ${f(rd.vmax, 1)} m/s, but you predicted ${f(pred, 1)}. Recalculate.`, 'bad', 4500); } },
+        goal: () => [[ok, 'Predict the top speed within 5 %'], [masses.size >= 2, `Run it with two different masses (${masses.size}/2)`]] }); void W; },
+    friction: R => { let stalled = false, made = false;
+      lab(R, { name: 'Friction', h1: 36, ang: 55, h2: 35, mu: .04 }, { q: Q.friction, lock: { h2: true, r: true, mu: true, m: true, ang: true },
+        after: how => { if (how === 'stall') stalled = true; if (how === 'done') made = true; },
+        goal: () => [[stalled, 'Watch the car stall on the second hill'], [made, 'Make it to the brakes with friction on']] }); },
+    design: R => { let best = null;
+      lab(R, { name: 'Fastest safe coaster', h1: 30, ang: 40, h2: 20, r: 8, mu: .03 }, { lock: { mu: true }, winMsg: 'Fast AND safe. Ship it!',
+        after: (how, rd) => { if (how === 'done' && rd.safe) { if (!best || rd.vmax > best) best = rd.vmax; } else if (how === 'done' && !rd.safe) { R.mistake(`Unsafe design (${f(rd.gmax, 1)} g)`, `Riders felt ${f(rd.gmax, 1)} g at the ${rd.gAt}. Keep it at 5 g or less: lower the drop or use a bigger loop.`); K.msg(`Made it, but riders felt ${f(rd.gmax, 1)} g at the ${rd.gAt}. Over 5 g is unsafe!`, 'bad', 5000); } },
+        goal: c => { const rd = c.rd; return [[c.h2 > 0 && c.r > 0, 'Has a second hill and a loop'], [!!best, 'Completes the track safely (≤ 5 g, stays on the loop)'], [!!best && best >= 26, `Top speed 26 m/s or more${best ? ` (best ${f(best, 1)} m/s)` : ` (this design: ${f(rd.vmax, 1)} m/s)`}`]]; } }); }
+  };
+  function finale() { lab({ next() {}, mistake() {} }, { name: 'Free design', h1: 45, ang: 60, h2: 25, r: 9, mu: .02 }, { goal: () => [[false, 'Free design: build any coaster you like']] }); }
+
+  return makeLab({
+    noSetup: true, fit: true, bg: () => '',
+    fresh: () => ({}), steps, S,
+    finale() { finale(); },
+    finaleMsg: 'Coaster certified. Keep designing while you answer the questions.',
+    verdicts: [['Coaster engineer', 'You used energy conservation to design a fast, safe coaster.'], ['Almost there', 'Nice work. Look over the questions you missed below.'], ['Practice again', 'Run the challenges once more and watch the energy bars.']], reviewLabel: 'Review these',
+    summary: () => 'You calculated potential energy, predicted speed with v = √(2gh), saw friction turn energy into heat, and designed a coaster that is fast but safe.',
+    quiz: [
+      { q: 'A 600 kg coaster car is 20 m high. What is its potential energy? (g = 9.8 m/s²)', a: ['117,600 J', '12,000 J', '6,000 J', '1,176 J'], c: 0, e: 'PE = mgh = 600 × 9.8 × 20 = 117,600 J.' },
+      { q: 'Where on a coaster is the kinetic energy greatest?', a: ['At the lowest point of the track', 'At the top of the lift hill', 'At the top of the loop', 'It is the same everywhere'], c: 0, e: 'The lowest point has the least potential energy, so (by conservation of energy) it has the most kinetic energy and the highest speed.' },
+      { q: 'Why must the first hill of a coaster be the tallest?', a: ['Friction removes energy, so the car can’t climb higher than it started', 'Taller hills are cheaper to build', 'The car gains energy as it rolls', 'Gravity is weaker at the end'], c: 0, e: 'The lift hill gives the car all its energy. Friction turns some into thermal energy along the way, so later hills must be lower.' },
+      { q: 'If you double a coaster car’s speed, its kinetic energy becomes…', a: ['4 times as large', '2 times as large', 'The same', 'Half as large'], c: 0, e: 'KE = ½mv². Speed is squared, so doubling v makes KE 2² = 4 times larger.' },
+      { q: 'Which change makes a coaster faster at the bottom of the first drop (no friction)?', a: ['A taller lift hill', 'A heavier car', 'A lighter car', 'A longer flat station'], c: 0, e: 'v = √(2gh) depends only on the height dropped. Mass cancels out.' }
+    ],
+    meta: { id: 'coaster', short: 'Roller Coaster Physics', title: 'Roller Coaster Physics', courses: ['ms-phys'], time: '25–35 min',
+      summary: 'Engineer a roller coaster: set hill heights, slopes and loops, calculate potential and kinetic energy, add friction, and build the fastest coaster that is still safe.',
+      objective: 'Use conservation of energy to relate height, potential energy, kinetic energy and speed, explain how friction transforms energy into thermal energy, and design a coaster within safety limits.',
+      materials: ['A computer or tablet', 'A calculator'], safety: ['No safety gear needed. This is a simulation.'],
+      ngss: [['MS-PS3-1', 'Construct and interpret graphical displays of data to describe the relationships of kinetic energy to the mass of an object and to the speed of an object.'], ['MS-PS3-2', 'Develop a model to describe that when the arrangement of objects interacting at a distance changes, different amounts of potential energy are stored in the system.'], ['MS-PS3-5', 'Construct, use, and present arguments to support the claim that when the kinetic energy of an object changes, energy is transferred to or from the object.']],
+      thumb: big => labThumb('coaster', big) }
+  });
+})();
+
 /* ═══════════ Science Showdown: team quiz board for the projector ═══════════
    Teams take turns picking a tile. A wrong answer lets the next team steal for half the points.
    One hidden tile is a Lab Bonus (double points, no steal). Answer order is shuffled every time.
@@ -5955,7 +7181,7 @@ const Zombies = {
    SITE_KEY. Students join with it (no account), run the labs, and each finished lab is posted to the sign-up Apps Script,
    which saves it in the "educator-space.com · Lab results" tab. Teachers read back only their own students' results.
    LAB_ORDER is the bit order inside codes: only ever ADD new labs at the end, never reorder. */
-const LAB_ORDER = ['dna-strawberry', 'titration', 'flame', 'pendulum', 'ohm', 'mass', 'erosion', 'onion', 'heart', 'vsepr', 'projectile', 'helix'];
+const LAB_ORDER = ['dna-strawberry', 'titration', 'flame', 'pendulum', 'ohm', 'mass', 'erosion', 'onion', 'heart', 'vsepr', 'projectile', 'helix', 'ecosystem', 'cellcity', 'volcano', 'weather', 'reactions', 'coaster'];
 /* GAME_ORDER is also append-only. A code with games = the usual 13 signed characters + a short tail holding a bitmask
    (labs in bits 0–11, games from bit 12). The 13-character core is version 2 and carries a 10-bit check of the tail, so the
    tail can't be edited. Only the core is sent with results, so the Apps Script needs no change. */
@@ -5966,10 +7192,12 @@ const OPT = { hints: 1, blaster: 2, repeat: 4 };
 
 const teacherKey = async email => parseInt((await sha256hex('t|' + SITE_KEY + '|' + normEmail(email))).slice(0, 5), 16);
 const fmtLabCode = c => c.slice(0, 4) + '-' + c.slice(4, 8) + '-' + c.slice(8);
+/* where each lab lives in a class code's extension: the first 12 labs use bits 0–11, games bits 12–39, later labs bits 40 and up */
+const labBit = i => i < 12 ? i : 40 + (i - 12);
 async function makeLabCode(email, labIds, opts, set, gameIds = []) {
   let labs = 0, ver = 1n, ext = '';
   if (gameIds.length || labIds.some(id => LAB_ORDER.indexOf(id) >= 10)) {
-    let mask = 0n; labIds.forEach(id => { const i = LAB_ORDER.indexOf(id); if (i >= 0) mask |= 1n << BigInt(i); }); gameIds.forEach(id => { const i = GAME_ORDER.indexOf(id); if (i >= 0) mask |= 1n << BigInt(12 + i); });
+    let mask = 0n; labIds.forEach(id => { const i = LAB_ORDER.indexOf(id); if (i >= 0) mask |= 1n << BigInt(labBit(i)); }); gameIds.forEach(id => { const i = GAME_ORDER.indexOf(id); if (i >= 0) mask |= 1n << BigInt(12 + i); });
     let mm = mask; do { ext = CODE_ABC[Number(mm % 31n)] + ext; mm /= 31n; } while (mm > 0n); while (ext.length < 6) ext = CODE_ABC[0] + ext;
     labs = await extHash(ext); ver = 2n;
   } else labIds.forEach(id => { const i = LAB_ORDER.indexOf(id); if (i >= 0) labs |= 1 << i; });
@@ -5989,7 +7217,7 @@ async function readLabCode(code) {
   const p = Number(payload), ver = Math.floor(p / 2 ** 38), field = Math.floor(p / 2 ** 28) % 1024, opts = Math.floor(p / 2 ** 24) % 16;
   let labs, games = [];
   if (ext) { if (ver !== 2 || field !== await extHash(ext)) return null; let mk = 0n; for (const ch of ext) { const i = CODE_ABC.indexOf(ch); if (i < 0) return null; mk = mk * 31n + BigInt(i); }
-    labs = LAB_ORDER.filter((id, i) => (mk >> BigInt(i)) & 1n); games = GAME_ORDER.filter((id, i) => (mk >> BigInt(12 + i)) & 1n); }
+    labs = LAB_ORDER.filter((id, i) => (mk >> BigInt(labBit(i))) & 1n); games = GAME_ORDER.filter((id, i) => (mk >> BigInt(12 + i)) & 1n); }
   else { if (ver === 2) return null; labs = LAB_ORDER.filter((id, i) => field & (1 << i)); if (opts & OPT.blaster) games = ['blaster']; }
   return { code: fmtLabCode(c) + (ext ? '-' + ext : ''), core: fmtLabCode(c), labs, games, opts, set: Math.floor(p / 2 ** 20) % 16, th: p % 2 ** 20 };
 }
