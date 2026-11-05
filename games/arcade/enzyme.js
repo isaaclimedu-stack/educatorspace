@@ -77,7 +77,7 @@
   function preview(c, t) { D.bg(c, '#041a10', '#0a3a20'); D.stars(c, t, 40, 8, '#9af0b4'); enzyme(c, LV[0], Math.sin(t) * .6, t, 0, false);
     [[220, 'sub'], [420, 'comp'], [640, 'non'], [800, 'sub']].forEach(([x, ty], i) => mol(c, { x: x + Math.sin(t + i) * 20, y: 80 + ((t * 50 + i * 90) % 300), type: ty, col: '#4be37a', sh: 'two', wob: i, label: '' }, t));
     for (let k = 0; k < 3; k++) { const y = EY - 80 - ((t * 400 + k * 90) % 300); c.save(); D.glow(c, '#e8fff0', 10); c.fillStyle = '#e8fff0'; c.beginPath(); c.arc(EX + 78 + Math.sin(t) * (EY - y) * .6, y, 4, 0, 7); c.fill(); c.restore(); } }
-  AR.reg({ id: 'enzyme', title: 'Enzyme Blast', sub: 'Shoot the inhibitors', topic: 'Enzymes', color: '#4be37a',
+  AR.reg({ id: 'enzyme', subject: 'Biology', diff: 'Medium', title: 'Enzyme Blast', sub: 'Shoot the inhibitors', topic: 'Enzymes', color: '#4be37a',
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3"/><path d="M7.5 15h9"/></svg>',
     intro: 'You are an <b>enzyme</b> with two turrets. Let your <b>substrate</b> reach the active site, and blast everything that would stop you working.',
     how: ['Aim with the <b>mouse</b> (or ← →) and fire with <b>click</b> or <b>Space</b>.', '<b>Don’t shoot your substrate</b> (lactose, then starch, then H₂O₂). Let it in to make products.', 'Shoot <b>competitive inhibitors</b> (red, ✕), <b>noncompetitive inhibitors</b> (purple, spiky) and orange <b>hazards</b> like heat and acid that denature you.', 'Break down 12 substrate molecules to clear each level.'],

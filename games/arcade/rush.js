@@ -79,7 +79,7 @@
   function preview(c, t) { D.bg(c, '#0c0a36', '#1b0f4f'); D.stars(c, t, 40, 6, '#c9b6ff'); membrane(c, t); [0, 1, 2].forEach(k => receptor(c, 200 + k * 280, k, false, false));
     [0, 1, 2].forEach(k => { const y = 70 + ((t * 70 + k * 110) % 320); c.save(); D.glow(c, KIND[k].col, 14); shape(c, KIND[k].sh, 200 + k * 280, Math.min(y, MEM - 34), 14, KIND[k].col); c.restore(); });
     c.save(); D.glow(c, '#ffd23f', 12); shape(c, 'hex', 620, 60 + ((t * 60) % 440), 12, '#ffd23f'); c.restore(); }
-  AR.reg({ id: 'rush', title: 'Receptor Rush', sub: 'Match ligands to their receptors', topic: 'Cell signaling', color: '#b46bff',
+  AR.reg({ id: 'rush', subject: 'Biology', diff: 'Medium', title: 'Receptor Rush', sub: 'Match ligands to their receptors', topic: 'Cell signaling', color: '#b46bff',
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 21v-8M12 13L6 4M12 13l6-9"/><path d="M3 21h18"/></svg>',
     intro: 'Ligands rain down on the cell. Slide your <b>receptor</b> under each one and switch its binding site to the matching shape to relay the signal.',
     how: ['Move with <b>← →</b> (or drag above the membrane). Switch the binding site with <b>Space</b> or keys <b>1 2 3</b> (or tap the membrane).', 'Each shape is a receptor family: <b>▲</b> G protein–coupled receptor, <b>●</b> ligand-gated ion channel, <b>■</b> receptor tyrosine kinase.', '<b>Yellow hexagons are steroids.</b> They’re lipid-soluble, so step aside and let them pass through the membrane.', 'Dodge grey <b>antagonists</b> marked ✕. They block your receptor and cost a life. Survive 90 seconds.'],

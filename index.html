@@ -529,7 +529,41 @@ body.gfs .gh-frame { height: calc(100vh - 70px); height: calc(100dvh - 70px); }
 .home-games { display: grid; gap: 10px; }
 .gm-mini { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 12px; align-items: center; padding: 8px; }
 .gm-mini .thumb { width: 92px; height: 56px; border-radius: 8px; overflow: hidden; display: block; }
-.gm-mini .thumb svg { width: 100%; height: 100%; display: block; }
+.gm-mini .thumb svg, .gm-mini .thumb img { width: 100%; height: 100%; display: block; }
+.thumb > img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pick .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.chip.diff-Easy { color: #127a4a; } .chip.diff-Medium { color: #9a6a00; } .chip.diff-Hard { color: #b42318; }
+/* game hall (middle school games and Science Arcade): dark arcade look */
+.hall { display: grid; grid-template-columns: minmax(0, 1fr) 250px; gap: 18px; align-items: start; padding: 18px; border-radius: 22px; background: radial-gradient(900px 400px at 70% -10%, #2a2a8a, transparent 60%), linear-gradient(180deg, #0b1440, #0a0f2e); color: #e8efff; }
+@media (max-width: 1150px) { .hall { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 600px) { .hall { padding: 10px; border-radius: 16px; } .hall-ban::after { opacity: .25; } .hall-chips button { font-size: 13px; padding: 6px 10px; } }
+.hall-ban { position: relative; overflow: hidden; padding: 22px 24px; border-radius: 16px; margin-bottom: 14px; background: radial-gradient(420px 200px at 85% 40%, rgba(130, 90, 255, .55), transparent 70%), linear-gradient(120deg, #13256a, #22125a); border: 1px solid rgba(140, 170, 255, .25); }
+.hall-ban::after { content: ""; position: absolute; right: 30px; top: -40px; width: 130px; height: 220px; opacity: .6; transform: rotate(20deg); background: repeating-linear-gradient(170deg, transparent 0 12px, rgba(255, 120, 220, .8) 12px 15px, transparent 15px 26px, rgba(90, 200, 255, .8) 26px 29px); border-radius: 40px; }
+.hall-ban h2 { margin: 0; font-size: clamp(1.4rem, 2.6vw, 2rem); color: #fff; } .hall-ban h2 em { font-style: normal; background: linear-gradient(90deg, #7fd0ff, #b98cff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hall-ban p { margin: 4px 0 0; color: #cdd8ff; font-weight: 700; }
+.hall-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.hall-chips button { display: inline-flex; align-items: center; gap: 6px; padding: 7px 13px; border-radius: 999px; border: 1px solid rgba(140, 170, 255, .3); background: rgba(255, 255, 255, .05); color: #d6e0ff; font: inherit; font-weight: 700; font-size: 14px; cursor: pointer; }
+.hall-chips button svg { width: 16px; height: 16px; } .hall-chips button[aria-selected="true"] { background: linear-gradient(180deg, #4f8cff, #2f62e0); border-color: transparent; color: #fff; }
+.hall-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(215px, 1fr)); gap: 14px; }
+.hall-card { display: grid; grid-template-rows: auto 1fr; border-radius: 16px; overflow: hidden; background: #111a46; border: 1.5px solid rgba(140, 170, 255, .28); box-shadow: 0 8px 22px rgba(0, 0, 0, .35); transition: transform .15s, border-color .15s; }
+.hall-card[hidden] { display: none; } .hall-card:hover { transform: translateY(-3px); border-color: #7fb0ff; }
+.hall-pic { display: block; padding: 0; border: 0; background: #0a1033; aspect-ratio: 16 / 9; overflow: hidden; cursor: pointer; } .hall-pic svg, .hall-pic img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.hall-b { padding: 10px 12px 12px; display: grid; gap: 4px; align-content: start; } .hall-b h3 { margin: 0; font-size: 1.02rem; color: #fff; } .hall-b p { margin: 0; font-size: .82rem; line-height: 1.35; color: #a9b8e0; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.hall-f { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; } .hall-d { display: inline-flex; align-items: center; gap: 6px; font-size: .78rem; font-weight: 700; color: var(--d); }
+.hall-d i { width: 11px; height: 10px; background: linear-gradient(90deg, var(--d) 30%, transparent 30% 38%, var(--d) 38% 66%, transparent 66% 74%, var(--d) 74%); border-radius: 2px; }
+.hall-prog { position: sticky; top: 16px; padding: 16px; border-radius: 16px; background: linear-gradient(180deg, #131f52, #0c1440); border: 1px solid rgba(140, 170, 255, .28); }
+.hall-prog h3 { display: flex; align-items: center; gap: 8px; margin: 0 0 10px; font-size: 1rem; color: #fff; } .hall-prog h3 svg { width: 18px; height: 18px; color: #7fd0ff; }
+.hp-lv { display: flex; justify-content: space-between; align-items: center; font-size: 1.1rem; color: #fff; } .hp-lv span { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: radial-gradient(circle, #ffe066, #f2a900); color: #6a4100; font-size: 18px; }
+.hp-bar { height: 9px; border-radius: 9px; background: rgba(255, 255, 255, .12); overflow: hidden; margin: 8px 0 4px; } .hp-bar i { display: block; height: 100%; background: linear-gradient(90deg, #4f8cff, #7fd0ff); }
+.hall-prog small { color: #a9b8e0; } .hall-prog h4 { display: flex; justify-content: space-between; margin: 14px 0 8px; font-size: .92rem; color: #fff; }
+.hp-bd { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; } .hp-bd span { display: grid; justify-items: center; gap: 2px; text-align: center; opacity: .35; filter: grayscale(1); } .hp-bd span.on { opacity: 1; filter: none; }
+.hp-bd i { font-style: normal; width: 38px; height: 38px; border-radius: 11px; display: grid; place-items: center; font-size: 19px; background: rgba(255, 255, 255, .08); border: 1px solid rgba(140, 170, 255, .3); } .hp-bd span.on i { border-color: #ffd23f; background: radial-gradient(circle, rgba(255, 210, 63, .35), rgba(255, 255, 255, .06)); }
+.hp-bd small { font-size: 10px; line-height: 1.15; }
+.hp-keep { margin-top: 14px; padding: 14px; border-radius: 14px; text-align: center; display: grid; gap: 2px; background: radial-gradient(120px 80px at 50% 20%, rgba(185, 140, 255, .45), transparent), linear-gradient(180deg, #2a1a6b, #1a1150); border: 1px solid rgba(185, 140, 255, .5); color: #fff; } .hp-keep span { font-size: 30px; }
+.arc-prog { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 14px 18px; border: 1px solid var(--line); border-radius: 14px; background: linear-gradient(90deg, #13255a, #2a1a6b); color: #fff; margin: 4px 0 6px; }
+.arc-prog .lv { width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 18px; background: radial-gradient(circle, #ffe066, #f2a900); color: #5a3a00; }
+.arc-prog .bar { height: 9px; border-radius: 9px; background: rgba(255,255,255,.18); overflow: hidden; margin-top: 6px; } .arc-prog .bar i { display: block; height: 100%; background: linear-gradient(90deg, #4f8cff, #7fd0ff); }
+.arc-prog small { color: #c9d4ff; } .arc-prog .bd { font-size: 20px; letter-spacing: 2px; white-space: nowrap; }
 .gm-mini b { font-family: var(--f-display); font-size: 15.5px; display: block; }
 .gm-cols { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
 .gm-col { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px; display: grid; gap: 6px; align-content: start; }
@@ -7220,7 +7254,7 @@ const LAB_ORDER = ['dna-strawberry', 'titration', 'flame', 'pendulum', 'ohm', 'm
 /* GAME_ORDER is also append-only. A code with games = the usual 13 signed characters + a short tail holding a bitmask
    (labs in bits 0–11, games from bit 12). The 13-character core is version 2 and carries a 10-bit check of the tail, so the
    tail can't be edited. Only the core is sent with results, so the Apps Script needs no change. */
-const GAME_ORDER = ['game', 'blaster', 'g-match', 'g-names', 'g-bomb', 'g-contaminated', 'g-gene', 'g-race', 'g-sort', 'g-launch', 'g-hazard', 'zombies', 'g-mitosis', 'g-elwars', 'g-atom', 'g-chemdet', 'g-signal', 'a-quest', 'a-rush', 'a-defender', 'a-mitosis', 'a-gene', 'a-enzyme'];
+const GAME_ORDER = ['game', 'blaster', 'g-match', 'g-names', 'g-bomb', 'g-contaminated', 'g-gene', 'g-race', 'g-sort', 'g-launch', 'g-hazard', 'zombies', 'g-mitosis', 'g-elwars', 'g-atom', 'g-chemdet', 'g-signal', 'a-quest', 'a-rush', 'a-defender', 'a-mitosis', 'a-gene', 'a-enzyme', 'm-rocket', 'm-senses', 'm-enzesc', 'm-dna', 'm-plat', 'm-immune', 'm-photo', 'm-force', 'm-mixer', 'm-atom', 'm-genetic'];
 const gameTitle = id => (GAMES.find(g => g.id === id) || {}).title || id;
 const extHash = async ext => parseInt((await sha256hex('x|' + SITE_KEY + '|' + ext)).slice(0, 3), 16) & 1023;
 const OPT = { hints: 1, blaster: 2, repeat: 4 };
@@ -7228,11 +7262,13 @@ const OPT = { hints: 1, blaster: 2, repeat: 4 };
 const teacherKey = async email => parseInt((await sha256hex('t|' + SITE_KEY + '|' + normEmail(email))).slice(0, 5), 16);
 const fmtLabCode = c => c.slice(0, 4) + '-' + c.slice(4, 8) + '-' + c.slice(8);
 /* where each lab lives in a class code's extension: the first 12 labs use bits 0–11, games bits 12–39, later labs bits 40 and up */
-const labBit = i => i < 12 ? i : 40 + (i - 12);
+const labBit = i => i < 12 ? i : i < 22 ? 40 + (i - 12) : 56 + (i - 22);
+/* games: bits 12–39 for the first 28, then bits 50–55 (labs 13–22 use 40–49, any labs after that 56+) */
+const gameBit = i => i < 28 ? 12 + i : 50 + (i - 28);
 async function makeLabCode(email, labIds, opts, set, gameIds = []) {
   let labs = 0, ver = 1n, ext = '';
   if (gameIds.length || labIds.some(id => LAB_ORDER.indexOf(id) >= 10)) {
-    let mask = 0n; labIds.forEach(id => { const i = LAB_ORDER.indexOf(id); if (i >= 0) mask |= 1n << BigInt(labBit(i)); }); gameIds.forEach(id => { const i = GAME_ORDER.indexOf(id); if (i >= 0) mask |= 1n << BigInt(12 + i); });
+    let mask = 0n; labIds.forEach(id => { const i = LAB_ORDER.indexOf(id); if (i >= 0) mask |= 1n << BigInt(labBit(i)); }); gameIds.forEach(id => { const i = GAME_ORDER.indexOf(id); if (i >= 0) mask |= 1n << BigInt(gameBit(i)); });
     let mm = mask; do { ext = CODE_ABC[Number(mm % 31n)] + ext; mm /= 31n; } while (mm > 0n); while (ext.length < 6) ext = CODE_ABC[0] + ext;
     labs = await extHash(ext); ver = 2n;
   } else labIds.forEach(id => { const i = LAB_ORDER.indexOf(id); if (i >= 0) labs |= 1 << i; });
@@ -7252,7 +7288,7 @@ async function readLabCode(code) {
   const p = Number(payload), ver = Math.floor(p / 2 ** 38), field = Math.floor(p / 2 ** 28) % 1024, opts = Math.floor(p / 2 ** 24) % 16;
   let labs, games = [];
   if (ext) { if (ver !== 2 || field !== await extHash(ext)) return null; let mk = 0n; for (const ch of ext) { const i = CODE_ABC.indexOf(ch); if (i < 0) return null; mk = mk * 31n + BigInt(i); }
-    labs = LAB_ORDER.filter((id, i) => (mk >> BigInt(labBit(i))) & 1n); games = GAME_ORDER.filter((id, i) => (mk >> BigInt(12 + i)) & 1n); }
+    labs = LAB_ORDER.filter((id, i) => (mk >> BigInt(labBit(i))) & 1n); games = GAME_ORDER.filter((id, i) => (mk >> BigInt(gameBit(i))) & 1n); }
   else { if (ver === 2) return null; labs = LAB_ORDER.filter((id, i) => field & (1 << i)); if (opts & OPT.blaster) games = ['blaster']; }
   return { code: fmtLabCode(c) + (ext ? '-' + ext : ''), core: fmtLabCode(c), labs, games, opts, set: Math.floor(p / 2 ** 20) % 16, th: p % 2 ** 20 };
 }
@@ -7690,17 +7726,28 @@ const GAMES = [
   { id: 'g-contaminated', band: 'hs', title: 'Contaminated', tag: 'Whole class · biology', time: '30–45 min', blurb: 'A hidden-saboteur lab game. Students do real biology tasks for scan results and vote out the saboteurs.', ext: 'games/contaminated/index.html' },
   { id: 'g-gene', band: 'hs', title: 'Gene Detectives', tag: 'Solo or teams · genetics', time: '25–40 min', blurb: 'A CSI genetics case: blood typing, base pairing, gel electrophoresis and Punnett squares rule out suspects.', ext: 'games/gene-detectives/index.html' }, { id: 'g-chemdet', band: 'hs', course: 'hs-chem', title: 'Chem Detectives', tag: 'Solo or teams · chemistry', time: '25–40 min', blurb: 'A CSI chemistry case: flame tests, ink chromatography, density by water displacement and pH calculations rule out suspects.', ext: 'games/chem-detectives/index.html' }, { id: 'g-signal', band: 'hs', course: 'hs-bio', title: 'Signal Cascade', tag: 'Solo · cell signaling', time: '25–40 min', blurb: 'Drag ligands into the receptors they fit, relay GPCR, receptor tyrosine kinase, ion-channel and steroid pathways step by step, then fix mutated receptors, beat a β-blocker, explore dose and find broken proteins.', ext: 'games/signal-cascade/index.html' }, { id: 'g-elwars', band: 'hs', course: 'hs-chem', title: 'Element Wars', tag: 'Chemistry · periodic trends', time: '15–25 min', blurb: 'Draft a team of elements with hidden stats, then battle through challenges like “lose an electron most easily.” Win rounds with atomic radius, ionization energy, electronegativity and metallic character, and earn bonus points by explaining why.', ext: 'games/element-wars/index.html' }, { id: 'g-atom', band: 'hs', course: 'hs-chem', title: 'Build an Atom', tag: 'Chemistry lab · atomic structure', time: '20–40 min', blurb: 'Build any of the 118 elements from protons, neutrons and electrons. See s, p, d and f orbitals in 3D, follow the filling order, read electron configurations, spot exceptions, explore the periodic table by group and discovery country, and predict trends before revealing them.', ext: 'games/build-an-atom/index.html' },
   { id: 'g-mitosis', band: 'hs', title: 'Cell//Divide', tag: 'Retro arcade · biology', time: '10–15 min', blurb: 'Take control of mitosis in an 8-bit arcade game: copy the DNA, coil and line up the chromosomes, split the sisters and pinch the cell in two, while hunting down cell-cycle errors.', page: m => CellDiv.page(m), stop: () => CellDiv.stop() },
-  { id: 'g-race', band: 'ms', title: 'Rocket Race', tag: 'Teams · projector', time: '20–30 min', blurb: 'Teams race rockets from Earth to Neptune. Pick a small, medium or big booster, answer the question, and blast off.', page: m => Race.page(m), stop: () => Race.stop() },
-  { id: 'g-sort', band: 'ms', title: 'Sort Storm', tag: 'Arcade · sorting', time: '3–5 min', blurb: 'Cards rain down from the clouds. Click the right bucket before they splash: rock types, food webs, changes, states of matter and more.', page: m => Sort.page(m), stop: () => Sort.stop() },
-  { id: 'g-launch', band: 'ms', title: 'Word Launch', tag: 'Vocabulary · solo', time: '5 min', blurb: 'Read the clue and guess the science word letter by letter. Every miss drains the rocket’s fuel; spell it to blast Pippin into space.', page: m => Launch.page(m), stop: () => Launch.stop() },
-  { id: 'g-hazard', band: 'ms', title: 'Hazard Hunt', tag: 'Lab safety · spot it', time: '3–5 min', blurb: 'Pippin and Puff are in the lab. Find every safety hazard in the room before the timer runs out.', page: m => Hazard.page(m), stop: () => Hazard.stop() },
-  { id: 'zombies', band: 'ms', title: 'Myth Zombies', tag: 'Arcade · 360° defense', time: '5–10 min', blurb: 'Stand in the middle of the lab and blast the science myths closing in from every side. Let the true facts walk in to power up.', page: m => Zombies.page(m), stop: () => Zombies.stop() },
+  { id: 'g-race', band: 'ms', fsub: 'ms-earth', title: 'Rocket Race', tag: 'Teams · projector', time: '20–30 min', blurb: 'Teams race rockets from Earth to Neptune. Pick a small, medium or big booster, answer the question, and blast off.', page: m => Race.page(m), stop: () => Race.stop() },
+  { id: 'g-sort', band: 'ms', fsub: 'mixed', title: 'Sort Storm', tag: 'Arcade · sorting', time: '3–5 min', blurb: 'Cards rain down from the clouds. Click the right bucket before they splash: rock types, food webs, changes, states of matter and more.', page: m => Sort.page(m), stop: () => Sort.stop() },
+  { id: 'g-launch', band: 'ms', fsub: 'mixed', title: 'Word Launch', tag: 'Vocabulary · solo', time: '5 min', blurb: 'Read the clue and guess the science word letter by letter. Every miss drains the rocket’s fuel; spell it to blast Pippin into space.', page: m => Launch.page(m), stop: () => Launch.stop() },
+  { id: 'g-hazard', band: 'ms', fsub: 'mixed', title: 'Hazard Hunt', tag: 'Lab safety · spot it', time: '3–5 min', blurb: 'Pippin and Puff are in the lab. Find every safety hazard in the room before the timer runs out.', page: m => Hazard.page(m), stop: () => Hazard.stop() },
+  { id: 'zombies', band: 'ms', fsub: 'mixed', title: 'Myth Zombies', tag: 'Arcade · 360° defense', time: '5–10 min', blurb: 'Stand in the middle of the lab and blast the science myths closing in from every side. Let the true facts walk in to power up.', page: m => Zombies.page(m), stop: () => Zombies.stop() },
   { id: 'a-quest', band: 'arcade', course: 'hs-bio', title: 'Cell Quest', tag: 'Retro arcade · cells', time: '5–10 min', blurb: 'A maze inside a cell: carry cargo like mRNA and pyruvate to the organelle that uses it, while dodging free radicals.', ext: 'games/arcade/index.html?g=quest' },
   { id: 'a-rush', band: 'arcade', course: 'hs-bio', title: 'Receptor Rush', tag: 'Retro arcade · cell signaling', time: '5 min', blurb: 'Switch your receptor’s binding site to catch the right ligands, let steroid hormones pass through, and dodge antagonists.', ext: 'games/arcade/index.html?g=rush' },
   { id: 'a-defender', band: 'arcade', course: 'hs-bio', title: 'Cell Defender', tag: 'Retro arcade · immune system', time: '10–15 min', blurb: 'A boss-rush shooter: antibodies vs. antibiotics against viruses and bacteria, ending with an antibiotic-resistant MRSA boss.', ext: 'games/arcade/index.html?g=defender' },
   { id: 'a-mitosis', band: 'arcade', course: 'hs-bio', title: 'Mitosis Master', tag: 'Retro arcade · cell division', time: '5–10 min', blurb: 'Beat the timer ring: name each phase, pick what comes next, count chromosomes and spot division errors.', ext: 'games/arcade/index.html?g=mitosis' },
   { id: 'a-gene', band: 'arcade', course: 'hs-bio', title: 'Gene Flight', tag: 'Retro arcade · DNA & protein', time: '5–10 min', blurb: 'Fly through gates of bases: replication, then transcription with U, then translation with codons.', ext: 'games/arcade/index.html?g=gene' },
-  { id: 'a-enzyme', band: 'arcade', course: 'hs-bio', title: 'Enzyme Blast', tag: 'Retro arcade · enzymes', time: '5–10 min', blurb: 'Defend your enzyme: let the substrate in and blast competitive and noncompetitive inhibitors, heat and acid.', ext: 'games/arcade/index.html?g=enzyme' }
+  { id: 'a-enzyme', band: 'arcade', course: 'hs-bio', title: 'Enzyme Blast', tag: 'Retro arcade · enzymes', time: '5–10 min', blurb: 'Defend your enzyme: let the substrate in and blast competitive and noncompetitive inhibitors, heat and acid.', ext: 'games/arcade/index.html?g=enzyme' },
+  { id: 'm-rocket', band: 'ms', course: 'ms-earth', title: 'Rocket Run', tag: 'Arcade · solar system', diff: 'Medium', time: '5–10 min', blurb: 'Fly from Earth to Neptune. Dodge asteroids and fly through the ring with the right answer to refuel.', ext: 'games/arcade-ms/index.html?g=rocket', thumb: 'games/arcade-ms/thumbs/rocket.webp' },
+  { id: 'm-senses', band: 'ms', course: 'ms-life', title: 'Receptor Rush 2.0', tag: 'Arcade · senses', diff: 'Hard', time: '5 min', blurb: 'Switch to the right sense (eye, ear, nose, tongue, skin) to catch each stimulus and send the signal to the brain.', ext: 'games/arcade-ms/index.html?g=senses', thumb: 'games/arcade-ms/thumbs/senses.webp' },
+  { id: 'm-enzesc', band: 'ms', course: 'ms-life', title: 'Enzyme Escape', tag: 'Puzzle · digestion', diff: 'Medium', time: '5–10 min', blurb: 'Turn each food molecule so its key fits, and drop it on the digestive enzyme that breaks it down.', ext: 'games/arcade-ms/index.html?g=enzesc', thumb: 'games/arcade-ms/thumbs/enzesc.webp' },
+  { id: 'm-dna', band: 'ms', course: 'ms-life', title: 'DNA Builder', tag: 'Arcade · DNA & genes', diff: 'Hard', time: '5–10 min', blurb: 'Build the matching DNA strand (A–T, G–C) against the clock, then hunt for mutations in copied genes.', ext: 'games/arcade-ms/index.html?g=dna', thumb: 'games/arcade-ms/thumbs/dna.webp' },
+  { id: 'm-plat', band: 'ms', course: 'ms-life', title: 'Cell Quest', tag: 'Platformer · cells', diff: 'Easy', time: '10 min', blurb: 'Run and jump through an animal cell and a plant cell, bumping quiz blocks at each organelle.', ext: 'games/arcade-ms/index.html?g=plat', thumb: 'games/arcade-ms/thumbs/plat.webp' },
+  { id: 'm-immune', band: 'ms', course: 'ms-life', title: 'Immune Defense', tag: 'Tower defense · immune system', diff: 'Medium', time: '10–15 min', blurb: 'Place phagocytes, antibody makers and fever along a blood vessel to stop germs before they reach the heart.', ext: 'games/arcade-ms/index.html?g=immune', thumb: 'games/arcade-ms/thumbs/immune.webp' },
+  { id: 'm-photo', band: 'ms', course: 'ms-life', title: 'Photosynthesis Sim', tag: 'Simulation · photosynthesis', diff: 'Medium', time: '5–10 min', blurb: 'Run a greenhouse: balance light, water and CO₂ to make enough glucose, and find the limiting factor.', ext: 'games/arcade-ms/index.html?g=photo', thumb: 'games/arcade-ms/thumbs/photo.webp' },
+  { id: 'm-force', band: 'ms', course: 'ms-phys', title: 'Force & Motion', tag: 'Puzzle · forces', diff: 'Easy', time: '5–10 min', blurb: 'Launch light and heavy balls to hit targets, using friction, bounces and Newton’s laws.', ext: 'games/arcade-ms/index.html?g=force', thumb: 'games/arcade-ms/thumbs/force.webp' },
+  { id: 'm-mixer', band: 'ms', course: 'ms-phys', title: 'Molecule Mixer', tag: 'Arcade · molecules', diff: 'Easy', time: '5 min', blurb: 'Catch exactly the right atoms in your flask to build water, CO₂, methane, salt and more.', ext: 'games/arcade-ms/index.html?g=mixer', thumb: 'games/arcade-ms/thumbs/mixer.webp' },
+  { id: 'm-atom', band: 'ms', course: 'ms-phys', title: 'Atom Blaster', tag: 'Arcade · atoms', diff: 'Medium', time: '5–10 min', blurb: 'Capture protons, neutrons and electrons to build hydrogen through carbon. The protons decide the element.', ext: 'games/arcade-ms/index.html?g=atom', thumb: 'games/arcade-ms/thumbs/atom.webp' },
+  { id: 'm-genetic', band: 'ms', course: 'ms-life', title: 'Genetic Detective', tag: 'Puzzle · heredity', diff: 'Medium', time: '10 min', blurb: 'Crack six heredity cases with Punnett squares and dominant and recessive traits.', ext: 'games/arcade-ms/index.html?g=genetic', thumb: 'games/arcade-ms/thumbs/genetic.webp' }
 ];
 const GBAND = { hs: { name: 'High school games', short: 'High school' }, ms: { name: 'Middle school games', short: 'Middle school' }, arcade: { name: 'Science Arcade', short: 'Arcade' } };
 
@@ -7732,10 +7779,30 @@ const GameHub = {
   }
 };
 
+/* the game hall: a dark arcade-style grid of picture cards with subject filters and the progress panel */
+function gameHall(band, list) {
+  const subOf = g => band === 'arcade' ? 'all' : g.course || g.fsub || 'mixed', SUBS = [['all', 'All games', 'pad'], ['ms-life', 'Life science', 'leaf'], ['ms-earth', 'Earth & space', 'globe'], ['ms-phys', 'Physical science', 'magnet'], ['mixed', 'Mixed review', 'bolt']];
+  const f = band === 'arcade' ? 'all' : APP.hallF || 'all', DC = { Easy: '#3ed17a', Medium: '#ffc93c', Hard: '#ff5d5d' };
+  const card = g => `<article class="hall-card" data-sub="${subOf(g)}" ${f !== 'all' && subOf(g) !== f ? 'hidden' : ''}><button class="hall-pic" data-game="${g.id}" aria-label="Play ${esc(g.title)}">${gameThumb(g.id)}</button>
+    <div class="hall-b"><h3>${esc(g.title)}</h3><p>${esc(g.blurb)}</p><div class="hall-f">${g.diff ? `<span class="hall-d" style="--d:${DC[g.diff]}"><i></i>${g.diff}</span>` : `<span class="hall-d" style="--d:#9fb0cc">${esc(g.time)}</span>`}<button class="btn primary sm" data-game="${g.id}">Play ${ico('play')}</button></div></div></article>`;
+  return `<section class="hall"><div class="hall-main"><div class="hall-ban"><h2><em>${band === 'arcade' ? 'Science' : 'Interactive'}</em> ${band === 'arcade' ? 'Arcade' : 'Science Games'}</h2><p>${band === 'arcade' ? 'Retro biology games for high school.' : 'Play, learn and master key concepts!'}</p></div>
+    ${band === 'arcade' ? '' : `<div class="hall-chips" role="tablist">${SUBS.map(([k, l, ic]) => `<button role="tab" data-hf="${k}" aria-selected="${k === f}">${ico(ic)}${l}</button>`).join('')}</div>`}
+    <div class="hall-grid">${list.map(card).join('')}</div></div>${arcadeProgress()}</section>`;
+}
+/* level, XP and badges from the arcade games, saved only in this browser */
+function arcadeProgress() {
+  let p = null; try { p = JSON.parse(localStorage.getItem('arcade.prog') || 'null'); } catch (e) {}
+  p = Object.assign({ xp: 0, badges: [], played: {} }, p || {}); const lv = Math.floor(p.xp / 1000) + 1, at = p.xp % 1000;
+  const IC = { explorer: '🧭', bio: '🌿', chem: '⚗️', phys: '🚀', earth: '🌍', quiz: '💡', score: '⭐', master: '🏆' };
+  const B = [['explorer', 'Explorer', '🧭'], ['bio', 'Biology Pro', '🌿'], ['chem', 'Chem Whiz', '⚗️'], ['phys', 'Physics Ace', '🚀'], ['earth', 'Space Cadet', '🌍'], ['quiz', 'Quiz Champ', '💡'], ['score', 'High Scorer', '⭐'], ['master', 'Lab Master', '🏆']];
+  return `<aside class="hall-prog" aria-label="Your progress"><h3>${ico('chart')}Your progress</h3><div class="hp-lv"><b>Level ${lv}</b><span>★</span></div><div class="hp-bar"><i style="width:${at / 10}%"></i></div><small>${at} / 1000 XP · ${Object.keys(p.played).length} played</small>
+    <h4>Achievements <small>${p.badges.length}/8</small></h4><div class="hp-bd">${B.map(([k, l, e]) => `<span class="${p.badges.includes(k) ? 'on' : ''}" title="${l}"><i>${e}</i><small>${l}</small></span>`).join('')}</div>
+    <div class="hp-keep"><span>🏆</span><b>Keep playing!</b><small>Saved in this browser only.</small></div></aside>`;
+}
 function gameCard(g) {
   return `<article class="card labcard"><div class="thumb">${gameThumb(g.id)}</div><div class="body">
     <span class="eyebrow">${esc(g.tag)}</span><h3>${esc(g.title)}</h3><p class="small muted">${esc(g.blurb)}</p>
-    <div class="meta"><span class="chip">${ico('clock')}${esc(g.time)}</span>${g.ext ? '<span class="chip acc">Full game</span>' : ''}</div>
+    <div class="meta"><span class="chip">${ico('clock')}${esc(g.time)}</span>${g.diff ? `<span class="chip diff-${g.diff}">${g.diff}</span>` : ''}${g.ext ? '<span class="chip acc">Full game</span>' : ''}</div>
     <div class="row" style="margin-top:4px"><button class="btn primary sm" data-game="${g.id}">${ico('play')}Play</button></div></div></article>`;
 }
 function bindGameCards(m) { $$('[data-game]', m).forEach(b => b.onclick = () => go(b.dataset.game)); }
@@ -7744,8 +7811,9 @@ function pageGames(m, band) {
   const lead = { hs: 'Review games for high school biology, chemistry and physics. Project them for the whole class or let students play on their own.', ms: 'Games made for middle school science: life, Earth and space, and physical science. They’re different games from the high school set.', arcade: 'Six retro arcade games for biology: cells, signaling, the immune system, mitosis, DNA and enzymes. Fast, solo and built around real science, with boss fights. They also open in their own tab for full screen play.' }[band];
   m.innerHTML = `${GH.head('Games', GBAND[band].name, lead)}
     <div class="row">${others.map(o => `<button class="btn sm" data-gb2="games-${o}">${ico(o === 'hs' ? 'atom' : o === 'ms' ? 'leaf' : 'pad')}See ${o === 'arcade' ? 'the Science Arcade' : GBAND[o].name.toLowerCase()}</button>`).join('')}${band === 'arcade' ? `<a class="btn sm primary" href="${gameURL('games/arcade/index.html')}" target="_blank" rel="noopener">${ico('link')}Open the arcade in a new tab</a>` : ''}</div>
-    <section class="sec">${list.map(gameCard).join('')}</section>`;
+    ${band === 'hs' ? `<section class="sec">${list.map(gameCard).join('')}</section>` : gameHall(band, list)}`;
   bindGameCards(m); $$('[data-gb2]', m).forEach(b => b.onclick = e => go(e.currentTarget.dataset.gb2));
+  $$('[data-hf]', m).forEach(b => b.onclick = () => { const f = b.dataset.hf; APP.hallF = f; $$('[data-hf]', m).forEach(x => x.setAttribute('aria-selected', String(x === b))); $$('.hall-card', m).forEach(c => { c.hidden = f !== 'all' && c.dataset.sub !== f; }); });
 }
 /* games that live in their own folder (Contaminated, Gene Detectives, Chem Detectives, Signal Cascade) open in a frame, or in a new tab */
 const gameURL = p => (CLEAN_URLS || /\/j\//.test(location.pathname) ? '/' : '') + p;
@@ -7758,6 +7826,7 @@ function extGame(m, g) {
 
 /* ── small cover art for each game (400×240, navy) ── */
 function gameThumb(id) {
+  const tg = GAMES.find(g => g.id === id); if (tg && tg.thumb) return `<img src="${gameURL(tg.thumb)}" alt="" loading="lazy" decoding="async">`;
   const bg = `<rect x="-200" y="-200" width="800" height="640" fill="#12304f"/><rect width="400" height="240" fill="#102d4b"/><circle cx="330" cy="40" r="90" fill="#1686e8" opacity=".12"/><circle cx="60" cy="230" r="80" fill="#10b8b0" opacity=".12"/>`;
   const st = Array.from({ length: 18 }, (_, i) => `<circle cx="${(i * 97) % 400}" cy="${(i * 53) % 230}" r="${i % 3 ? 1 : 1.6}" fill="#fff" opacity=".5"/>`).join('');
   const A = {

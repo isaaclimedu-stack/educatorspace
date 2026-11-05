@@ -142,7 +142,7 @@
     vesicle(c, px(x), py(4), t, true); [0, 1, 2].forEach(i => radical(c, px(x - 4 - i * 2.2), py(4), i, t, false));
     radical(c, px(12 + Math.sin(t) * 4), py(8), 3, t, true);
   }
-  AR.reg({ id: 'quest', title: 'Cell Quest', sub: 'Deliver cargo to the right organelle', topic: 'Cells & organelles', color: '#39a0ff',
+  AR.reg({ id: 'quest', subject: 'Biology', diff: 'Easy', title: 'Cell Quest', sub: 'Deliver cargo to the right organelle', topic: 'Cells & organelles', color: '#39a0ff',
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="10" cy="10" r="3"/><circle cx="16" cy="15" r="1.6"/><circle cx="8" cy="16" r="1.2"/></svg>',
     intro: 'You are a <b>transport vesicle</b> zipping through the cytoplasm. Pick up cargo and deliver it to the organelle that uses it.',
     how: ['Move with the <b>arrow keys</b> or <b>WASD</b> (or tap where you want to go).', 'Grab the glowing <b>cargo</b>, then carry it to the right corner organelle: nucleus, mitochondrion, ribosome or Golgi body.', '<b>Free radicals</b> chase you. Eat a green <b>antioxidant</b> to neutralize them for a few seconds.', 'Eat every nutrient to clear the level. Clear 3 levels to win.'],

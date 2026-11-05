@@ -94,7 +94,7 @@
   function preview(c, t) { D.bg(c, '#120a33', '#24104f'); D.stars(c, t, 40, 4, '#e3c9ff'); const p = Math.floor(t / 1.5) % 5;
     [0, 1, 2].forEach(i => { const ph = (p + i) % 5; c.save(); if (i !== 1) c.globalAlpha = .55; cell(c, 180 + i * 300, 280, i === 1 ? 110 : 80, ph, 4); c.restore(); if (i < 2) D.text(c, '›', 330 + i * 300, 296, { size: 50, align: 'center', color: '#c77dff' }); });
     for (let i = 0; i < 4; i++) { c.fillStyle = i === 1 ? '#ffd23f' : '#c77dff'; c.beginPath(); c.arc(420 + i * 40, 480, 7, 0, 7); c.fill(); } }
-  AR.reg({ id: 'mitosis', title: 'Mitosis Master', sub: 'Guide the cell through mitosis', topic: 'Cell division', color: '#c77dff',
+  AR.reg({ id: 'mitosis', subject: 'Biology', diff: 'Medium', title: 'Mitosis Master', sub: 'Guide the cell through mitosis', topic: 'Cell division', color: '#c77dff',
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><ellipse cx="7.5" cy="12" rx="5" ry="6"/><ellipse cx="16.5" cy="12" rx="5" ry="6"/></svg>',
     intro: 'Cells roll in one at a time. Read each cell before the <b>timer ring</b> runs out. Four stages, six cells each, and the clock gets faster.',
     how: ['Stage 1: <b>name the phase</b>. Stage 2: <b>what comes next?</b> Stage 3: <b>count chromosomes</b> and chromatids. Stage 4: <b>spot the error</b>.', 'Answer with keys <b>1–5</b> or click the answer cards.', 'Fast answers and streaks score more. A wrong answer or running out of time costs a life.'],

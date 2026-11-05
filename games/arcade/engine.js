@@ -8,6 +8,24 @@ const AR = (() => {
   const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
   const rnd = (a, b) => a + Math.random() * (b - a), pick = a => a[Math.floor(Math.random() * a.length)], clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
+  /* ── progress: XP, levels and badges, saved only in this browser (shared by every arcade page on the site) ── */
+  const BADGES = [
+    ['explorer', 'Science Explorer', 'Play 3 different games', '🧭', p => Object.keys(p.played).length >= 3],
+    ['bio', 'Biology Pro', 'Win 2 biology games', '🌿', p => Object.values(p.wins).filter(s => s === 'Biology').length >= 2],
+    ['chem', 'Chemistry Whiz', 'Win 2 chemistry games', '⚗️', p => Object.values(p.wins).filter(s => s === 'Chemistry').length >= 2],
+    ['phys', 'Physics Ace', 'Win 2 physics games', '🚀', p => Object.values(p.wins).filter(s => s === 'Physics').length >= 2],
+    ['earth', 'Space Cadet', 'Win an Earth & space game', '🌍', p => Object.values(p.wins).some(s => s === 'Earth & Space')],
+    ['quiz', 'Quiz Champ', 'Answer 25 questions right', '💡', p => p.qright >= 25],
+    ['score', 'High Scorer', 'Score 3,000 in one game', '⭐', p => p.top >= 3000],
+    ['master', 'Lab Master', 'Reach level 5', '🏆', p => Math.floor(p.xp / 1000) + 1 >= 5]];
+  const PROG = {
+    get() { return Object.assign({ xp: 0, played: {}, wins: {}, qright: 0, top: 0, badges: [] }, store.get('prog', {})); },
+    level(xp) { return { lv: Math.floor(xp / 1000) + 1, at: xp % 1000 }; },
+    record(g, A, won) { const p = PROG.get(), gain = Math.round(A.score / 10) + (won ? 100 : 20) + A.stats.right * 10;
+      p.xp += gain; p.played[g.id] = 1; if (won) p.wins[g.id] = g.subject || 'Biology'; p.qright += A.stats.right; p.top = Math.max(p.top, A.score);
+      const fresh = BADGES.filter(b => !p.badges.includes(b[0]) && b[4](p)); fresh.forEach(b => p.badges.push(b[0])); store.set('prog', p); return { gain, fresh, p }; }
+  };
+
   /* ── sound: tiny square-wave bleeps ── */
   let actx = null, muted = store.get('muted', false);
   function tone(f, d = .08, type = 'square', vol = .05, slide = 0) {
@@ -19,7 +37,14 @@ const AR = (() => {
     power: () => [523, 659, 784, 1046].forEach((f, i) => setTimeout(() => tone(f, .08, 'triangle', .05), i * 60)), boss: () => [110, 104, 98].forEach((f, i) => setTimeout(() => tone(f, .25, 'sawtooth', .06), i * 220)), flap: () => tone(500, .05, 'triangle', .03, 200) };
 
   /* ── drawing helpers shared by the games ── */
+  const shade = (hex, f) => { const n = parseInt(hex.slice(1, 7), 16), ch = k => { const v = (n >> k) & 255; return Math.round(f < 0 ? v * (1 + f) : v + (255 - v) * f); }; return `rgb(${ch(16)},${ch(8)},${ch(0)})`; };
   const D = {
+    shade,
+    /* glossy, toy-like shapes for the brighter middle school games */
+    gloss(c, x, y, r, col) { const g = c.createRadialGradient(x - r * .35, y - r * .4, r * .08, x, y, r * 1.05); g.addColorStop(0, shade(col, .75)); g.addColorStop(.35, col); g.addColorStop(1, shade(col, -.45)); c.fillStyle = g; c.beginPath(); c.arc(x, y, r, 0, 7); c.fill(); },
+    glossRect(c, x, y, w, h, r, col) { const g = c.createLinearGradient(0, y, 0, y + h); g.addColorStop(0, shade(col, .45)); g.addColorStop(.5, col); g.addColorStop(1, shade(col, -.35)); c.fillStyle = g; D.rr(c, x, y, w, h, r); c.fill(); c.fillStyle = 'rgba(255,255,255,.28)'; D.rr(c, x + 4, y + 3, w - 8, Math.min(h * .3, 10), r / 2); c.fill(); },
+    cloud(c, x, y, s, a = .9) { c.save(); c.globalAlpha = a; c.fillStyle = '#fff'; [[0, 0, 1], [.9, .15, .8], [-.9, .2, .75], [.4, -.45, .7]].forEach(([dx, dy, r]) => { c.beginPath(); c.arc(x + dx * s, y + dy * s, r * s, 0, 7); c.fill(); }); c.restore(); },
+    sparkle(c, x, y, r, col = '#fff') { c.save(); c.fillStyle = col; c.beginPath(); c.moveTo(x, y - r); c.quadraticCurveTo(x, y, x + r, y); c.quadraticCurveTo(x, y, x, y + r); c.quadraticCurveTo(x, y, x - r, y); c.quadraticCurveTo(x, y, x, y - r); c.fill(); c.restore(); },
     text(c, s, x, y, o = {}) { c.save(); c.font = `${o.bold === false ? '' : '700 '}${o.size || 16}px ${o.pix ? "'Press Start 2P', monospace" : "'Atkinson Hyperlegible', system-ui, sans-serif"}`; c.textAlign = o.align || 'left'; c.textBaseline = o.base || 'alphabetic';
       if (o.glow) { c.shadowColor = o.glow; c.shadowBlur = o.blur || 12; } c.fillStyle = o.color || '#fff'; c.fillText(s, x, y); c.restore(); },
     rr(c, x, y, w, h, r) { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); },
@@ -47,11 +72,12 @@ const AR = (() => {
 
   /* ── input ── */
   const KMAP = { ArrowLeft: 'left', a: 'left', A: 'left', ArrowRight: 'right', d: 'right', D: 'right', ArrowUp: 'up', w: 'up', W: 'up', ArrowDown: 'down', s: 'down', S: 'down', ' ': 'fire', Enter: 'enter', Shift: 'alt', e: 'alt', E: 'alt', x: 'alt', X: 'alt', q: 'alt2', Q: 'alt2', z: 'alt2', Z: 'alt2', '1': '1', '2': '2', '3': '3', '4': '4' };
-  let held = {}, hitNow = {}, ptr = { x: 0, y: 0, down: false, tap: false, moved: false };
+  let held = {}, hitNow = {}, typed = [], ptr = { x: 0, y: 0, down: false, tap: false, moved: false };
   function bindInput(stage) {
     window.onkeydown = e => { if (e.target.closest && e.target.closest('input,textarea')) return; const k = KMAP[e.key];
       if ((e.key === 'p' || e.key === 'P' || e.key === 'Escape') && S.state === 'play') { pause(true); e.preventDefault(); return; }
       if (S.onKey && S.onKey(e)) { e.preventDefault(); return; }
+      if (S.state === 'play' && e.key.length === 1) typed.push(e.key.toLowerCase());
       if (k) { if (!held[k]) hitNow[k] = true; held[k] = true; if (S.state === 'play' && /^(Arrow| )/.test(e.key)) e.preventDefault(); } };
     window.onkeyup = e => { const k = KMAP[e.key]; if (k) held[k] = false; };
     const pos = e => { const r = stage.getBoundingClientRect(); ptr.x = (e.clientX - r.left) / r.width * W; ptr.y = (e.clientY - r.top) / r.height * H; };
@@ -68,7 +94,7 @@ const AR = (() => {
   function api(g) {
     return {
       W, H, D, fx, rnd, pick, clamp, shuffle, sfx: SFX,
-      key: k => !!held[k], hit: k => !!hitNow[k], ptr,
+      key: k => !!held[k], hit: k => !!hitNow[k], typed: () => typed, ptr,
       score: 0, lives: 3, t: 0, stats: { right: 0, asked: 0 },
       add(n, x, y, col) { this.score = Math.max(0, this.score + n); if (x !== undefined) fx.pop(x, y, (n > 0 ? '+' : '') + n, col || (n > 0 ? '#ffe066' : '#ff6b81')); },
       hurt(msg) { this.lives--; SFX.bad(); S.shake = .35; if (msg) this.toast(msg); if (this.lives <= 0) this.over(false); },
@@ -89,7 +115,7 @@ const AR = (() => {
     ctx.save(); if (S.shake && S.state === 'play') ctx.translate(rnd(-6, 6) * S.shake, rnd(-6, 6) * S.shake);
     ctx.clearRect(-20, -20, W + 40, H + 40); G.draw(ctx); fx.draw(ctx); ctx.restore();
     if (S.state !== 'title') hud(ctx, A, G);
-    hitNow = {}; ptr.tap = false; ptr.moved = false;
+    hitNow = {}; typed = []; ptr.tap = false; ptr.moved = false;
     if (toastT > 0) { toastT -= dt; if (toastT <= 0) { const el = $('#toast'); if (el) el.hidden = true; } }
   }
   function hud(c, A, G) {
@@ -140,8 +166,10 @@ const AR = (() => {
   function gameOver(won, line) {
     const g = S.g, A = S.api, best = store.get('best.' + g.id, 0), nb = A.score > best; if (nb) store.set('best.' + g.id, A.score);
     S.state = 'over'; setPad(true); const tEl = $('#toast'); if (tEl) tEl.hidden = true; toastT = 0;
+    const pr = PROG.record(g, A, won), L = PROG.level(pr.p.xp);
     card(`<span class="eyebrow">${won ? 'You win!' : 'Game over'}</span><h3>${won ? esc(g.winTitle || 'Mission complete') : esc(g.loseTitle || 'Out of lives')}</h3>
       <div class="big">${A.score}</div><p>${nb ? '<b style="color:#ffe066">New best score!</b>' : `Best: <b>${Math.max(best, A.score)}</b>`}${A.stats.asked ? ` · Questions: <b>${A.stats.right}/${A.stats.asked}</b>` : ''}</p>
+      <p class="xpline"><b>+${pr.gain} XP</b> · Level ${L.lv} (${L.at}/1000 XP)</p>${pr.fresh.map(b => `<p class="newbadge"><span>${b[3]}</span> New badge: <b>${esc(b[1])}</b></p>`).join('')}
       ${line ? `<p>${line}</p>` : ''}${g.recap ? `<div class="why"><b>Remember:</b> ${g.recap}</div>` : ''}
       <div class="row"><button class="btn primary" data-first id="agBtn">Play again</button><button class="btn" id="hubBtn">All games</button></div>`, ov => {
       $('#agBtn', ov).onclick = start; $('#hubBtn', ov).onclick = () => nav(null); });
@@ -174,14 +202,27 @@ const AR = (() => {
     cv = $('#cv'); ctx = cv.getContext('2d'); S.g = g; S.api = api(g); S.game = g.make(S.api); bindInput($('#stage'));
     lastT = performance.now(); raf = requestAnimationFrame(frame); titleCard();
   }
+  const CFG = { title: 'Science Arcade', lead: 'Play, learn and master key science ideas.', foot: 'SCIENCE HAS NEVER BEEN MORE FUN' };
+  const DIFF = { Easy: '#4be37a', Medium: '#ffd23f', Hard: '#ff5d7a' };
+  let filt = 'All';
+  function progPanel() { const p = PROG.get(), L = PROG.level(p.xp);
+    return `<aside class="prog" aria-label="Your progress"><h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 20v-6M12 20V8M19 20V4"/></svg>Your progress</h2>
+      <div class="lvl"><b>Level ${L.lv}</b><span class="star">★</span></div><div class="bar"><i style="width:${L.at / 10}%"></i></div><p class="small">${L.at} / 1000 XP</p>
+      <h3>Badges <span class="small">${p.badges.length}/${BADGES.length}</span></h3><div class="badges">${BADGES.map(b => `<span class="bdg ${p.badges.includes(b[0]) ? 'on' : ''}" title="${esc(b[1])}: ${esc(b[2])}"><i>${b[3]}</i><small>${esc(b[1])}</small></span>`).join('')}</div>
+      <p class="small note">Saved in this browser only.</p><div class="keep"><span>🏆</span><b>Keep playing!</b><small>${p.badges.length ? 'You’re on a roll!' : 'Win a game to earn your first badge.'}</small></div></aside>`; }
   function hub(app) {
-    app.innerHTML = `<div class="grid">${LIST.map(g => `<button class="tile" data-g="${g.id}" style="--c:${g.color}" aria-label="Play ${esc(g.title)}: ${esc(g.sub)}">
+    const subs = ['All', ...new Set(LIST.map(g => g.subject).filter(Boolean))], vis = LIST.filter(g => filt === 'All' || g.subject === filt);
+    app.innerHTML = `<div class="hubwrap"><div class="hubmain"><section class="banner"><h1>${CFG.title.replace(/^(\S+)/, '<em>$1</em>')}</h1><p>${esc(CFG.lead)}</p></section>
+      ${subs.length > 2 ? `<div class="chips" role="tablist">${subs.map(s => `<button role="tab" aria-selected="${s === filt}" data-f="${esc(s)}">${esc(s === 'All' ? 'All games' : s)}</button>`).join('')}</div>` : ''}
+      <div class="grid ${CFG.cards ? 'v2' : ''}">${vis.map(g => CFG.cards ? `<button class="tile v2" data-g="${g.id}" style="--c:${g.color}" aria-label="Play ${esc(g.title)}: ${esc(g.sub)}"><canvas width="480" height="270" aria-hidden="true"></canvas>
+      <div class="tb"><h2>${esc(g.title)}</h2><p>${esc(g.sub)}</p><div class="tf">${g.diff ? `<span class="diff" style="--d:${DIFF[g.diff]}"><i></i>${g.diff}</span>` : '<span></span>'}<span class="playb">Play ▶</span></div></div>${store.get('best.' + g.id, 0) ? `<span class="best">BEST<b>${store.get('best.' + g.id, 0)}</b></span>` : ''}</button>` : `<button class="tile" data-g="${g.id}" style="--c:${g.color}" aria-label="Play ${esc(g.title)}: ${esc(g.sub)}">
       <div class="th"><span class="ti">${g.icon}</span><div><h2>${esc(g.title)}</h2><div class="sub">${esc(g.sub)}</div></div></div>
-      <canvas width="480" height="270" aria-hidden="true"></canvas>${store.get('best.' + g.id, 0) ? `<span class="best">BEST<b>${store.get('best.' + g.id, 0)}</b></span>` : ''}<span class="topic">${esc(g.topic)}</span></button>`).join('')}</div>
-      <p class="foot">SCIENCE HAS NEVER BEEN MORE FUN</p>`;
+      <canvas width="480" height="270" aria-hidden="true"></canvas>${store.get('best.' + g.id, 0) ? `<span class="best">BEST<b>${store.get('best.' + g.id, 0)}</b></span>` : ''}<span class="topic">${esc(g.topic)}</span>${g.diff ? `<span class="diff" style="--d:${DIFF[g.diff]}"><i></i>${g.diff}</span>` : ''}<span class="playb">Play ▶</span></button>`).join('')}</div>
+      <p class="foot">${CFG.foot}</p></div>${progPanel()}</div>`;
     app.querySelectorAll('.tile').forEach(b => b.onclick = () => nav(b.dataset.g));
+    app.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { filt = b.dataset.f; cancelAnimationFrame(hubRaf); hub(app); });
     const cvs = [...app.querySelectorAll('.tile canvas')], cs = cvs.map(c => c.getContext('2d')), still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const draw = t => { cvs.forEach((c, i) => { const x = cs[i]; x.setTransform(c.width / W, 0, 0, c.height / H, 0, 0); x.clearRect(0, 0, W, H); try { LIST[i].preview(x, t / 1000); } catch (e) {} }); if (!still) hubRaf = requestAnimationFrame(draw); };
+    const draw = t => { cvs.forEach((c, i) => { const x = cs[i]; x.setTransform(c.width / W, 0, 0, c.height / H, 0, 0); x.clearRect(0, 0, W, H); try { vis[i].preview(x, t / 1000); } catch (e) {} }); if (!still) hubRaf = requestAnimationFrame(draw); };
     hubRaf = requestAnimationFrame(draw);
   }
   function boot() {
@@ -191,5 +232,5 @@ const AR = (() => {
     mb.onclick = () => { muted = !muted; store.set('muted', muted); ms(); }; ms();
     window.onpopstate = render; render();
   }
-  return { reg: g => LIST.push(g), boot, D, W, H, list: LIST, _S: S };
+  return { reg: g => LIST.push(g), boot, config: o => Object.assign(CFG, o), D, W, H, list: LIST, _S: S, PROG, BADGES };
 })();

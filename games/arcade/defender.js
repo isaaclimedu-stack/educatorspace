@@ -116,7 +116,7 @@
     bact(c, 480 + Math.sin(t * .7) * 200, 260, 26, '#4be37a', t, Math.PI / 2);
     const x = W / 2 + Math.sin(t * 1.3) * 200; for (let k = 0; k < 4; k++) { const y = 440 - ((t * 500 + k * 90) % 360); c.save(); D.glow(c, '#5ff4ff', 10); c.strokeStyle = '#5ff4ff'; c.lineWidth = 3; c.beginPath(); c.moveTo(x, y + 8); c.lineTo(x, y); c.lineTo(x - 5, y - 7); c.moveTo(x, y); c.lineTo(x + 5, y - 7); c.stroke(); c.restore(); }
     D.ship(c, x, 470, 1.3, '#e8fbff', '#5ff4ff'); }
-  AR.reg({ id: 'defender', title: 'Cell Defender', sub: 'Defeat giant pathogen bosses', topic: 'Immune system', color: '#28e0d0',
+  AR.reg({ id: 'defender', subject: 'Biology', diff: 'Hard', title: 'Cell Defender', sub: 'Defeat giant pathogen bosses', topic: 'Immune system', color: '#28e0d0',
     icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg>',
     intro: 'You are a <b>white blood cell</b> fighter. Clear waves of viruses and bacteria, then take down a <b>giant boss</b> at the end of each sector.',
     how: ['Move with <b>arrows / WASD</b>, hold <b>Space</b> to fire (on touch screens, hold and drag).', 'Switch weapons with <b>Shift</b> (or 1 and 2). <b>Antibodies</b> are strong on viruses. <b>Antibiotics</b> are strong on bacteria but do nothing to viruses.', 'Bosses: <b>Influenza Prime</b> (shoot off its spike proteins first), <b>Strep Colossus</b> (it splits into new bacteria) and <b>MRSA Overlord</b> (antibiotic-resistant!).', 'Answer the question after each boss for a power-up.'],
