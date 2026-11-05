@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Science Arcade</title>
+<meta name="description" content="Six retro arcade games for high school biology: cells, receptors, the immune system, mitosis, DNA and enzymes.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #070d24; --bg2: #0b1536; --ink: #e8efff; --muted: #93a3cc; --line: rgba(140, 170, 255, .22);
+  --pix: 'Press Start 2P', ui-monospace, monospace; --sans: 'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --c-quest: #39a0ff; --c-rush: #b46bff; --c-def: #28e0d0; --c-mito: #c77dff; --c-gene: #6d8cff; --c-enz: #4be37a;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body { font-family: var(--sans); color: var(--ink); background: radial-gradient(1200px 600px at 50% -10%, #17286a 0%, transparent 60%), radial-gradient(700px 500px at 100% 100%, #2a1058 0%, transparent 60%), var(--bg); line-height: 1.5; overflow-x: hidden; }
+button { font: inherit; color: inherit; }
+header.top { position: sticky; top: 0; z-index: 30; display: flex; align-items: center; gap: 14px; padding: 12px 20px; background: rgba(7, 13, 36, .85); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+.logo { white-space: nowrap; display: flex; align-items: center; gap: 10px; background: none; border: 0; cursor: pointer; padding: 0; font-weight: 700; font-size: 1.05rem; color: #fff; }
+.logo svg { width: 30px; height: 30px; }
+.logo .bw { font-weight: 800; letter-spacing: -.015em; color: #fff; }
+.logo .bw span { color: #4fb3ff; }
+@media (max-width: 640px) { .logo .bw, .logo .sep { display: none; } }
+.logo .sep { width: 1px; height: 22px; background: var(--line); }
+.top .tagline { font: 12px var(--pix); letter-spacing: .12em; color: #cfe0ff; text-shadow: 0 0 10px rgba(120, 180, 255, .7); margin: 0 auto; white-space: nowrap; }
+.top .tagline i { font-style: normal; color: #8fd0ff; }
+.top .chipx { display: inline-flex; align-items: center; gap: 7px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); font-size: .82rem; white-space: nowrap; }
+.top .chipx svg { width: 16px; height: 16px; }
+.top .back { display: none; }
+body.ingame .top .back { display: inline-flex; }
+body.ingame .top .tagline { display: none; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 18px; border-radius: 12px; border: 1px solid var(--line); background: rgba(255, 255, 255, .05); font-weight: 700; cursor: pointer; transition: transform .08s, border-color .15s, background .15s; }
+.btn:hover { border-color: #8fd0ff; background: rgba(255, 255, 255, .09); }
+.btn:active { transform: translateY(1px); }
+.btn.primary { background: linear-gradient(180deg, #4fb4ff, #2a7cf0); border-color: transparent; color: #fff; box-shadow: 0 0 18px rgba(79, 180, 255, .45); }
+.btn.sm { padding: 6px 12px; font-size: .86rem; border-radius: 10px; }
+.btn svg { width: 16px; height: 16px; }
+main { max-width: 1320px; margin: 0 auto; padding: 24px 18px 40px; }
+/* hub */
+.grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; }
+@media (max-width: 1000px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .top .tagline { display: none; } }
+@media (max-width: 640px) { .grid { grid-template-columns: minmax(0, 1fr); } .top .chipx { display: none; } }
+.tile { --c: #39a0ff; position: relative; display: grid; grid-template-rows: auto 1fr; text-align: left; padding: 0; border-radius: 18px; overflow: hidden; cursor: pointer; background: linear-gradient(180deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, .01)), var(--bg2); border: 2px solid color-mix(in srgb, var(--c) 75%, transparent); box-shadow: 0 0 0 1px rgba(0, 0, 0, .4) inset, 0 0 22px color-mix(in srgb, var(--c) 40%, transparent), 0 0 2px var(--c) inset; transition: transform .15s, box-shadow .15s; }
+.tile:hover, .tile:focus-visible { transform: translateY(-3px); box-shadow: 0 0 0 1px rgba(0, 0, 0, .4) inset, 0 0 36px color-mix(in srgb, var(--c) 65%, transparent), 0 0 2px var(--c) inset; outline: none; }
+.tile .th { display: flex; align-items: center; gap: 12px; padding: 14px 16px 12px; background: linear-gradient(90deg, color-mix(in srgb, var(--c) 20%, transparent), transparent); }
+.tile .ti { flex: none; width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; border: 2px solid var(--c); color: var(--c); background: rgba(0, 0, 0, .3); box-shadow: 0 0 12px color-mix(in srgb, var(--c) 60%, transparent); }
+.tile .ti svg { width: 22px; height: 22px; }
+.tile h2 { margin: 0; font-size: 1.12rem; color: #fff; }
+.tile .sub { font-size: .84rem; color: var(--muted); }
+.tile canvas { display: block; width: 100%; aspect-ratio: 16 / 9; background: #050a1c; }
+.tile .best { position: absolute; top: 64px; right: 10px; font: 9px var(--pix); line-height: 1.6; padding: 6px 8px; border-radius: 8px; background: rgba(5, 10, 28, .85); border: 1px solid var(--line); text-align: center; }
+.tile .best b { display: block; font-size: 12px; color: #fff; }
+.tile .topic { position: absolute; left: 10px; bottom: 10px; font-size: .74rem; font-weight: 700; padding: 3px 9px; border-radius: 999px; background: rgba(5, 10, 28, .8); color: var(--c); border: 1px solid color-mix(in srgb, var(--c) 50%, transparent); }
+.foot { margin-top: 26px; text-align: center; font: 10px var(--pix); letter-spacing: .25em; color: #6f80b0; }
+/* game screen */
+.stage { position: relative; width: 100%; max-width: 1280px; margin: 0 auto; aspect-ratio: 16 / 9; max-height: calc(100vh - 150px); border-radius: 16px; overflow: hidden; border: 2px solid var(--c, #39a0ff); box-shadow: 0 0 30px color-mix(in srgb, var(--c, #39a0ff) 45%, transparent); background: #050a1c; touch-action: none; user-select: none; -webkit-user-select: none; }
+.stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+:fullscreen .stage { max-height: calc(100vh - 80px); }
+.under { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: center; max-width: 1280px; margin: 12px auto 0; color: var(--muted); font-size: .9rem; }
+.keys kbd { font: 11px var(--pix); padding: 3px 6px; border-radius: 6px; border: 1px solid var(--line); color: #cfe0ff; background: rgba(255, 255, 255, .05); }
+/* overlay cards (title, quiz, game over) */
+.ov { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(4, 8, 22, .72); backdrop-filter: blur(2px); z-index: 5; padding: 12px; }
+.ov[hidden] { display: none; }
+.card { width: min(620px, 100%); max-height: 100%; overflow: auto; padding: 22px 24px; border-radius: 16px; background: linear-gradient(180deg, #111d48, #0a1333); border: 2px solid var(--c, #39a0ff); box-shadow: 0 0 26px color-mix(in srgb, var(--c, #39a0ff) 45%, transparent); }
+.card h3 { margin: 0 0 6px; font: 18px/1.4 var(--pix); color: #fff; text-shadow: 0 0 12px var(--c, #39a0ff); }
+.card .eyebrow { font: 9px var(--pix); letter-spacing: .14em; color: var(--c, #39a0ff); }
+.card p { margin: 8px 0; }
+.card ul { margin: 8px 0 14px; padding-left: 20px; }
+.card li { margin: 4px 0; }
+.card .row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+.card .big { font: 26px var(--pix); color: #fff; margin: 10px 0; }
+.opts { display: grid; gap: 8px; margin-top: 12px; }
+.opts button { text-align: left; padding: 11px 14px; border-radius: 11px; border: 1px solid var(--line); background: rgba(255, 255, 255, .05); cursor: pointer; font-weight: 700; }
+.opts button:hover, .opts button:focus-visible { border-color: var(--c, #39a0ff); background: rgba(255, 255, 255, .1); outline: none; }
+.opts button.right { border-color: #4be37a; background: rgba(75, 227, 122, .18); }
+.opts button.wrong { border-color: #ff5d7a; background: rgba(255, 93, 122, .16); }
+.opts button kbd { font: 10px var(--pix); margin-right: 8px; color: var(--muted); }
+.why { margin-top: 10px; padding: 10px 12px; border-radius: 10px; background: rgba(255, 255, 255, .06); font-size: .94rem; }
+.why b { color: #fff; }
+/* touch controls */
+.pad { position: absolute; inset: auto 0 0 0; display: none; justify-content: space-between; align-items: flex-end; padding: 12px; pointer-events: none; z-index: 4; }
+.pad.on { display: flex; }
+.pad .grp { display: flex; gap: 10px; pointer-events: auto; }
+.pad button { width: 62px; height: 62px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, .35); background: rgba(255, 255, 255, .1); font: 12px var(--pix); color: #fff; touch-action: none; }
+.pad button.act { border-color: var(--c, #39a0ff); background: color-mix(in srgb, var(--c, #39a0ff) 30%, transparent); }
+.toast { position: absolute; left: 50%; top: 15%; transform: translateX(-50%); z-index: 6; max-width: 80%; padding: 8px 14px; border-radius: 10px; background: rgba(5, 10, 28, .92); border: 1px solid var(--c, #39a0ff); font-size: .95rem; text-align: center; pointer-events: none; transition: opacity .3s; }
+.toast[hidden] { display: block; opacity: 0; }
+@media (prefers-reduced-motion: reduce) { .tile, .btn { transition: none; } }
+/* inside an Educator Space game page: that page has its own menu, so the arcade stays on the one game */
+.embed #backBtn, .embed #hubBtn { display: none; }
+.embed .logo { pointer-events: none; }
+/* small screens: compact header, and the cards float over the whole screen so they are never cut off */
+.btn, .chipx { white-space: nowrap; }
+@media (max-width: 900px) { .top .chipx { display: none; } header.top { gap: 8px; padding: 8px 12px; } main { padding: 12px 10px 24px; } }
+@media (max-width: 700px), (max-height: 500px) {
+  .ov { position: fixed; z-index: 50; padding: 10px; }
+  .card { max-height: calc(100vh - 20px); padding: 16px 18px; }
+  .card h3 { font-size: 15px; }
+  .stage { border-radius: 10px; max-height: calc(100vh - 110px); }
+  .under .keys { display: none; }
+}
+.rotate { display: none; }
+@media (max-width: 700px) and (orientation: portrait) { .rotate { display: block; margin: 10px auto 0; text-align: center; color: var(--muted); font-size: .9rem; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <button class="logo" id="home" aria-label="Science Arcade home"><svg viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" rx="22" fill="#0a355f"/><path d="M29.5,61.8 L29.1,64.0 L28.8,66.0 L28.8,67.8 L29.0,69.4 L29.3,70.7 L29.9,71.7 L30.5,72.6 L31.3,73.2 L32.3,73.7 L33.6,74.1 L35.1,74.2 L36.9,74.1 L38.8,73.7 L40.9,73.1 L43.2,72.2 L45.5,71.0 L48.0,69.6 L50.4,67.9 L52.9,66.0 L55.4,63.9 L57.8,61.7 L60.1,59.3 L62.3,56.7 L64.4,54.1 L66.4,51.4 L68.2,48.7 L69.8,45.9 L71.2,43.2 L72.4,40.5 L73.4,38.0 L74.1,35.5 L74.6,33.1 L74.8,31.0 L74.8,29.0 L74.6,27.2 L74.1,25.7 L73.4,24.3 L72.5,23.3 L71.4,22.4 L70.1,21.8 L68.5,21.4 L66.8,21.3 L64.8,21.4 L62.7,21.9 L60.5,22.6 L58.1,23.6 L55.7,24.9 L53.2,26.4 L52.7,25.5 L55.2,24.0 L57.7,22.6 L60.1,21.5 L62.4,20.7 L64.6,20.2 L66.8,20.0 L68.7,20.0 L70.6,20.4 L72.2,21.0 L73.6,22.0 L74.8,23.4 L75.8,24.9 L76.4,26.8 L76.8,28.8 L76.9,31.0 L76.7,33.4 L76.3,36.0 L75.6,38.7 L74.7,41.4 L73.5,44.3 L72.1,47.2 L70.6,50.1 L68.8,53.0 L66.8,55.9 L64.7,58.7 L62.4,61.4 L60.1,63.9 L57.6,66.4 L55.1,68.7 L52.6,70.8 L50.0,72.6 L47.4,74.3 L44.9,75.7 L42.4,76.8 L39.9,77.7 L37.5,78.3 L35.2,78.5 L33.0,78.5 L30.9,78.1 L29.0,77.3 L27.3,76.1 L25.8,74.5 L24.7,72.6 L24.0,70.5 L23.6,68.3 L23.5,65.8 L23.6,63.3 L24.1,60.6Z" fill="#1effb0"/><circle cx="41.7" cy="45" r="11.6" fill="#fff"/><circle cx="54.3" cy="28.3" r="2.5" fill="#fff"/></svg><span class="bw">educator<span>space</span></span><span class="sep"></span><span>Science Arcade</span></button>
+  <button class="btn sm back" id="backBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>All games</button>
+  <p class="tagline">PLAY <i>•</i> LEARN <i>•</i> EXCEL</p>
+  <span class="chipx"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="2" y="7" width="20" height="11" rx="5"/><path d="M7 11v3M5.5 12.5h3M16 12h.01M18 14h.01"/></svg>Interactive science games</span>
+  <button class="btn sm" id="muteBtn" aria-pressed="false" title="Sound on/off">Sound on</button>
+</header>
+<main id="app"></main>
+<script src="engine.js"></script>
+<script src="quest.js"></script>
+<script src="rush.js"></script>
+<script src="defender.js"></script>
+<script src="mitosis.js"></script>
+<script src="gene.js"></script>
+<script src="enzyme.js"></script>
+<script>AR.boot();</script>
+<script src="../shared/fullscreen.js"></script>
+</body>
+</html>
