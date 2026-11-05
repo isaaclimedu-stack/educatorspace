@@ -235,6 +235,20 @@ table.rec tr.rs-det td { padding: 0 10px 12px 10px; }
 .scene .glow { animation: glow 1.4s ease-in-out infinite; }
 @keyframes glow { 0%,100% { opacity: .35 } 50% { opacity: .9 } }
 .scene text { font-family: var(--f-body); }
+/* ── soft look: rounded joints and corners on every drawing, soft contact shadows under lab equipment, and gentle
+   light across the lab stage, so scenes read as objects on a bench instead of flat paper cut-outs ── */
+svg :is(path, polygon, polyline, line, rect, circle, ellipse) { stroke-linejoin: round; }
+svg :is(path, polyline, line) { stroke-linecap: round; }
+svg rect:not([rx]):not(pattern rect):not(clipPath rect):not(mask rect) { rx: 2.5px; }
+.scene .obj .inner, svg .soft { filter: url(#esSoft); }
+/* games: each top-level drawing group in a game's art gets the same soft edges and shadow */
+.gh-body svg > g:not(:only-child) { filter: url(#esSoft); }
+/* glassware stays crisp and clear: only a soft shadow, no bevel */
+.scene .obj .inner:has([stroke="url(#glassEdge)"]) { filter: drop-shadow(0 6px 7px rgba(6, 18, 28, .22)); }
+.stage::after { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 1; border-radius: inherit;
+  background: radial-gradient(120% 75% at 50% -12%, rgba(255,255,255,.18), transparent 62%), radial-gradient(135% 115% at 50% 42%, transparent 58%, rgba(0,0,0,.26) 100%);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.06), inset 0 1px 18px rgba(0,0,0,.18); }
+.stage > .stage-msg, .stage > .oops { z-index: 2; }
 .stage-msg { position: absolute; left: 50%; top: 14px; transform: translateX(-50%); background: rgba(12,22,21,.86); color: #f1f7f5; padding: 8px 14px; border-radius: 999px; font-size: 14px; font-weight: 600; pointer-events: none; transition: opacity .25s; max-width: 86%; text-align: center; }
 .stage-msg.bad { background: rgba(160,40,44,.92); }
 .stage-msg.ok { background: rgba(25,110,66,.92); }
@@ -505,6 +519,13 @@ details.sim-note summary { cursor: pointer; }
 .gh-crumb svg { width: 16px; height: 16px; }
 .gh-body { display: grid; gap: 22px; min-width: 0; }
 .gh-frame { width: 100%; height: max(640px, calc(100vh - 230px)); border: 1px solid var(--line); border-radius: 14px; background: #0a0f1c; }
+.gh-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.gh-fs span { font-size: 13px; }
+/* full-screen games: the whole page goes full screen (so pop-ups still show) and the menu and page headers step aside */
+body.gfs .rail, body.gfs .stu-top, body.gfs .gh-ext-head { display: none; }
+body.gfs .shell { grid-template-columns: minmax(0, 1fr); }
+body.gfs .main, body.gfs .stu-main { max-width: none; width: 100%; padding-block: 12px 20px; gap: 14px; }
+body.gfs .gh-frame { height: calc(100vh - 70px); height: calc(100dvh - 70px); }
 .home-games { display: grid; gap: 10px; }
 .gm-mini { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 12px; align-items: center; padding: 8px; }
 .gm-mini .thumb { width: 92px; height: 56px; border-radius: 8px; overflow: hidden; display: block; }
@@ -764,6 +785,20 @@ p.contact { display: block; line-height: 1.55; margin: 0; }
 .z-top canvas { background: #12304f; }
 </style>
 <div id="app"></div>
+<!-- shared soft-look filters: a soft drop shadow plus a gentle highlight along top edges and shade along bottom edges,
+     so flat shapes read as rounded objects. Used by the labs (.scene .obj) and game art (.soft). -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+  <filter id="esSoft" x="-25%" y="-25%" width="150%" height="160%" color-interpolation-filters="sRGB">
+    <feGaussianBlur in="SourceAlpha" stdDeviation="1.9" result="b"/>
+    <feOffset in="b" dy="1.9" result="bd"/><feComposite in="SourceAlpha" in2="bd" operator="out" result="topEdge"/>
+    <feFlood flood-color="#ffffff" flood-opacity=".3"/><feComposite in2="topEdge" operator="in" result="hi"/>
+    <feOffset in="b" dy="-1.9" result="bu"/><feComposite in="SourceAlpha" in2="bu" operator="out" result="botEdge"/>
+    <feFlood flood-color="#06121c" flood-opacity=".22"/><feComposite in2="botEdge" operator="in" result="lo"/>
+    <feGaussianBlur in="SourceAlpha" stdDeviation="5.5" result="sb"/><feOffset in="sb" dy="6" result="so"/>
+    <feFlood flood-color="#06121c" flood-opacity=".28"/><feComposite in2="so" operator="in" result="sh"/>
+    <feMerge><feMergeNode in="sh"/><feMergeNode in="SourceGraphic"/><feMergeNode in="hi"/><feMergeNode in="lo"/></feMerge>
+  </filter>
+</defs></svg>
 <script>
 /* ═══════════ Educator Space: app shell, sign-in, courses, records ═══════════
    HOW TO ADD A LAB: write a lab module (see dna.js) and push an entry to LABS below:
@@ -940,9 +975,8 @@ async function boot() {
 
 function render() {
   if (typeof Kit !== 'undefined') Kit.unmount();
-  if (APP.student && !APP.user) return renderStudent();
-  if (!APP.user) return renderGate();
-  renderShell();
+  if (APP.student && !APP.user) renderStudent(); else if (!APP.user) renderGate(); else renderShell();
+  if (typeof GFS !== 'undefined') GFS.sync();
 }
 
 /* ── gate: teachers sign in (or sign up); students join with a lab code ── */
@@ -2197,10 +2231,11 @@ function labThumb(id, big) {
   const bg = `<rect width="400" height="240" fill="#12304f"/><rect y="186" width="400" height="54" fill="#1b2125"/><rect y="186" width="400" height="2" fill="#fff" opacity=".1"/>`;
   const glass = 'fill="rgba(255,255,255,.08)" stroke="#cfe0f2" stroke-width="2.4"';
   const art = {
-    titration: `<rect x="196" y="6" width="8" height="186" fill="#9aa5ab"/><rect x="204" y="70" width="70" height="7" fill="#9aa5ab"/>
-      <rect x="262" y="14" width="16" height="150" ${glass}/><rect x="264" y="60" width="12" height="104" fill="#cde4f0" opacity=".5"/><rect x="258" y="160" width="24" height="8" fill="#2f6fd6"/><path d="M268,168 L272,168 L271,182 L269,182Z" fill="#cfe0f2"/>
-      <path d="M256,196 L256,214 L226,226 Q222,232 230,232 L310,232 Q318,232 314,226 L284,214 L284,196" ${glass}/><path d="M232,224 L308,224 L312,229 Q312,231 308,231 L232,231 Q228,231 228,229Z" fill="#e0408f" opacity=".75"/>
-      <circle cx="270" cy="188" r="2.5" fill="#cde4f0"/>${[0, 1, 2, 3, 4].map(i => `<line x1="262" x2="268" y1="${30 + i * 26}" y2="${30 + i * 26}" stroke="#cfe0f2"/>`).join('')}`,
+    titration: `<rect x="196" y="6" width="8" height="186" fill="#9aa5ab"/><rect x="204" y="54" width="70" height="7" fill="#9aa5ab"/>
+      <rect x="262" y="8" width="16" height="108" ${glass}/><rect x="264" y="40" width="12" height="76" fill="#cde4f0" opacity=".5"/><rect x="258" y="114" width="24" height="8" fill="#2f6fd6"/><path d="M268,122 L272,122 L271,134 L269,134Z" fill="#cfe0f2"/>
+      <path d="M261,142 L261,174 L235,220 Q232,228 241,228 L299,228 Q308,228 305,220 L279,174 L279,142" ${glass}/><ellipse cx="270" cy="142" rx="10" ry="2.2" fill="none" stroke="#cfe0f2" stroke-width="1.6"/>
+      <path d="M248,202 L292,202 L304,221 Q306,226 299,226 L241,226 Q234,226 236,221Z" fill="#e0408f" opacity=".75"/><path d="M243,216 L263,180" stroke="#fff" stroke-width="2.5" opacity=".25" stroke-linecap="round"/>
+      <circle cx="270" cy="138" r="2.2" fill="#cde4f0"/>${[0, 1, 2, 3, 4].map(i => `<line x1="262" x2="268" y1="${20 + i * 20}" y2="${20 + i * 20}" stroke="#cfe0f2"/>`).join('')}`,
     flame: `<ellipse cx="200" cy="232" rx="44" ry="8" fill="#3d464c"/><rect x="190" y="150" width="20" height="82" fill="#9aa5ab"/>
       <path d="M182,150 C176,110 196,76 200,40 C206,76 224,110 218,150Z" fill="#1fd39a" opacity=".85"/><path d="M190,150 C188,128 198,110 200,96 C202,110 212,128 210,150Z" fill="#3d8bff" opacity=".9"/>
       <g transform="translate(110 236) rotate(-58)"><rect x="-3" y="-150" width="6" height="150" fill="#dcab74"/><rect x="-3.5" y="-150" width="7" height="18" fill="#5fb7a6"/></g>
@@ -7185,7 +7220,7 @@ const LAB_ORDER = ['dna-strawberry', 'titration', 'flame', 'pendulum', 'ohm', 'm
 /* GAME_ORDER is also append-only. A code with games = the usual 13 signed characters + a short tail holding a bitmask
    (labs in bits 0–11, games from bit 12). The 13-character core is version 2 and carries a 10-bit check of the tail, so the
    tail can't be edited. Only the core is sent with results, so the Apps Script needs no change. */
-const GAME_ORDER = ['game', 'blaster', 'g-match', 'g-names', 'g-bomb', 'g-contaminated', 'g-gene', 'g-race', 'g-sort', 'g-launch', 'g-hazard', 'zombies', 'g-mitosis', 'g-elwars', 'g-atom', 'g-chemdet'];
+const GAME_ORDER = ['game', 'blaster', 'g-match', 'g-names', 'g-bomb', 'g-contaminated', 'g-gene', 'g-race', 'g-sort', 'g-launch', 'g-hazard', 'zombies', 'g-mitosis', 'g-elwars', 'g-atom', 'g-chemdet', 'g-signal'];
 const gameTitle = id => (GAMES.find(g => g.id === id) || {}).title || id;
 const extHash = async ext => parseInt((await sha256hex('x|' + SITE_KEY + '|' + ext)).slice(0, 3), 16) & 1023;
 const OPT = { hints: 1, blaster: 2, repeat: 4 };
@@ -7255,7 +7290,7 @@ function pageAssign(m) {
     <section class="setup">
       <div style="display:grid;gap:8px"><span class="eyebrow">1 · Choose labs</span>
         <div class="pick-grid">${LABS.filter(l => LAB_ORDER.includes(l.id)).map(l => { const c = COURSES.find(x => l.courses.includes(x.id)); return `<label class="pick ${sel.has(l.id) ? 'on' : ''}" for="pk-${l.id}"><input type="checkbox" id="pk-${l.id}" data-lab="${l.id}" ${sel.has(l.id) ? 'checked' : ''}><span class="thumb">${l.thumb ? l.thumb() : ''}</span><span><b>${esc(l.title)}</b><span class="small muted">${esc(c.band.replace(' Science', ''))} · ${esc(c.name)} · ${esc(l.time)}</span></span></label>`; }).join('')}</div></div>
-      <div style="display:grid;gap:8px"><span class="eyebrow">2 · Choose games <span style="text-transform:none;letter-spacing:0;font-weight:500">(optional)</span></span><span class="small muted">Students play them on their own laptops. Scores from solo games come back to Student results. Team games (Science Showdown, Rocket Race) are best on the projector. Contaminated, Gene Detectives and Chem Detectives open in their own page and don’t send scores back.</span>
+      <div style="display:grid;gap:8px"><span class="eyebrow">2 · Choose games <span style="text-transform:none;letter-spacing:0;font-weight:500">(optional)</span></span><span class="small muted">Students play them on their own laptops. Scores from solo games come back to Student results. Team games (Science Showdown, Rocket Race) are best on the projector. Contaminated, Gene Detectives, Chem Detectives and Signal Cascade open in their own page and don’t send scores back.</span>
         <div class="pick-grid">${['hs', 'ms'].map(b => GAMES.filter(g => g.band === b && GAME_ORDER.includes(g.id)).map(g => `<label class="pick ${gsel.has(g.id) ? 'on' : ''}" for="pg-${g.id}"><input type="checkbox" id="pg-${g.id}" data-gm="${g.id}" ${gsel.has(g.id) ? 'checked' : ''}><span class="thumb">${gameThumb(g.id)}</span><span><b>${esc(g.title)}</b><span class="small muted">${GBAND[g.band].short} · ${esc(g.tag)}</span></span></label>`).join('')).join('')}</div></div>
       <div style="display:grid;gap:8px"><span class="eyebrow">3 · Options</span>
         <label class="check" for="oHints"><input type="checkbox" id="oHints" ${ao.hints ? 'checked' : ''}> Students can use <b>Show hint</b></label>
@@ -7380,7 +7415,7 @@ function renderStudent() {
   $('#stOut').onclick = () => { if (!$('#stOut').dataset.sure) { $('#stOut').dataset.sure = 1; $('#stOut').textContent = 'Click again to leave'; return; } LS.del('student'); APP.student = null; APP.gateTab = 'student'; render(); };
   $('#stSnd').onclick = () => { SND.on = !SND.on; LS.set('sound', SND.on); renderStudent(); };
   const m = $('#stMain');
-  if (v !== 'home') { codeOpen(S.k.code).then(op => { if (op === false && APP.student === S) closeStudent(); }); const g = GAMES.find(x => x.id === v); m.innerHTML = `<div><button class="btn sm" id="stBack">${ico('back')}Back to my assignments</button></div><div id="stG" class="gh-body"></div>`; $('#stBack').onclick = () => go('home'); GH.runT0 = performance.now(); if (g.ext) extGame($('#stG'), g); else g.page($('#stG')); return; }
+  if (v !== 'home') { codeOpen(S.k.code).then(op => { if (op === false && APP.student === S) closeStudent(); }); const g = GAMES.find(x => x.id === v); m.innerHTML = `<div class="gh-top"><button class="btn sm" id="stBack">${ico('back')}Back to my assignments</button>${GFS.btn()}</div><div id="stG" class="gh-body"></div>`; $('#stBack').onclick = () => go('home'); GH.runT0 = performance.now(); if (g.ext) extGame($('#stG'), g); else g.page($('#stG')); return; }
   const labs = S.k.labs.map(id => LABS.find(l => l.id === id)).filter(Boolean), gl = games.map(id => GAMES.find(g => g.id === id)).filter(Boolean), out = LS.get('outbox', []).filter(o => o.code === (S.k.core || S.k.code));
   m.innerHTML = `<header style="display:grid;gap:6px"><span class="eyebrow">Class code ${esc(S.k.code)}</span><h1>Hi ${esc(S.name.split(' ')[0])}! Here are your ${labs.length && gl.length ? 'labs and games' : labs.length ? 'labs' : 'games'}.</h1><p class="muted" style="max-width:62ch">${labs.length ? 'Do each lab with your mouse. Mistakes are part of practice: you’ll see what goes wrong and why. ' : ''}When you finish, your results go to your teacher.</p></header>
     ${out.length ? `<div class="send-box warn"><b>${out.length} result${out.length > 1 ? 's' : ''} not sent yet.</b><span class="small">Your computer was offline. <button class="btn sm" id="stRetry">Send now</button></span></div>` : ''}
@@ -7556,9 +7591,9 @@ function chFigure(k = 'otter') {
       <circle cx="0" cy="-90" r="4.5" fill="#cdd5d8"/><circle cx="0" cy="-56" r="4.5" fill="#cdd5d8"/>
       ${[-1, 1].map(s => `<path d="M${s * 58},-182 Q${s * 98},-172 ${s * 106},-114 L${s * 72},-106 Q${s * 70},-138 ${s * 50},-150Z" fill="#fdfdfb" stroke="${ol}" stroke-width="2.5"/>`).join('')}</g>
     <g class="ov-gloves" visibility="hidden">${[-1, 1].map(s => `<rect x="${s * 88 - 15}" y="-124" width="30" height="11" rx="5" fill="#7d6de0" stroke="${ol}" stroke-width="2"/><ellipse cx="${s * 88}" cy="-100" rx="21" ry="21" fill="#9a8cf2" stroke="${ol}" stroke-width="2.5"/>`).join('')}</g>
-    <g class="ov-goggles" visibility="hidden"><path d="M-114,-304 Q0,-318 114,-304" fill="none" stroke="#1686e8" stroke-width="10" stroke-linecap="round"/>
-      <rect x="-74" y="-330" width="66" height="54" rx="24" fill="#d6f0fa" fill-opacity=".5" stroke="${ol}" stroke-width="5"/><rect x="8" y="-330" width="66" height="54" rx="24" fill="#d6f0fa" fill-opacity=".5" stroke="${ol}" stroke-width="5"/>
-      <path d="M-8,-306 h16" stroke="${ol}" stroke-width="5"/><path d="M-62,-318 q8,-6 18,-4 M20,-318 q8,-6 18,-4" stroke="#fff" stroke-width="4" stroke-linecap="round" fill="none"/></g>`;
+    <g class="ov-goggles" visibility="hidden"><path d="M-116,-300 L-76,-304 M76,-304 L116,-300" fill="none" stroke="#1686e8" stroke-width="10" stroke-linecap="round"/>
+      <rect x="-74" y="-330" width="66" height="54" rx="24" fill="#d6f0fa" fill-opacity=".14" stroke="${ol}" stroke-width="5"/><rect x="8" y="-330" width="66" height="54" rx="24" fill="#d6f0fa" fill-opacity=".14" stroke="${ol}" stroke-width="5"/>
+      <path d="M-8,-306 h16" stroke="${ol}" stroke-width="5"/><path d="M-64,-320 q6,-4 13,-3 M18,-320 q6,-4 13,-3" stroke="#fff" stroke-width="3.5" stroke-linecap="round" fill="none" opacity=".85"/></g>`;
 }
 
 /* a standalone face (expression portrait) as an <svg> string */
@@ -7653,7 +7688,7 @@ const GAMES = [
   { id: 'g-names', band: 'hs', title: 'Nomenclature Rush', tag: 'Chemistry · beat the clock', time: '5 min', blurb: 'Name the compound (or write the formula) before the flask fizzes over. Ionic, transition metals, polyatomics, molecular and acids.', page: m => Names.page(m), stop: () => Names.stop() },
   { id: 'g-bomb', band: 'hs', title: 'Bomb Squad', tag: 'Chemistry · defuse it', time: '5 min', blurb: 'Every right answer about strong acids, strong bases or polyatomic ions earns a tool. Collect five to defuse the bomb before the fuse runs out.', page: m => Bomb.page(m), stop: () => Bomb.stop() },
   { id: 'g-contaminated', band: 'hs', title: 'Contaminated', tag: 'Whole class · biology', time: '30–45 min', blurb: 'A hidden-saboteur lab game. Students do real biology tasks for scan results and vote out the saboteurs.', ext: 'games/contaminated/index.html' },
-  { id: 'g-gene', band: 'hs', title: 'Gene Detectives', tag: 'Solo or teams · genetics', time: '25–40 min', blurb: 'A CSI genetics case: blood typing, base pairing, gel electrophoresis and Punnett squares rule out suspects.', ext: 'games/gene-detectives/index.html' }, { id: 'g-chemdet', band: 'hs', course: 'hs-chem', title: 'Chem Detectives', tag: 'Solo or teams · chemistry', time: '25–40 min', blurb: 'A CSI chemistry case: flame tests, ink chromatography, density by water displacement and pH calculations rule out suspects.', ext: 'games/chem-detectives/index.html' }, { id: 'g-elwars', band: 'hs', course: 'hs-chem', title: 'Element Wars', tag: 'Chemistry · periodic trends', time: '15–25 min', blurb: 'Draft a team of elements with hidden stats, then battle through challenges like “lose an electron most easily.” Win rounds with atomic radius, ionization energy, electronegativity and metallic character, and earn bonus points by explaining why.', ext: 'games/element-wars/index.html' }, { id: 'g-atom', band: 'hs', course: 'hs-chem', title: 'Build an Atom', tag: 'Chemistry lab · atomic structure', time: '20–40 min', blurb: 'Build any of the 118 elements from protons, neutrons and electrons. See s, p, d and f orbitals in 3D, follow the filling order, read electron configurations, spot exceptions, explore the periodic table by group and discovery country, and predict trends before revealing them.', ext: 'games/build-an-atom/index.html' },
+  { id: 'g-gene', band: 'hs', title: 'Gene Detectives', tag: 'Solo or teams · genetics', time: '25–40 min', blurb: 'A CSI genetics case: blood typing, base pairing, gel electrophoresis and Punnett squares rule out suspects.', ext: 'games/gene-detectives/index.html' }, { id: 'g-chemdet', band: 'hs', course: 'hs-chem', title: 'Chem Detectives', tag: 'Solo or teams · chemistry', time: '25–40 min', blurb: 'A CSI chemistry case: flame tests, ink chromatography, density by water displacement and pH calculations rule out suspects.', ext: 'games/chem-detectives/index.html' }, { id: 'g-signal', band: 'hs', course: 'hs-bio', title: 'Signal Cascade', tag: 'Solo · cell signaling', time: '25–40 min', blurb: 'Drag ligands into the receptors they fit, relay GPCR, receptor tyrosine kinase, ion-channel and steroid pathways step by step, then fix mutated receptors, beat a β-blocker, explore dose and find broken proteins.', ext: 'games/signal-cascade/index.html' }, { id: 'g-elwars', band: 'hs', course: 'hs-chem', title: 'Element Wars', tag: 'Chemistry · periodic trends', time: '15–25 min', blurb: 'Draft a team of elements with hidden stats, then battle through challenges like “lose an electron most easily.” Win rounds with atomic radius, ionization energy, electronegativity and metallic character, and earn bonus points by explaining why.', ext: 'games/element-wars/index.html' }, { id: 'g-atom', band: 'hs', course: 'hs-chem', title: 'Build an Atom', tag: 'Chemistry lab · atomic structure', time: '20–40 min', blurb: 'Build any of the 118 elements from protons, neutrons and electrons. See s, p, d and f orbitals in 3D, follow the filling order, read electron configurations, spot exceptions, explore the periodic table by group and discovery country, and predict trends before revealing them.', ext: 'games/build-an-atom/index.html' },
   { id: 'g-mitosis', band: 'hs', title: 'Cell//Divide', tag: 'Retro arcade · biology', time: '10–15 min', blurb: 'Take control of mitosis in an 8-bit arcade game: copy the DNA, coil and line up the chromosomes, split the sisters and pinch the cell in two, while hunting down cell-cycle errors.', page: m => CellDiv.page(m), stop: () => CellDiv.stop() },
   { id: 'g-race', band: 'ms', title: 'Rocket Race', tag: 'Teams · projector', time: '20–30 min', blurb: 'Teams race rockets from Earth to Neptune. Pick a small, medium or big booster, answer the question, and blast off.', page: m => Race.page(m), stop: () => Race.stop() },
   { id: 'g-sort', band: 'ms', title: 'Sort Storm', tag: 'Arcade · sorting', time: '3–5 min', blurb: 'Cards rain down from the clouds. Click the right bucket before they splash: rock types, food webs, changes, states of matter and more.', page: m => Sort.page(m), stop: () => Sort.stop() },
@@ -7663,6 +7698,21 @@ const GAMES = [
 ];
 const GBAND = { hs: { name: 'High school games', short: 'High school' }, ms: { name: 'Middle school games', short: 'Middle school' } };
 
+/* full screen for games (labs have their own button in Kit). Like labs, the whole page goes full screen so pop-ups and
+   toasts still show; body.gfs hides the menu. Leaving the game for a page that isn't a game or lab exits full screen. */
+const GFS = {
+  on: () => !!(document.fullscreenElement || document.webkitFullscreenElement),
+  ok: () => !!(document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen),
+  btn: () => GFS.ok() ? `<button class="btn sm ghost gh-fs" type="button" aria-label="Full screen" title="Full screen">${ico('full')}<span>Full screen</span></button>` : '',
+  toggle() { const el = document.documentElement;
+    try { if (GFS.on()) (document.exitFullscreen || document.webkitExitFullscreen).call(document); else { const pr = (el.requestFullscreen || el.webkitRequestFullscreen).call(el); if (pr && pr.catch) pr.catch(() => {}); } } catch (e) {} },
+  sync() { const on = GFS.on(), game = !!$('.gh-fs');
+    if (on && !game && !$('.lab')) { try { (document.exitFullscreen || document.webkitExitFullscreen).call(document); } catch (e) {} }
+    document.body.classList.toggle('gfs', on && game);
+    $$('.gh-fs').forEach(b => { b.innerHTML = ico(on ? 'unfull' : 'full') + `<span>${on ? 'Exit full screen' : 'Full screen'}</span>`; b.title = on ? 'Exit full screen (Esc)' : 'Full screen'; b.setAttribute('aria-label', on ? 'Exit full screen' : 'Full screen'); b.onclick = GFS.toggle; }); }
+};
+document.addEventListener('fullscreenchange', () => GFS.sync()); document.addEventListener('webkitfullscreenchange', () => GFS.sync());
+
 const GameHub = {
   ids() { return ['games-hs', 'games-ms'].concat(GAMES.map(g => g.id)); },
   bandOf(v) { const g = GAMES.find(x => x.id === v); return g ? g.band : v === 'games-hs' ? 'hs' : v === 'games-ms' ? 'ms' : null; },
@@ -7670,9 +7720,9 @@ const GameHub = {
   route(v, m) {
     if (v === 'games-hs' || v === 'games-ms') { pageGames(m, v.slice(6)); return true; }
     const g = GAMES.find(x => x.id === v); if (!g) return false;
-    m.innerHTML = `<div class="gh-crumb"><a href="${HP}games-${g.band}" data-gb="games-${g.band}">${ico('back')}${GBAND[g.band].name}</a></div><div class="gh-body" id="ghBody"></div>`;
+    m.innerHTML = `<div class="gh-crumb gh-top"><a href="${HP}games-${g.band}" data-gb="games-${g.band}">${ico('back')}${GBAND[g.band].name}</a>${GFS.btn()}</div><div class="gh-body" id="ghBody"></div>`;
     $('[data-gb]', m).onclick = e => { e.preventDefault(); go(e.currentTarget.dataset.gb); };
-    const b = $('#ghBody', m); if (g.ext) extGame(b, g); else g.page(b); return true;
+    const b = $('#ghBody', m); if (g.ext) extGame(b, g); else g.page(b); GFS.sync(); return true;
   }
 };
 
@@ -7690,12 +7740,12 @@ function pageGames(m, band) {
     <section class="sec">${list.map(gameCard).join('')}</section>`;
   bindGameCards(m); $('[data-gb2]', m).onclick = e => go(e.currentTarget.dataset.gb2);
 }
-/* games that live in their own folder (Contaminated, Gene Detectives, Chem Detectives) open in a frame, or in a new tab */
+/* games that live in their own folder (Contaminated, Gene Detectives, Chem Detectives, Signal Cascade) open in a frame, or in a new tab */
 const gameURL = p => (CLEAN_URLS || /\/j\//.test(location.pathname) ? '/' : '') + p;
 function extGame(m, g) {
-  m.innerHTML = `<div class="sec-h"><div style="display:grid;gap:4px"><span class="eyebrow">${esc(g.tag)}</span><h1>${esc(g.title)}</h1></div>
+  m.innerHTML = `<div class="sec-h gh-ext-head"><div style="display:grid;gap:4px"><span class="eyebrow">${esc(g.tag)}</span><h1>${esc(g.title)}</h1></div>
       <div class="row"><a class="btn primary" href="${gameURL(g.ext)}" target="_blank" rel="noopener">${ico('link')}Open in a new tab</a></div></div>
-    <p class="muted" style="max-width:70ch">${esc(g.blurb)} For the projector or student devices, open it in its own tab. Students can also open the same link on their devices to join.</p>
+    <p class="muted gh-ext-head" style="max-width:70ch">${esc(g.blurb)} For the projector or student devices, open it in its own tab. Students can also open the same link on their devices to join.</p>
     <iframe class="gh-frame" src="${gameURL(g.ext)}" title="${esc(g.title)}" allow="clipboard-write; fullscreen"></iframe>`;
 }
 
@@ -7714,6 +7764,7 @@ function gameThumb(id) {
     'g-atom': `${st}<ellipse cx="200" cy="74" rx="34" ry="52" fill="#ff9a3c" opacity=".85"/><ellipse cx="200" cy="170" rx="34" ry="52" fill="#3fa4ff" opacity=".85"/><ellipse cx="200" cy="122" rx="120" ry="30" fill="none" stroke="#5fd4ff" stroke-opacity=".5" stroke-width="2" stroke-dasharray="4 6"/>${[[-7, -5, '#ff5a6e'], [6, -4, '#a3abcf'], [0, 6, '#ff5a6e'], [-6, 6, '#a3abcf'], [7, 5, '#ff5a6e']].map(([x, y, c]) => `<circle cx="${200 + x}" cy="${122 + y}" r="7" fill="${c}"/>`).join('')}${[['#ff4fa8', 'S', 60], ['#ffb02e', 'P', 110], ['#3ad687', 'D', 290], ['#3f9dff', 'F', 340]].map(([c, t, x]) => `<circle cx="${x}" cy="212" r="14" fill="${c}"/><text x="${x}" y="217" font-size="14" font-weight="800" fill="#fff" text-anchor="middle" font-family="sans-serif">${t}</text>`).join('')}`,
     'g-gene': `${Array.from({ length: 11 }, (_, i) => { const y = 26 + i * 18, a = i / 11 * Math.PI * 2.2, x1 = 130 + Math.sin(a) * 40, x2 = 130 - Math.sin(a) * 40; return `<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="${i % 2 ? '#3ee6c4' : '#f472b6'}" stroke-width="4"/><circle cx="${x1}" cy="${y}" r="5" fill="#e8eef9"/><circle cx="${x2}" cy="${y}" r="5" fill="#9fb0cf"/>`; }).join('')}<circle cx="268" cy="108" r="54" fill="rgba(255,255,255,.08)" stroke="#ffd23f" stroke-width="9"/><line x1="306" y1="148" x2="350" y2="196" stroke="#ffd23f" stroke-width="14" stroke-linecap="round"/>`,
     'g-chemdet': `<path d="M110,40 h40 M118,40 v50 l-44,96 q-6,14 10,14 h92 q16,0 10,-14 l-44,-96 v-50" fill="rgba(255,255,255,.1)" stroke="#cfe0f2" stroke-width="4"/><path d="M90,160 h80 l12,26 q4,10 -8,10 h-88 q-12,0 -8,-10z" fill="#ffa94d"/>${[[110, 150, 7], [132, 138, 9], [150, 152, 6]].map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="#ffe0b8" opacity=".85"/>`).join('')}<circle cx="268" cy="108" r="54" fill="rgba(255,255,255,.08)" stroke="#ffd23f" stroke-width="9"/><line x1="306" y1="146" x2="350" y2="190" stroke="#ffd23f" stroke-width="14" stroke-linecap="round"/><path d="M268,74 C286,98 292,114 286,128 C281,140 255,140 250,128 C244,114 250,98 268,74Z" fill="#1fd6b0"/><path d="M268,104 C275,114 277,122 274,128 C272,133 264,133 262,128 C259,122 261,114 268,104Z" fill="#c9f6ff"/>`,
+    'g-signal': `<rect x="0" y="150" width="400" height="90" fill="#f3e9dd" opacity=".18"/>${Array.from({ length: 34 }, (_, i) => `<circle cx="${i * 12 + 2}" cy="146" r="5" fill="#e9dccd"/><circle cx="${i * 12 + 2}" cy="176" r="5" fill="#e9dccd"/>`).join('')}${[0, 1, 2, 3, 4, 5, 6].map(i => `<rect x="${168 + i * 10}" y="122" width="8" height="78" rx="4" fill="#2f8f9d"/>`).join('')}<path d="M164,126 C158,92 176,78 200,78 C224,78 242,92 236,126Z" fill="#4aa7b4"/><polygon points="200,84 214,108 186,108" fill="#f28c38" stroke="#a8521a" stroke-width="2"/><circle cx="200" cy="100" r="52" fill="#7fe0c5" opacity=".18"/>${[[70, 50, '#f28c38', 'tri'], [320, 44, '#29ad78', 'c'], [110, 96, '#8a6cf0', 's'], [300, 100, '#e4587f', 'd']].map(([x, y, c, k]) => k === 'tri' ? `<polygon points="${x},${y - 12} ${x + 12},${y + 8} ${x - 12},${y + 8}" fill="${c}"/>` : k === 'c' ? `<circle cx="${x}" cy="${y}" r="11" fill="${c}"/>` : k === 's' ? `<rect x="${x - 10}" y="${y - 10}" width="20" height="20" rx="3" fill="${c}"/>` : `<polygon points="${x},${y - 13} ${x + 10},${y} ${x},${y + 13} ${x - 10},${y}" fill="${c}"/>`).join('')}<path d="M200,206 v14 h-60 v12" stroke="#ffd27a" stroke-width="4" fill="none"/><rect x="108" y="220" width="64" height="20" rx="7" fill="#ffd27a"/><path d="M200,220 h60 v12" stroke="#ffd27a" stroke-width="4" fill="none"/><rect x="228" y="220" width="64" height="20" rx="7" fill="#ffd27a"/>`,
     'g-mitosis': `<rect width="400" height="240" fill="#050912"/>${Array.from({ length: 40 }, (_, i) => `<rect x="${(i * 53) % 400}" y="${(i * 37) % 240}" width="2" height="2" fill="#1f2a52"/>`).join('')}<g shape-rendering="crispEdges"><circle cx="150" cy="120" r="70" fill="#0d2130" stroke="#46e0b0" stroke-width="6"/><circle cx="250" cy="120" r="70" fill="#0d2130" stroke="#46e0b0" stroke-width="6"/><rect x="186" y="62" width="28" height="116" fill="#0d2130"/><circle cx="135" cy="120" r="30" fill="#0f2a3c" stroke="#9ae6ff" stroke-width="4"/><circle cx="265" cy="120" r="30" fill="#0f2a3c" stroke="#9ae6ff" stroke-width="4"/>${[[120, 106, '#ff4d6d'], [146, 112, '#4dd2ff'], [130, 134, '#ffd23f'], [252, 106, '#ff4d6d'], [276, 112, '#4dd2ff'], [262, 134, '#ffd23f']].map(([x, y, c]) => `<rect x="${x}" y="${y - 10}" width="5" height="20" fill="${c}"/><rect x="${x + 7}" y="${y - 10}" width="5" height="20" fill="${c}"/><rect x="${x + 4}" y="${y - 2}" width="4" height="4" fill="#fff"/>`).join('')}</g><text x="200" y="222" font-family="'Press Start 2P', monospace" font-size="20" fill="#ff4dd2" text-anchor="middle" stroke="#050912" stroke-width="2" paint-order="stroke">CELL//DIVIDE</text><text x="200" y="36" font-family="'Press Start 2P', monospace" font-size="10" fill="#7dff9a" text-anchor="middle">1UP · MITOSIS</text>`,
     'g-race': `${st}<circle cx="60" cy="190" r="40" fill="#2f8fe0"/><path d="M38,176 q14,-12 30,-2 q10,10 -4,18" fill="#47c26b"/><circle cx="330" cy="70" r="30" fill="#5a7cf0"/><circle cx="250" cy="150" r="20" fill="#e2733f"/><g transform="translate(170 120) rotate(50)">${rocketArt('#ffd27a')}</g><path d="M100,170 Q170,140 250,80" fill="none" stroke="#fff" stroke-dasharray="4 8" opacity=".4" stroke-width="3"/>`,
     'g-sort': `${[[90, 40], [210, 30], [320, 46]].map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="60" ry="24" fill="#cfe0f2" opacity=".9"/>`).join('')}${Array.from({ length: 12 }, (_, i) => `<line x1="${30 + i * 32}" y1="${80 + (i % 3) * 10}" x2="${24 + i * 32}" y2="${98 + (i % 3) * 10}" stroke="#9cfff0" stroke-width="2" opacity=".6"/>`).join('')}<g transform="translate(200 120) rotate(-8)"><rect x="-54" y="-20" width="108" height="40" rx="9" fill="#f5f9fd"/><text y="6" font-size="16" font-weight="800" fill="#102d4b" text-anchor="middle" font-family="sans-serif">granite</text></g>${['#1686e8', '#10b8b0', '#e2733f'].map((c, i) => `<path d="M${60 + i * 110},180 h100 l-10,50 h-80z" fill="${c}"/>`).join('')}`,
