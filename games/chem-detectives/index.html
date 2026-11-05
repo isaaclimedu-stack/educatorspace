@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chem Detectives</title>
+<meta name="description" content="CSI-style chemistry formative assessment game for high school: flame tests, paper chromatography, density by water displacement, and pH.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0c0e1a;--bg2:#111527;--panel:#161c33;--panel2:#1e2645;--line:#2e3a64;
+  --text:#eef1fa;--muted:#a3aed0;--accent:#ffa94d;--accent-ink:#2a1400;--accent2:#5ac8fa;
+  --tape:#ffd23f;--bad:#ff6b81;--good:#4ade80;--warn:#fbbf24;
+  --radius:16px;
+  --mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+  --sans:'Space Grotesk',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+*{box-sizing:border-box}
+html{font-size:16px}
+body{margin:0;min-height:100vh;color:var(--text);font-family:var(--sans);line-height:1.5;
+  background:radial-gradient(900px 500px at 85% -10%,#3a2450 0%,transparent 60%),radial-gradient(700px 400px at -10% 110%,#3a2a12 0%,transparent 60%),var(--bg);}
+a{color:var(--accent)}
+sup{font-size:.7em}
+.tape{height:26px;background:repeating-linear-gradient(-45deg,var(--tape) 0 20px,#0d0d0d 20px 40px);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.tape span{background:var(--tape);color:#111;font:700 .72rem var(--mono);letter-spacing:.22em;padding:2px 14px;white-space:nowrap}
+#turnbar:empty{display:none}
+header.top{position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+  padding:10px 18px;background:rgba(12,14,26,.9);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.logo{display:flex;align-items:center;gap:8px;font-weight:700;letter-spacing:.03em;cursor:pointer;background:none;border:0;color:var(--text);font-size:1.05rem;padding:0}
+.logo b{color:var(--accent)}
+.hud{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pill{font:600 .78rem var(--mono);padding:5px 10px;border-radius:999px;background:var(--panel);border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.pill strong{color:var(--text)}
+.iconbtn{background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:6px 10px;font:600 .8rem var(--sans);cursor:pointer}
+.iconbtn:hover{border-color:var(--accent)}
+.turnbar{margin:8px -18px -10px;display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;padding:8px 12px;background:rgba(17,21,39,.95);border-bottom:1px solid var(--line)}
+.tchip{display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;border:2px solid transparent;background:var(--panel);font-weight:600;font-size:.9rem;transition:all .2s}
+.tchip .dot{width:10px;height:10px;border-radius:50%}
+.tchip .sc{font-family:var(--mono);color:var(--muted)}
+.tchip.active{transform:scale(1.06);box-shadow:0 0 0 3px rgba(255,169,77,.15)}
+.tchip.active::before{content:'▶';font-size:.7rem}
+main{max-width:1180px;margin:0 auto;padding:26px 16px 90px}
+button{font:inherit}
+.btn{background:var(--accent);color:var(--accent-ink);border:0;padding:12px 20px;border-radius:12px;font-weight:700;cursor:pointer;transition:transform .08s,filter .15s,opacity .15s}
+.btn:hover{filter:brightness(1.08)}
+.btn:active{transform:translateY(1px)}
+.btn.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
+.btn.ghost:hover{border-color:var(--accent)}
+.btn.warn{background:var(--tape);color:#1a1300}
+.btn.small{padding:7px 12px;font-size:.88rem;border-radius:9px}
+.btn:disabled{opacity:.35;cursor:not-allowed;filter:none}
+.row{display:flex;align-items:center;flex-wrap:wrap}
+.gap{gap:10px}
+.muted{color:var(--muted)}
+.small{font-size:.88rem}
+.eyebrow{font:600 .75rem var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+h1,h2,h3{line-height:1.15;margin:.2em 0 .4em}
+h2{font-size:1.7rem}
+.sec{margin-top:28px;font-size:1.05rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:var(--radius);padding:20px}
+
+/* HOME */
+.hero{text-align:center;padding:30px 0 10px}
+.hero h1{font-size:clamp(2.6rem,7vw,4.6rem);letter-spacing:-.02em;margin:.15em 0}
+.hero h1 span{color:var(--accent);text-shadow:0 0 28px rgba(255,169,77,.45)}
+.lead{max-width:640px;margin:0 auto 26px;color:var(--muted);font-size:1.1rem}
+.badge{display:inline-block;font:700 .72rem var(--mono);letter-spacing:.2em;padding:6px 12px;border:1px dashed var(--tape);color:var(--tape);border-radius:6px}
+.mode-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;max-width:760px;margin:0 auto}
+.mode{text-align:left;cursor:pointer;color:var(--text);background:linear-gradient(160deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:var(--radius);padding:22px;transition:transform .15s,border-color .15s}
+.mode:hover{transform:translateY(-3px);border-color:var(--accent)}
+.mode .big{font-size:2rem}
+.mode h3{margin:8px 0 4px;font-size:1.25rem}
+.mode p{margin:0;color:var(--muted);font-size:.95rem}
+.skills-strip{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:26px 0 8px}
+.skills-strip span{font:600 .8rem var(--mono);padding:6px 12px;border-radius:999px;background:rgba(255,169,77,.08);border:1px solid rgba(255,169,77,.3);color:var(--accent)}
+details.how{max-width:760px;margin:24px auto 0;text-align:left}
+details.how summary{cursor:pointer;font-weight:700;padding:12px 0;color:var(--muted)}
+details.how ol{margin:0;padding-left:22px;color:var(--muted)}
+details.how li{margin:6px 0}
+
+/* SETUP */
+.setup{max-width:620px;margin:0 auto}
+label.f{display:block;font-weight:600;margin:14px 0 6px}
+input.tx,select.tx{width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font:inherit}
+input.tx:focus,select.tx:focus{outline:2px solid var(--accent);outline-offset:1px}
+.team-row{display:flex;gap:10px;align-items:center;margin:8px 0}
+.team-row .dot{width:16px;height:16px;border-radius:50%;flex:none}
+.countbtns{display:flex;gap:8px;flex-wrap:wrap}
+.countbtns button{width:46px;height:42px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--text);font-weight:700;cursor:pointer}
+.countbtns button.sel{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+
+/* CASES */
+.case-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.case-card{cursor:pointer;text-align:left;color:var(--text);border:1px solid var(--line);border-radius:var(--radius);padding:0;overflow:hidden;background:var(--panel);transition:transform .15s,border-color .15s;display:flex;flex-direction:column}
+.case-card:hover{transform:translateY(-3px);border-color:var(--accent)}
+.case-card .top{padding:18px 18px 12px;background:linear-gradient(135deg,rgba(90,200,250,.14),rgba(255,169,77,.1));border-bottom:1px dashed var(--line);position:relative}
+.case-card .top .ico{font-size:2.2rem}
+.case-card .stamp{position:absolute;right:14px;top:14px;font:700 .68rem var(--mono);letter-spacing:.14em;color:var(--bad);border:2px solid var(--bad);padding:2px 8px;border-radius:4px;transform:rotate(6deg);opacity:.8}
+.case-card h3{margin:6px 0 2px}
+.case-card .body{padding:14px 18px 18px;color:var(--muted);font-size:.93rem;flex:1}
+.codebox{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:22px}
+.codebox input{max-width:200px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.1em}
+
+/* BRIEF */
+.dossier{display:grid;grid-template-columns:1.2fr 1fr;gap:18px}
+@media (max-width:820px){.dossier{grid-template-columns:1fr}}
+.meta-row{display:flex;gap:18px;flex-wrap:wrap;font:600 .82rem var(--mono);color:var(--muted);margin:6px 0 12px}
+.story{font-size:1.08rem}
+.mission li{margin:6px 0}
+
+/* SUSPECTS */
+.suspects{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.sus{position:relative;border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--panel);transition:opacity .3s,filter .3s}
+.sus .av{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font:700 1rem var(--mono);color:#0c0e1a}
+.sus .nm{font-weight:700;margin-top:8px}
+.sus .rl{color:var(--muted);font-size:.85rem}
+.sus .al{color:var(--muted);font-size:.82rem;margin-top:6px;font-style:italic}
+.sus .tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px}
+.sus .tag{font:600 .7rem var(--mono);padding:2px 7px;border-radius:999px;background:rgba(255,107,129,.12);color:var(--bad);border:1px solid rgba(255,107,129,.35)}
+.sus .tag.ok{background:rgba(255,169,77,.1);color:var(--accent);border-color:rgba(255,169,77,.35)}
+.sus.out{opacity:.5;filter:grayscale(.8)}
+.sus.out::after{content:'EXCLUDED';position:absolute;right:10px;top:12px;font:700 .68rem var(--mono);letter-spacing:.12em;color:var(--bad);border:2px solid var(--bad);padding:1px 6px;border-radius:4px;transform:rotate(8deg)}
+.sus.guilty{border-color:var(--bad);box-shadow:0 0 0 3px rgba(255,107,129,.25)}
+.sus.guilty::after{content:'GUILTY';position:absolute;right:10px;top:12px;font:700 .8rem var(--mono);letter-spacing:.12em;color:#fff;background:var(--bad);padding:2px 8px;border-radius:4px;transform:rotate(8deg)}
+.sus.pickable{cursor:pointer}
+.sus.pickable:hover{border-color:var(--accent)}
+.sus.picked{border-color:var(--accent);box-shadow:0 0 0 3px rgba(255,169,77,.3)}
+
+/* BOARD */
+.board-head{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px}
+.progress{height:10px;border-radius:999px;background:var(--panel);border:1px solid var(--line);overflow:hidden;margin:16px 0 6px}
+.progress div{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .5s}
+.stations{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.stn{cursor:pointer;text-align:left;color:var(--text);border:1px solid var(--line);border-radius:var(--radius);padding:18px;background:linear-gradient(160deg,var(--panel2),var(--panel));transition:transform .15s,border-color .15s}
+.stn:hover{transform:translateY(-3px);border-color:var(--accent)}
+.stn .ico{font-size:2rem}
+.stn h3{margin:8px 0 2px}
+.stn .st{font:600 .75rem var(--mono);margin-top:10px;display:flex;gap:6px;align-items:center}
+.stn .dots{display:flex;gap:4px;margin-top:8px}
+.stn .dots i{width:26px;height:6px;border-radius:3px;background:var(--line)}
+.stn .dots i.g{background:var(--good)}.stn .dots i.r{background:var(--warn)}
+.stn.done{border-color:rgba(74,222,128,.5)}
+
+/* STATION */
+.station-head{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap}
+.station-head h2{margin:.1em 0}
+.intro{background:rgba(90,200,250,.08);border-left:3px solid var(--accent2);padding:12px 16px;border-radius:0 10px 10px 0;margin:16px 0}
+.step{border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);margin:16px 0;overflow:hidden}
+.step-h{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px;background:var(--panel2);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.step-h .t{display:flex;align-items:center;gap:10px;font-weight:700}
+.step-h .n{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--bg);border:1px solid var(--line);font:700 .85rem var(--mono)}
+.step.ok .step-h .n{background:var(--good);color:#032;border-color:var(--good)}
+.step.rev .step-h .n{background:var(--warn);color:#2a1a00;border-color:var(--warn)}
+.step-b{padding:18px 16px}
+.step.locked .step-b{color:var(--muted);font-style:italic}
+.ptchip{font:600 .75rem var(--mono);color:var(--muted)}
+.q{font-size:1.12rem;font-weight:600;margin:0 0 14px}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px}
+.opt{display:flex;gap:10px;align-items:flex-start;text-align:left;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--bg2);color:var(--text);cursor:pointer;transition:border-color .15s}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt .key{font:700 .8rem var(--mono);width:24px;height:24px;flex:none;border-radius:6px;display:grid;place-items:center;background:var(--panel2)}
+.opt.wrong{border-color:var(--bad);opacity:.55;text-decoration:line-through}
+.opt.right{border-color:var(--good);background:rgba(74,222,128,.1)}
+.opt:disabled{cursor:default}
+.why{margin:14px 0 0;color:var(--muted)}
+.msg{margin-top:14px;padding:10px 14px;border-radius:10px;font-weight:600}
+.msg.good{background:rgba(74,222,128,.12);color:var(--good);border:1px solid rgba(74,222,128,.35)}
+.msg.bad{background:rgba(255,107,129,.1);color:var(--bad);border:1px solid rgba(255,107,129,.35)}
+.hintbox{margin-top:12px;padding:10px 14px;border-radius:10px;background:rgba(251,191,36,.1);border:1px dashed var(--warn);color:#fde68a}
+.reveal{margin-top:12px;padding:10px 14px;border-radius:10px;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.35);color:var(--warn);font-weight:600}
+.submit-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:16px}
+.tbtn{padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:var(--bg2);color:var(--text);font:700 1rem var(--mono);cursor:pointer}
+.tbtn.sel{border-color:var(--accent);background:rgba(255,169,77,.14)}
+.tbtn.right{border-color:var(--good);background:rgba(74,222,128,.16)}
+.tbtn:disabled{cursor:default}
+.bgrid{display:flex;gap:8px;flex-wrap:wrap}
+.labwrap{display:flex;gap:22px;flex-wrap:wrap;align-items:flex-start}
+.labwrap svg{max-width:100%;height:auto}
+.labwrap .side{flex:1;min-width:250px}
+.bench{background:#0a0d1a;border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;gap:14px;flex-wrap:wrap;justify-content:center;align-items:flex-end}
+.dbtable{width:100%;border-collapse:collapse;margin-bottom:14px}
+.dbtable td,.dbtable th{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left}
+.dbtable th{font:600 .72rem var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.dbtable .mono{font:600 1rem var(--mono);letter-spacing:.03em;white-space:nowrap}
+.readout{font:700 1.15rem var(--mono);background:#050812;border:1px solid var(--line);color:#7fffd4;padding:10px 14px;border-radius:10px;display:inline-block;margin:4px 0 10px}
+.legend{font-size:.9rem;color:var(--muted)}
+.legend b{font-family:var(--mono);color:var(--text)}
+.reftab{border-collapse:collapse;font-size:.86rem;margin-top:10px}
+.reftab td{padding:3px 10px;border-bottom:1px solid var(--line)}
+.reftab td:last-child{font-family:var(--mono);text-align:right}
+@keyframes flick{0%,100%{transform:scaleY(1) scaleX(1)}50%{transform:scaleY(1.05) scaleX(.97)}}
+.flame{transform-origin:100px 200px;animation:flick .9s ease-in-out infinite}
+
+/* EXCLUSION */
+.chips{display:flex;gap:10px;flex-wrap:wrap}
+.chip{display:flex;align-items:center;gap:8px;padding:8px 14px 8px 8px;border-radius:999px;border:1px solid var(--line);background:var(--bg2);color:var(--text);cursor:pointer;font-weight:600}
+.chip .av{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font:700 .72rem var(--mono);color:#0c0e1a}
+.chip.sel{border-color:var(--bad);background:rgba(255,107,129,.12)}
+.chip.sel::after{content:'✕';color:var(--bad);font-weight:800}
+.chip:disabled{cursor:default}
+.done-row{display:flex;justify-content:center;margin-top:24px}
+
+/* ACCUSE + RESULTS */
+.handoff{max-width:560px;margin:40px auto;text-align:center}
+.handoff .lock{font-size:3.5rem}
+.scoreboard{display:grid;gap:10px;margin:16px 0}
+.sb-row{display:grid;grid-template-columns:44px 1fr auto auto;gap:12px;align-items:center;padding:12px 16px;border-radius:12px;background:var(--panel);border:1px solid var(--line)}
+.sb-row .rk{font:700 1.2rem var(--mono);color:var(--muted)}
+.sb-row.first{border-color:var(--tape);box-shadow:0 0 0 2px rgba(255,210,63,.2)}
+.sb-row .pts{font:700 1.2rem var(--mono)}
+.mastery{width:100%;border-collapse:collapse;font-size:.92rem}
+.mastery th,.mastery td{padding:10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+.mastery th{font:600 .72rem var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.bar{height:8px;border-radius:4px;background:var(--line);overflow:hidden;margin-top:4px;min-width:80px}
+.bar i{display:block;height:100%}
+.tablewrap{overflow-x:auto}
+
+/* MODAL / TOAST */
+.modal{position:fixed;inset:0;background:rgba(3,4,12,.75);display:flex;align-items:flex-start;justify-content:center;z-index:60;padding:40px 14px;overflow-y:auto}
+.modal.hidden{display:none}
+.modal-card{width:min(760px,100%);background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:22px;position:relative}
+.modal-card .x{position:absolute;right:14px;top:12px}
+.keyt{width:100%;border-collapse:collapse;font-size:.92rem}
+.keyt td,.keyt th{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.keyt th{color:var(--muted);font:600 .72rem var(--mono);letter-spacing:.1em;text-transform:uppercase}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(30px);opacity:0;z-index:70;padding:12px 20px;border-radius:12px;font-weight:700;background:var(--panel2);border:1px solid var(--line);transition:all .25s;pointer-events:none;max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.good{border-color:var(--good);color:var(--good)}
+.toast.bad{border-color:var(--bad);color:var(--bad)}
+.codes{font:600 1rem var(--mono);display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.codes span{padding:6px 10px;border-radius:8px;background:var(--bg);border:1px solid var(--line)}
+@keyframes pop{0%{transform:scale(.9);opacity:0}100%{transform:scale(1);opacity:1}}
+.pop{animation:pop .25s ease-out}
+@media print{.tape,header.top,.turnbar,.noprint{display:none!important}body{background:#fff;color:#000}.card,.sb-row{background:#fff;border-color:#bbb}}
+@media (max-width:560px){h2{font-size:1.35rem}}
+@media (prefers-reduced-motion:reduce){.flame{animation:none}.pop{animation:none}}
+</style>
+</head>
+<body>
+<div class="tape" aria-hidden="true"><span>CRIME SCENE — DO NOT CROSS — CHEMISTRY LAB — CRIME SCENE — DO NOT CROSS</span></div>
+<header class="top">
+  <button class="logo" onclick="act.home()" title="Home">⚗️ Chem <b>Detectives</b></button>
+  <div class="hud" id="hud"></div>
+  <div id="turnbar" style="width:100%"></div>
+</header>
+<main id="app"></main>
+<div id="modal" class="modal hidden" onclick="if(event.target===this)act.closeModal()"><div class="modal-card" id="modalCard"></div></div>
+<div id="toast" class="toast"></div>
+
+<script>
+'use strict';
+/* =====================================================================
+   CHEM DETECTIVES — CSI Chemistry Formative Assessment
+   Sister game to Gene Detectives (same engine, same case-code system).
+   Single-file app. No build step. Edit the data blocks below to customize.
+   NOTE: case codes are generated from this file's data. Editing NAMES, CASES,
+   BANK or the generators changes what an existing code produces.
+   ===================================================================== */
+
+// Teacher answer-key PIN (not secure—just keeps students from peeking casually).
+const TEACHER_PIN = '1234';
+
+const NAMES = ['Avery Chen','Jordan Okafor','Mia Rodriguez','Ethan Park','Priya Nair','Lucas Bennett','Zoe Kim',
+  'Marcus Hill','Sofia Rossi','Daniel Kowalski','Hana Sato','Omar Haddad','Grace Liu','Theo Martin','Leila Ahmadi',
+  'Noah Williams','Isabel Cruz','Ryan Choi','Amara Diallo','Felix Wagner','Jiwoo Lee','Minseo Kang','Caleb Brooks','Nadia Petrova'];
+const SUS_COLORS = ['#f472b6','#60a5fa','#fbbf24','#34d399','#a78bfa'];
+const TEAM_COLORS = ['#ffa94d','#f472b6','#5ac8fa','#4ade80','#a78bfa','#fb7185'];
+const TEAM_NAMES = ['Mole Patrol','Bunsen Burners','Ion Investigators','Covalent Crew','Proton Posse','Catalyst Squad'];
+
+// ---- CASE SCENARIOS (add your own by copying one block; the 2-letter id starts each case code) ----
+const CASES = [
+  { id:'FW', icon:'🎆', title:'The Fireworks Fiasco', location:'Lakeview High Football Stadium', time:'Friday, 9:10 PM',
+    story:'The homecoming fireworks show was supposed to light the sky in school colors. Instead, half the shells fizzled and the rest burned the wrong color. Someone broke into the storage crate an hour before the show and swapped the colorant packets.',
+    roles:[
+      {role:'Stadium Groundskeeper', alibi:'Says they were painting the end-zone lines.'},
+      {role:'Pyrotechnics Assistant', alibi:'Says they were checking the launch tubes.'},
+      {role:'Rival School’s Student Council VP', alibi:'Says they were “just here for the game.”'},
+      {role:'Chemistry Club Treasurer', alibi:'Says they were selling glow sticks at the gate.'},
+      {role:'Band Equipment Manager', alibi:'Says they were tuning drums in the band room.'}],
+    evidence:{ flame:'Colored powder spilled on the lid of the storage crate.', ink:'A handwritten note left inside the crate: “Swap done. Meet at gate 3.”', density:'A snapped metal tip from the tool used to pry the crate open.', ph:'A puddle of liquid from a dropped bottle next to the crate.' } },
+  { id:'PP', icon:'🥤', title:'The Pink Punch Prank', teaser:'At the winter formal, the punch bowl suddenly turned bright pink. Nobody drank it, but somebody planned it.', location:'Central High Cafeteria, Winter Formal', time:'Saturday, 8:30 PM',
+    story:'Halfway through the winter formal, the clear punch bowl turned shocking pink in front of everyone (an acid–base indicator, anyone?). The punch was thrown out and nobody drank it, but the dance was stopped for an hour. Five people were near the drinks table.',
+    roles:[
+      {role:'Dance Committee Chair', alibi:'Says they were running the photo booth.'},
+      {role:'Cafeteria Manager', alibi:'Says they were washing trays in the kitchen.'},
+      {role:'DJ', alibi:'Says they never left the DJ booth.'},
+      {role:'Chemistry Lab Aide', alibi:'Says they were outside getting fresh air.'},
+      {role:'Senior Class Prankster', alibi:'Says, “It wasn’t me. This time.”'}],
+    evidence:{ flame:'White crystals left on a napkin beside the punch bowl.', ink:'A torn sign-up sheet with a scribbled message: “7:55 — the bowl.”', density:'A small metal stirring rod hidden under the table.', ph:'A few drops of liquid in an unlabeled dropper bottle.' } },
+  { id:'AF', icon:'🖼️', title:'The Art Forgery', teaser:'A gallery’s star painting was swapped for a forgery during a busy opening night.', location:'Harbor City Art Gallery', time:'Thursday, 10:45 PM',
+    story:'At closing time, a conservator noticed the gallery’s most valuable painting looked “too fresh.” It was a forgery. The real one is gone. Only five people were allowed in the back room during the opening-night party.',
+    roles:[
+      {role:'Art Conservator', alibi:'Says they were cleaning frames in the workshop.'},
+      {role:'Caterer', alibi:'Says they were plating desserts all night.'},
+      {role:'Gallery Security Guard', alibi:'Says they were watching the front door.'},
+      {role:'Visiting Art Dealer', alibi:'Says they were talking with buyers.'},
+      {role:'Art Student Intern', alibi:'Says they were sketching in the lobby.'}],
+    evidence:{ flame:'Pigment dust on the back of the forged canvas.', ink:'A fake certificate of authenticity signed in pen.', density:'A broken piece of a metal frame clip.', ph:'Liquid spilled from a jar of cleaning solution in the back room.' } },
+  { id:'OL', icon:'🏅', title:'The Olympiad Leak', location:'Westfield High Science Wing', time:'Wednesday, 6:20 AM',
+    story:'The answer key for Saturday’s regional Chemistry Olympiad vanished from a locked cabinet. The cabinet hinge was forced, and a few drops of something were spilled on the floor. Five people had access to the science wing that morning.',
+    roles:[
+      {role:'Chemistry Teacher', alibi:'Says they were setting up a titration lab.'},
+      {role:'Olympiad Team Captain', alibi:'Says they were studying in the library.'},
+      {role:'Early-Morning Custodian', alibi:'Says they were mopping the gym.'},
+      {role:'Rival Team Coach', alibi:'Says they only came to drop off paperwork.'},
+      {role:'Student Teacher', alibi:'Says they were making photocopies.'}],
+    evidence:{ flame:'Powder smudged on the cabinet handle.', ink:'A sticky note on the cabinet: “Key copied — 2nd drawer.”', density:'A small metal shard broken off the tool that forced the hinge.', ph:'Drops of liquid on the floor in front of the cabinet.' } },
+  { id:'MT', icon:'☄️', title:'The Meteorite Mix-Up', teaser:'A museum’s iron meteorite was swapped for a painted fake—and the fake is lighter than it should be.', location:'Summit Science Museum', time:'Sunday, 3:40 PM',
+    story:'A visiting geologist picked up the museum’s “iron meteorite” during a hands-on demo and frowned: it was far too light. It was a painted fake. The real meteorite was swapped sometime that afternoon, while five people had access to the exhibit.',
+    roles:[
+      {role:'Exhibit Designer', alibi:'Says they were fixing a light in the planetarium.'},
+      {role:'Museum Educator', alibi:'Says they were running the slime demo.'},
+      {role:'Volunteer Docent', alibi:'Says they were giving a tour upstairs.'},
+      {role:'Gem & Mineral Collector', alibi:'Says they were only “taking photos.”'},
+      {role:'Maintenance Technician', alibi:'Says they were in the boiler room.'}],
+    evidence:{ flame:'Powder left on the display stand where the fake was placed.', ink:'A delivery label written on the fake’s box.', density:'A metal chip from the tool used to open the display case.', ph:'Liquid that leaked from a bottle in the exhibit trash can.' } }
+];
+
+const ORDER = ['flame','ink','density','ph'];
+const META = {
+  flame:  {icon:'🔥', title:'Spectroscopy Bench',     sub:'Flame tests & electron energy'},
+  ink:    {icon:'🖊️', title:'Chromatography Station', sub:'Separating mixtures · R<sub>f</sub> values'},
+  density:{icon:'⚖️', title:'Density Lab',            sub:'Mass, volume & density'},
+  ph:     {icon:'🧪', title:'Acid–Base Bench',        sub:'pH, [H⁺] and [OH⁻]'}
+};
+const INTRO = {
+  flame:'The crime lab dipped a clean wire loop in the powder and held it in a Bunsen burner flame. Heat <b>excites the metal ion’s electrons</b> to higher energy levels. When they fall back down, they give off light of specific colors, so each metal gives its own flame color, like a fingerprint.',
+  ink:'A dot of ink from the note was placed on a <b>pencil start line</b>, and the paper was stood in solvent. Each dye in the ink is carried a different distance. Dyes are compared using their <b>R<sub>f</sub> value</b> = distance the spot traveled ÷ distance the solvent front traveled.',
+  density:'Density is a <b>characteristic property</b>: every piece of the same metal has the same density, whatever its size. The lab weighed the fragment on a balance and found its volume by <b>water displacement</b>.',
+  ph:'The lab measured the hydrogen-ion or hydroxide-ion concentration of the liquid. Remember: <b>pH = −log[H⁺]</b>, <b>pOH = −log[OH⁻]</b>, and at 25 °C, <b>pH + pOH = 14</b>.'
+};
+const HINTS = {
+  flame:{lab:'Flame color reference: lithium = crimson red · sodium = bright yellow-orange · potassium = lilac (pale violet) · calcium = orange-red · copper(II) = blue-green · barium = pale apple green.',
+         ex:'Find the metal at the start of each formula (for example, Cu in CuSO₄). The flame color comes from the metal ion, not from the other ions in the compound.'},
+  ink:{lab:'R<sub>f</sub> = (distance the spot traveled) ÷ (distance the solvent front traveled). Both are measured from the pencil start line, so R<sub>f</sub> is always between 0 and 1.',
+       ex:'A pen matches only if its ink makes the SAME spots at the SAME heights as the scene ink. One extra spot, one missing spot, or one spot at a different height rules it out.'},
+  density:{lab:'Volume of the fragment = final water level − starting water level. Then density = mass ÷ volume.',
+           ex:'Calculate mass ÷ volume for each item, then compare to the fragment. Size doesn’t matter: a big and a small piece of the same metal have the same density.'},
+  ph:{lab:'If [H⁺] = 1.0 × 10<sup>−n</sup> M, then pH = n. If you’re given [OH⁻] = 1.0 × 10<sup>−n</sup> M, then pOH = n and pH = 14 − pOH.',
+      ex:'Convert every reading to pH first. An [H⁺] gives pH directly. An [OH⁻] gives pOH, so subtract it from 14.'}
+};
+
+// ---- CONCEPT-CHECK QUESTION BANK (first answer listed is correct; options are shuffled) ----
+const BANK = {
+  flame:[
+    {q:'Why does a metal compound give off colored light in a flame?', a:['Heated electrons jump to higher energy levels, then release light as they fall back','The metal atoms burn like wood','Heat changes the number of protons in the nucleus','The flame’s gas reacts to make a colored dye'], hint:'Think about electrons and energy levels.', why:'Electrons absorb energy and move to higher levels. When they drop back, they emit photons with specific energies, which we see as specific colors.'},
+    {q:'Why does each element produce its own unique flame color (emission spectrum)?', a:['Each element has its own set of electron energy levels','Each element has a different melting point','Heavier elements always glow red','Each element has a different number of neutrons'], hint:'The color depends on the energy gap an electron falls across.', why:'The energy gaps between levels are different for every element, so the emitted light has different wavelengths.'},
+    {q:'When an electron falls from a higher energy level to a lower one, the atom…', a:['Emits a photon of light','Absorbs a photon of light','Loses a proton','Becomes a different element'], hint:'Energy has to go somewhere when the electron drops.', why:'The energy lost by the electron leaves the atom as a photon.'},
+    {q:'Red light has a longer wavelength than violet light. Compared with violet light, red light has…', a:['Lower frequency and lower energy','Higher frequency and higher energy','Lower frequency and higher energy','The same energy'], hint:'Wavelength and frequency are inversely related, and E = hf.', why:'Longer wavelength means lower frequency, and since E = hf, lower energy.'},
+    {q:'CuCl₂ gives a blue-green flame, but NaCl gives a yellow flame. What causes the different colors?', a:['The metal ion (Cu²⁺ vs. Na⁺)','The chloride ion','The oxygen in the air','The wire loop'], hint:'Both compounds contain chloride.', why:'Both contain chloride ions, so the different colors must come from the different metal ions.'}
+  ],
+  ink:[
+    {q:'Paper chromatography separates the dyes in an ink because…', a:['Each dye is attracted differently to the paper and the solvent','Heavier dyes are pushed up faster by gravity','The paper chemically reacts with each dye','The solvent changes the color of each dye'], hint:'It’s a tug-of-war between the paper and the moving solvent.', why:'Dyes that dissolve well in the solvent and stick weakly to the paper travel farther.'},
+    {q:'How is an R<sub>f</sub> value calculated?', a:['Distance traveled by the spot ÷ distance traveled by the solvent front','Distance traveled by the solvent front ÷ distance traveled by the spot','Distance traveled by the spot × time','Distance traveled by the spot − distance traveled by the solvent'], hint:'R<sub>f</sub> is always between 0 and 1.', why:'R<sub>f</sub> = spot distance ÷ solvent-front distance. The spot can’t travel farther than the solvent, so R<sub>f</sub> ≤ 1.'},
+    {q:'Why is the start line drawn in pencil instead of pen?', a:['Pencil graphite won’t dissolve and move with the solvent','Pencil is easier to see','Pen ink makes the solvent evaporate','Pencil makes the dyes move faster'], hint:'What would happen to pen ink on the start line?', why:'Pen ink would separate along with the sample and confuse the results. Graphite is insoluble and stays put.'},
+    {q:'An ink separates into three spots on a chromatogram. This shows the ink is…', a:['A mixture of at least three substances','A pure substance','A compound of three elements','An element'], hint:'A pure substance makes one spot.', why:'Each spot is a different substance, so the ink is a mixture of at least three dyes.'},
+    {q:'Why must the solvent level start BELOW the pencil start line?', a:['Otherwise the ink would dissolve into the solvent pool instead of moving up the paper','So the solvent moves faster','So the R<sub>f</sub> values come out bigger','It doesn’t matter where the solvent starts'], hint:'Imagine the ink dot sitting under the liquid.', why:'If the dot is submerged, the dyes wash out into the solvent and never climb the paper.'}
+  ],
+  density:[
+    {q:'Which formula gives density?', a:['Density = mass ÷ volume','Density = volume ÷ mass','Density = mass × volume','Density = mass − volume'], hint:'Units are g/mL or g/cm³.', why:'Density is mass per unit volume: D = m ÷ V.'},
+    {q:'Why do scientists use water displacement to find the volume of an irregular object?', a:['The rise in water level equals the object’s volume','Water makes the object lighter so it’s easier to weigh','Water removes air from the object','Water dissolves part of the object'], hint:'The object pushes water out of its way.', why:'A submerged object pushes aside a volume of water equal to its own volume.'},
+    {q:'A steel key is cut in half. What happens to the density of each half?', a:['It stays the same as the whole key','It becomes half as much','It doubles','It depends on which half'], hint:'Mass AND volume are both cut in half.', why:'Density is an intensive property: halving both mass and volume leaves the ratio unchanged.'},
+    {q:'An object with a density of 2.7 g/cm³ is placed in water (1.0 g/mL). It will…', a:['Sink','Float','Hover halfway','Dissolve'], hint:'Compare it to water’s density.', why:'Objects denser than water sink.'},
+    {q:'A block has a mass of 54 g and a volume of 20 cm³. What is its density?', a:['2.7 g/cm³','0.37 g/cm³','1,080 g/cm³','74 g/cm³'], hint:'Divide mass by volume.', why:'54 g ÷ 20 cm³ = 2.7 g/cm³ (aluminum!).'}
+  ],
+  ph:[
+    {q:'A solution with pH 3 has how much more H⁺ than a solution with pH 5?', a:['100 times more','2 times more','20 times more','It has less H⁺'], hint:'The pH scale is logarithmic (powers of 10).', why:'Each pH unit is a factor of 10. Two units = 10 × 10 = 100 times more H⁺.'},
+    {q:'At 25 °C, pH + pOH equals…', a:['14','7','10','1'], hint:'Water’s ion product is 1.0 × 10⁻¹⁴.', why:'[H⁺][OH⁻] = 1.0 × 10⁻¹⁴, so pH + pOH = 14.'},
+    {q:'According to the Arrhenius definition, an acid is a substance that…', a:['Produces H⁺ (H₃O⁺) ions in water','Produces OH⁻ ions in water','Always contains oxygen','Turns phenolphthalein pink'], hint:'“H” for acid.', why:'Arrhenius acids increase [H⁺] in water; Arrhenius bases increase [OH⁻].'},
+    {q:'When an acid and a base neutralize each other, the products are…', a:['A salt and water','Hydrogen gas and oxygen gas','Two new acids','Carbon dioxide only'], hint:'HCl + NaOH → ?', why:'For example, HCl + NaOH → NaCl + H₂O: a salt and water.'},
+    {q:'Which pH describes the most strongly basic solution?', a:['pH 13','pH 7','pH 1','pH 9'], hint:'Basic solutions have pH above 7.', why:'The higher the pH above 7, the more basic the solution.'}
+  ]
+};
+
+const SKILLS = [['flame','Flame Tests'],['ink','Chromatography'],['density','Density'],['ph','pH & Acids/Bases'],['reason','Evidence Reasoning']];
+const BASE = {mcq:100, lab:200, ex:150};
+const DECAY = [1, 0.5, 0.25];
+const MAX_TRIES = 3;
+const HINT_COST = 25;
+const ACCUSE_RIGHT = 500, ACCUSE_WRONG = -200;
+
+// ---- CHEMISTRY DATA ----
+const METALS = [
+  {sym:'Li', name:'Lithium',    ion:'Li⁺',  color:'crimson red',        hex:'#ff1e4e', cmp:['LiCl','Li₂CO₃','LiNO₃']},
+  {sym:'Na', name:'Sodium',     ion:'Na⁺',  color:'bright yellow-orange',hex:'#ffb300', cmp:['NaCl','Na₂CO₃','NaHCO₃']},
+  {sym:'K',  name:'Potassium',  ion:'K⁺',   color:'lilac (pale violet)', hex:'#c9a2ff', cmp:['KCl','KNO₃','K₂SO₄']},
+  {sym:'Ca', name:'Calcium',    ion:'Ca²⁺', color:'orange-red',          hex:'#ff6a1f', cmp:['CaCl₂','CaCO₃','Ca(NO₃)₂']},
+  {sym:'Cu', name:'Copper(II)', ion:'Cu²⁺', color:'blue-green',          hex:'#1fd6b0', cmp:['CuSO₄','CuCl₂','Cu(NO₃)₂']},
+  {sym:'Ba', name:'Barium',     ion:'Ba²⁺', color:'pale apple green',    hex:'#b6ec4a', cmp:['BaCl₂','Ba(NO₃)₂','BaCO₃']}
+];
+const RFS = [0.15,0.25,0.35,0.45,0.55,0.65,0.75,0.85];
+const DYE = {0.15:'#1d4ed8',0.25:'#7c3aed',0.35:'#db2777',0.45:'#dc2626',0.55:'#ea580c',0.65:'#ca8a04',0.75:'#16a34a',0.85:'#0891b2'};
+const DMETALS = [
+  {name:'Aluminum',d:2.70},{name:'Titanium',d:4.51},{name:'Zinc',d:7.14},{name:'Iron (steel)',d:7.87},
+  {name:'Brass',d:8.47},{name:'Copper',d:8.96},{name:'Silver',d:10.49},{name:'Lead',d:11.34}];
+const ITEMS = ['House key','Wrench','Bike-lock shackle','Belt buckle','Screwdriver tip','Keychain charm','Pocketknife handle','Hex bolt'];
+const SAMPLES = ['Water bottle','Thermos','Spray bottle','Travel mug','Squeeze bottle','Locker beaker'];
+const UI_COLORS = ['#d7191c','#e8412c','#f46d43','#fb8d3c','#fdae61','#fee08b','#e6f598','#a6d96a','#66bd63','#3cb0a8','#3288bd','#4a64b0','#5e4fa2','#6a3d9a','#54278f'];
+
+/* ---------------- Seeded randomness (same code = same case for everyone) ---------------- */
+function hashStr(s){let h=1779033703^s.length;for(let i=0;i<s.length;i++){h=Math.imul(h^s.charCodeAt(i),3432918353);h=h<<13|h>>>19;}h=Math.imul(h^(h>>>16),2246822507);h=Math.imul(h^(h>>>13),3266489909);return (h^(h>>>16))>>>0;}
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+const rngFor = code => mulberry32(hashStr(code.toUpperCase()));
+const pick = (r,a) => a[Math.floor(r()*a.length)];
+function shuffle(r,a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+const initials = n => n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+function h(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+const r1 = x => Math.round(x*10)/10;
+const r2 = x => Math.round(x*100)/100;
+const f2 = x => x.toFixed(2);
+const f1 = x => x.toFixed(1);
+const sci = n => n===0 ? '1.0' : `1.0 × 10<sup>−${n}</sup>`;
+function phText(p,f){ return f==='pH' ? `pH = ${p}` : f==='H' ? `[H⁺] = ${sci(p)} M` : `[OH⁻] = ${sci(14-p)} M`; }
+const inkKey = a => a.map(x=>x.toFixed(2)).join(',');
+
+/* ---------------- Case generation ---------------- */
+function pickMCQ(r,topic){
+  const e = pick(r,BANK[topic]);
+  const opts = shuffle(r, e.a.map((t,i)=>({t, ok:i===0})));
+  return {q:e.q, opts, ans:opts.findIndex(o=>o.ok), hint:e.hint, why:e.why};
+}
+function genFlame(r,S,c,ex){
+  const scene = Math.floor(r()*METALS.length), others = METALS.map((_,i)=>i).filter(i=>i!==scene);
+  S.forEach(s=>{ const m = s.id===ex ? pick(r,others) : s.id===c ? scene : (r()<0.6 ? scene : pick(r,others));
+    s.metal = m; s.cmpd = pick(r,METALS[m].cmp); });
+  return { scene, excluded:S.filter(s=>s.metal!==scene).map(s=>s.id), mcq:pickMCQ(r,'flame') };
+}
+function inkVariant(r,scene){
+  const a = scene.slice(), free = RFS.filter(x=>!a.includes(x)), k = Math.floor(r()*3);
+  if(k===0 && a.length>2) a.splice(Math.floor(r()*a.length),1);                 // a dye is missing
+  else if(k===1) a.push(pick(r,free));                                           // an extra dye
+  else a[Math.floor(r()*a.length)] = pick(r,free);                               // a dye at a different height
+  return [...new Set(a)].sort((x,y)=>x-y);
+}
+function genInk(r,S,c,ex){
+  const scene = shuffle(r,RFS).slice(0,3).sort((x,y)=>x-y), F = pick(r,[8,10,12]), target = pick(r,scene), d = r1(target*F);
+  const ans = target.toFixed(2), cand = [ans, (F/d).toFixed(2), Math.min(.95,target+.1).toFixed(2), Math.max(.05,target-.1).toFixed(2), Math.min(.95,target+.2).toFixed(2)];
+  const options = shuffle(r,[...new Set(cand)].slice(0,4));
+  S.forEach(s=>{ s.ink = s.id===ex ? inkVariant(r,scene) : s.id===c ? scene.slice() : (r()<0.55 ? scene.slice() : inkVariant(r,scene)); });
+  return { scene, F, target, d, ans, options, excluded:S.filter(s=>inkKey(s.ink)!==inkKey(scene)).map(s=>s.id), mcq:pickMCQ(r,'ink') };
+}
+function genDensity(r,S,c,ex){
+  const scene = Math.floor(r()*DMETALS.length), others = DMETALS.map((_,i)=>i).filter(i=>i!==scene);
+  const V1 = pick(r,[20,25,30,40,50]), dV = 2+Math.floor(r()*7), V2 = V1+dV, m = r2(DMETALS[scene].d*dV);
+  const ans = (m/dV).toFixed(2);
+  const cand = [ans, (dV/m).toFixed(2), (m/V2).toFixed(2), (m/V1).toFixed(2), (m/dV+1.5).toFixed(2)];
+  const options = shuffle(r,[...new Set(cand)].slice(0,4));
+  const items = shuffle(r,ITEMS);
+  S.forEach((s,i)=>{ const mt = s.id===ex ? pick(r,others) : s.id===c ? scene : (r()<0.55 ? scene : pick(r,others));
+    const v = 2+Math.floor(r()*9); s.dmetal = mt; s.item = items[i]; s.vol = v; s.mass = r2(DMETALS[mt].d*v); });
+  return { scene, V1, V2, dV, m, ans, options, excluded:S.filter(s=>s.dmetal!==scene).map(s=>s.id), mcq:pickMCQ(r,'density') };
+}
+function genPH(r,S,c,ex){
+  const p = 1+Math.floor(r()*13), fmt = r()<0.5 ? 'H' : 'OH';
+  const other = () => { let q; do { q = 1+Math.floor(r()*13); } while(q===p); return q; };
+  const samples = shuffle(r,SAMPLES);
+  S.forEach((s,i)=>{ s.ph = s.id===ex ? other() : s.id===c ? p : (r()<0.55 ? p : other());
+    s.phFmt = pick(r,['pH','H','OH','H','OH']); s.sample = samples[i]; });
+  return { p, fmt, excluded:S.filter(s=>s.ph!==p).map(s=>s.id), mcq:pickMCQ(r,'ph') };
+}
+function buildCase(code){
+  code = String(code||'').trim().toUpperCase();
+  const m = code.match(/^([A-Z]{2})-(\d{4})$/); if(!m) return null;
+  const tpl = CASES.find(c=>c.id===m[1]); if(!tpl) return null;
+  const r = rngFor('chem|'+code);
+  const names = shuffle(r,NAMES).slice(0,5), roles = shuffle(r,tpl.roles);
+  const suspects = names.map((n,i)=>({id:i, name:n, role:roles[i].role, alibi:roles[i].alibi, color:SUS_COLORS[i]}));
+  const culprit = Math.floor(r()*5);
+  const decoys = shuffle(r,[0,1,2,3,4].filter(i=>i!==culprit));
+  // each station is guaranteed to rule out one specific decoy → all 4 stations are needed
+  const st = { flame:genFlame(r,suspects,culprit,decoys[0]), ink:genInk(r,suspects,culprit,decoys[1]),
+               density:genDensity(r,suspects,culprit,decoys[2]), ph:genPH(r,suspects,culprit,decoys[3]) };
+  return {code, tpl, suspects, culprit, st};
+}
+const newCode = id => `${id}-${1000+Math.floor(Math.random()*9000)}`;
+
+/* ---------------- State ---------------- */
+const S = { screen:'home', mode:'solo', setup:{solo:'', count:3, names:TEAM_NAMES.slice()},
+  players:[], turn:0, game:null, items:{}, ui:{}, station:null, start:0, end:0, acc:null,
+  scale:0, teacherOK:false, scrollTo:null, keyCode:'' };
+
+function startGame(code){
+  const g = buildCase(code); if(!g) return false;
+  S.game=g; S.items={};
+  ORDER.forEach(st=>['mcq','lab','ex'].forEach(sp=>{
+    S.items[st+'.'+sp]={attempts:0,resolved:false,correct:false,revealed:false,hint:false,wrong:[],msg:null,points:0,by:null};
+  }));
+  S.ui={ flame:{sel:null}, ink:{sel:null}, density:{sel:null}, ph:{sel:null}, ex:{flame:[],ink:[],density:[],ph:[]} };
+  const names = S.mode==='solo' ? [S.setup.solo.trim()||'Detective'] : S.setup.names.slice(0,S.setup.count).map((n,i)=>n.trim()||TEAM_NAMES[i]);
+  S.players = names.map((n,i)=>({name:n, color:S.mode==='solo'?'#ffa94d':TEAM_COLORS[i], score:0, log:[], hints:0, vote:null}));
+  S.turn=0; S.start=Date.now(); S.end=0; S.acc=null; S.station=null; S.screen='brief';
+  return true;
+}
+const cur = () => S.players[S.turn];
+const stationDone = st => S.items[st+'.ex'].resolved;
+const isExcluded = sid => ORDER.some(st=>stationDone(st) && S.game.st[st].excluded.includes(sid));
+
+/* ---------------- Grading ---------------- */
+function attempt(id, ok, msg){
+  const it=S.items[id]; if(it.resolved) return;
+  const [st,step]=id.split('.');
+  it.attempts++;
+  const p=cur(), skill = step==='ex' ? 'reason' : st;
+  let pts=0;
+  if(ok){
+    pts=Math.round(BASE[step]*DECAY[it.attempts-1]);
+    Object.assign(it,{resolved:true,correct:true,by:p.name,points:pts});
+    p.score+=pts;
+    it.msg={type:'good', text:`✔ Correct! +${pts}${S.mode==='team'?' for '+h(p.name):''}`};
+    toast(`+${pts} ${S.mode==='team'?p.name:''}`,'good');
+  } else {
+    let t = msg || 'Not quite.';
+    if(it.attempts>=MAX_TRIES){ it.resolved=true; it.revealed=true; t+=' No tries left—the answer is revealed below.'; }
+    else if(S.mode==='team'){ const nx=S.players[(S.turn+1)%S.players.length]; t+=` ⚡ Steal chance: ${h(nx.name)} for ${Math.round(BASE[step]*DECAY[it.attempts])} pts!`; }
+    else t+=` Try again for ${Math.round(BASE[step]*DECAY[it.attempts])} pts.`;
+    it.msg={type:'bad', text:t};
+    toast('✕ Not quite','bad');
+  }
+  p.log.push({item:id, skill, ok, attempt:it.attempts, pts});
+  if(S.mode==='team') S.turn=(S.turn+1)%S.players.length;
+  if(it.resolved){ const nxt={mcq:'lab',lab:'ex'}[step]; S.scrollTo = nxt ? `step-${st}-${nxt}` : 'stationDone'; }
+  render();
+}
+function checkLab(st){
+  const d=S.game.st[st], sel=S.ui[st].sel;
+  if(st==='flame'){
+    if(sel===d.scene) return [true];
+    return [false, `${METALS[sel].name} gives a ${METALS[sel].color} flame. Does that match what you see?`];
+  }
+  if(st==='ink'){
+    if(sel===d.ans) return [true];
+    if(+sel>1) return [false, `An R<sub>f</sub> of ${sel} is bigger than 1. A spot can’t travel farther than the solvent. Check which distance goes on top.`];
+    return [false, `${sel} isn’t right. Divide the spot’s distance by the solvent front’s distance.`];
+  }
+  if(st==='density'){
+    if(sel===d.ans) return [true];
+    if(sel===(d.dV/d.m).toFixed(2)) return [false, 'That’s volume ÷ mass. Density is mass ÷ volume.'];
+    if(sel===(d.m/d.V2).toFixed(2)||sel===(d.m/d.V1).toFixed(2)) return [false, 'You used a water level as the volume. The fragment’s volume is the CHANGE in water level.'];
+    return [false, 'Not quite. Find the fragment’s volume first, then divide.'];
+  }
+  if(st==='ph'){
+    if(sel===d.p) return [true];
+    if(sel===14-d.p) return [false, d.fmt==='OH' ? `${sel} is the pOH. Use pH = 14 − pOH.` : `pH ${sel} would mean [H⁺] = ${sci(sel)} M. Read the exponent again.`];
+    return [false, `pH ${sel} would mean [H⁺] = ${sci(sel)} M. Does that match the meter?`];
+  }
+}
+function checkEx(st){
+  const want=S.game.st[st].excluded, got=S.ui.ex[st];
+  const extra=got.filter(i=>!want.includes(i)).length, miss=want.filter(i=>!got.includes(i)).length;
+  if(!extra&&!miss) return [true];
+  const parts=[]; if(extra) parts.push(`you excluded ${extra} suspect${extra>1?'s':''} the evidence does NOT rule out`); if(miss) parts.push(`you missed ${miss} suspect${miss>1?'s':''} who should be excluded`);
+  return [false, parts.join(', and ').replace(/^./,c=>c.toUpperCase())+'.'];
+}
+
+/* ---------------- Actions ---------------- */
+const act = {
+  home(){ if(S.game && !S.end && S.screen!=='home' && !confirm('Leave this case? Progress will be lost.')) return; S.game=null; S.screen='home'; render(); },
+  mode(m){ S.mode=m; S.screen='setup'; render(); },
+  setSolo(v){ S.setup.solo=v; },
+  setCount(n){ S.setup.count=n; render(); },
+  setName(i,v){ S.setup.names[i]=v; },
+  toCases(){ S.screen='cases'; render(); },
+  pickCase(id){ startGame(newCode(id)); render(); window.scrollTo(0,0); },
+  enterCode(){ const v=document.getElementById('codeIn').value; if(!startGame(v)){ toast('That case code isn’t valid (example: FW-4821)','bad'); return;} render(); window.scrollTo(0,0); },
+  go(scr){ S.screen=scr; render(); window.scrollTo(0,0); },
+  openStation(st){ S.station=st; S.screen='station'; render(); window.scrollTo(0,0); },
+  mcq(st,i){ const id=st+'.mcq', q=S.game.st[st].mcq, it=S.items[id];
+    if(it.resolved||it.wrong.includes(i)) return;
+    if(i!==q.ans) it.wrong.push(i);
+    attempt(id, i===q.ans, 'That’s not it.'); },
+  sel(st,v){ if(S.items[st+'.lab'].resolved) return; S.ui[st].sel=v; render(); },
+  labSubmit(st){ if(S.ui[st].sel===null) return; const [ok,msg]=checkLab(st); attempt(st+'.lab', ok, msg); },
+  exToggle(st,id){ const a=S.ui.ex[st], k=a.indexOf(id); k>=0?a.splice(k,1):a.push(id); render(); },
+  exSubmit(st){ const [ok,msg]=checkEx(st); attempt(st+'.ex', ok, msg); },
+  hint(id){ const it=S.items[id]; if(it.hint||it.resolved) return; it.hint=true; const p=cur(); p.score-=HINT_COST; p.hints++; toast(`Hint used: −${HINT_COST} ${S.mode==='team'?p.name:''}`,'bad'); render(); },
+  toAccuse(){ S.acc={i:0, sel:null, phase:'pick'}; S.screen='accuse'; render(); window.scrollTo(0,0); },
+  accSel(id){ S.acc.sel=id; render(); },
+  lockVote(){ const a=S.acc; if(a.sel===null) return; S.players[a.i].vote=a.sel; a.i++; a.sel=null;
+    if(a.i<S.players.length){ a.phase='handoff'; render(); } else finish(); },
+  ready(){ S.acc.phase='pick'; render(); window.scrollTo(0,0); },
+  replay(){ startGame(newCode(S.game.tpl.id)); render(); window.scrollTo(0,0); },
+  otherCase(){ S.game=null; S.screen='cases'; render(); },
+  copyReport(){ copyText(fullReport()); },
+  csv(){ downloadCSV(); },
+  scale(){ S.scale=(S.scale+1)%3; document.documentElement.style.fontSize=[16,18,20][S.scale]+'px'; },
+  teacher(){ openTeacher(); },
+  closeModal(){ document.getElementById('modal').classList.add('hidden'); },
+  pin(){ if(document.getElementById('pinIn').value===TEACHER_PIN){ S.teacherOK=true; openTeacher(); } else toast('Wrong PIN','bad'); },
+  keyLoad(){ S.keyCode=document.getElementById('keyIn').value.trim().toUpperCase(); openTeacher(); },
+  genCodes(){ const id=document.getElementById('genCase').value, n=+document.getElementById('genN').value||6;
+    const set=new Set(); while(set.size<Math.min(n,40)) set.add(newCode(id));
+    document.getElementById('codesOut').innerHTML=[...set].map(c=>`<span>${c}</span>`).join(''); }
+};
+function finish(){
+  const g=S.game;
+  S.players.forEach(p=>{ const ok=p.vote===g.culprit, pts=ok?ACCUSE_RIGHT:ACCUSE_WRONG; p.score+=pts; p.log.push({item:'accuse',skill:'reason',ok,attempt:1,pts}); });
+  S.end=Date.now(); S.screen='result'; render(); window.scrollTo(0,0);
+}
+
+/* ---------------- Visual builders ---------------- */
+function avatar(s,size){ return `<div class="av" style="background:${s.color};${size?`width:${size}px;height:${size}px`:''}">${initials(s.name)}</div>`; }
+function suspectCard(s,opts={}){
+  const g=S.game;
+  const by = ORDER.filter(st=>stationDone(st) && g.st[st].excluded.includes(s.id));
+  const cls = ['sus', opts.pick?'pickable':'', opts.picked?'picked':'', opts.guilty?'guilty':'', (!opts.noOut && by.length)?'out':''].join(' ');
+  return `<div class="${cls}" ${opts.pick?`onclick="act.accSel(${s.id})" role="button" tabindex="0"`:''}>
+    ${avatar(s)}<div class="nm">${h(s.name)}</div><div class="rl">${h(s.role)}</div>
+    ${opts.alibi?`<div class="al">“${h(s.alibi)}”</div>`:''}
+    ${opts.tags!==false?`<div class="tags">${by.map(st=>`<span class="tag">${META[st].icon} ruled out</span>`).join('') || (ORDER.some(stationDone)?'<span class="tag ok">still a suspect</span>':'')}</div>`:''}
+  </div>`;
+}
+function flameSVG(hex){
+  return `<svg viewBox="0 0 220 280" width="220" role="img" aria-label="Flame test">
+    <defs><radialGradient id="flg" cx="50%" cy="72%" r="65%"><stop offset="0" stop-color="#fff" stop-opacity=".95"/><stop offset=".3" stop-color="${hex}"/><stop offset=".85" stop-color="${hex}" stop-opacity=".55"/><stop offset="1" stop-color="${hex}" stop-opacity="0"/></radialGradient>
+      <filter id="flglow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="9"/></filter></defs>
+    <ellipse cx="100" cy="130" rx="60" ry="90" fill="${hex}" opacity=".35" filter="url(#flglow)"/>
+    <g class="flame"><path d="M100,22 C132,74 154,118 144,160 C138,186 120,202 100,202 C80,202 62,186 56,160 C46,118 68,74 100,22Z" fill="url(#flg)"/>
+    <path d="M100,128 C111,150 114,168 109,182 C105,193 95,193 91,182 C86,168 89,150 100,128Z" fill="#8fd3ff" opacity=".55"/></g>
+    <rect x="88" y="200" width="24" height="52" rx="3" fill="#8c96b4"/><rect x="84" y="200" width="32" height="6" rx="2" fill="#aab3cc"/>
+    <rect x="56" y="250" width="88" height="14" rx="4" fill="#5d6785"/><rect x="112" y="232" width="34" height="6" rx="3" fill="#5d6785"/>
+    <line x1="208" y1="96" x2="128" y2="150" stroke="#c9cfdf" stroke-width="3"/><rect x="196" y="86" width="22" height="16" rx="3" transform="rotate(-34 207 94)" fill="#6b4f2a"/>
+    <circle cx="124" cy="153" r="6" fill="none" stroke="#f1f3fa" stroke-width="2.5"/>
+  </svg>`;
+}
+const CH_H = 260, CH_TOP = 34;
+function chromaSVG(lanes, F, o={}){
+  const laneW = 56, x0 = 64, W = x0 + lanes.length*laneW + 24 + (o.measure ? 150 : 0), base = CH_TOP + CH_H, H = base + 50, pxcm = CH_H / F;
+  let s = `<svg viewBox="0 0 ${W} ${H}" width="${W}" role="img" aria-label="Paper chromatogram">
+    <rect x="${x0-12}" y="14" width="${W-x0+4}" height="${H-26}" rx="6" fill="#f3ede0" stroke="#c8bfa8"/>
+    <rect x="${x0-12}" y="${base+18}" width="${W-x0+4}" height="${H-base-30}" fill="#b6d7f0" opacity=".55"/>
+    <line x1="${x0-12}" y1="${CH_TOP}" x2="${W-8}" y2="${CH_TOP}" stroke="#4b6fa8" stroke-width="2" stroke-dasharray="6 5"/>
+    <text x="${W-10}" y="${CH_TOP-6}" font-family="JetBrains Mono,monospace" font-size="10" fill="#4b6fa8" text-anchor="end">solvent front</text>
+    <line x1="${x0-12}" y1="${base}" x2="${W-8}" y2="${base}" stroke="#6b6b6b" stroke-width="1.5"/>
+    <text x="${W-10}" y="${base+13}" font-family="JetBrains Mono,monospace" font-size="10" fill="#555" text-anchor="end">pencil start line</text>`;
+  for(let cm=0; cm<=F; cm++){ const y = base - cm*pxcm; s += `<line x1="${x0-30}" y1="${y}" x2="${x0-(cm%2?36:40)}" y2="${y}" stroke="#a3aed0" stroke-width="1"/>`;
+    if(cm%2===0) s += `<text x="${x0-44}" y="${y+4}" font-family="JetBrains Mono,monospace" font-size="10" fill="#a3aed0" text-anchor="end">${cm}</text>`; }
+  s += `<line x1="${x0-30}" y1="${base}" x2="${x0-30}" y2="${CH_TOP}" stroke="#a3aed0"/><text x="${x0-44}" y="${CH_TOP-14}" font-family="JetBrains Mono,monospace" font-size="10" fill="#a3aed0" text-anchor="end">cm</text>`;
+  lanes.forEach((ln,i)=>{
+    const cx = x0 + 18 + i*laneW;
+    s += `<circle cx="${cx}" cy="${base}" r="3" fill="#777" opacity=".5"/>`;
+    ln.spots.forEach(rf=>{ const y = base - rf*CH_H;
+      s += `<ellipse cx="${cx}" cy="${y}" rx="13" ry="8" fill="${DYE[rf]}" opacity=".85"/>`;
+      if(ln.star===rf) s += `<text x="${cx+16}" y="${y+6}" fill="#b45309" font-size="17">★</text>`; });
+    s += `<text x="${cx}" y="${H-16}" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="${ln.color||'#333'}" text-anchor="middle">${h(ln.label)}</text>`;
+  });
+  if(o.measure){ const cx = x0 + 18 + (o.measure.lane||0)*laneW + 40, ys = base - o.measure.rf*CH_H, fx = cx + 74;
+    s += `<line x1="${cx}" y1="${base}" x2="${cx}" y2="${ys}" stroke="#b45309" stroke-width="2"/><path d="M${cx-4},${ys+7} L${cx},${ys} L${cx+4},${ys+7}" fill="none" stroke="#b45309" stroke-width="2"/>
+      <text x="${cx+6}" y="${Math.max(ys+24,(base+ys)/2)}" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="#b45309">${f1(o.measure.d)} cm</text>
+      <line x1="${fx}" y1="${base}" x2="${fx}" y2="${CH_TOP}" stroke="#4b6fa8" stroke-width="2"/><path d="M${fx-4},${CH_TOP+7} L${fx},${CH_TOP} L${fx+4},${CH_TOP+7}" fill="none" stroke="#4b6fa8" stroke-width="2"/>
+      <text x="${fx+6}" y="${(base+CH_TOP)/2+30}" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="#4b6fa8">${f1(F)} cm</text>`;
+  }
+  return s+'</svg>';
+}
+function cylinderSVG(level, label, rock){
+  const top=20, bot=250, max=60, y = v => bot - (v/max)*(bot-top-20);
+  let s = `<svg viewBox="0 0 120 290" width="110" role="img" aria-label="${label}: ${level} mL">
+    <rect x="38" y="${top}" width="44" height="${bot-top}" rx="4" fill="rgba(255,255,255,.05)" stroke="#9fb0cf" stroke-width="2"/>
+    <rect x="40" y="${y(level)}" width="40" height="${bot-y(level)-1}" fill="#3b82f6" opacity=".45"/>
+    <path d="M40,${y(level)} Q60,${y(level)+5} 80,${y(level)}" fill="none" stroke="#93c5fd" stroke-width="2"/>`;
+  for(let v=0; v<=max; v+=5){ const yy=y(v); s += `<line x1="38" y1="${yy}" x2="${v%10?46:50}" y2="${yy}" stroke="#9fb0cf"/>`; if(v%10===0) s += `<text x="32" y="${yy+4}" font-family="JetBrains Mono,monospace" font-size="10" fill="#a3aed0" text-anchor="end">${v}</text>`; }
+  if(rock) s += `<path d="M50,${bot-4} l6,-14 l10,-2 l8,10 l-4,7 z" fill="#8a8f9c" stroke="#c0c6d4"/>`;
+  s += `<rect x="30" y="${bot}" width="60" height="8" rx="3" fill="#5d6785"/>
+    <text x="60" y="${bot+28}" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="#eef1fa" text-anchor="middle">${label}</text></svg>`;
+  return s;
+}
+function balanceSVG(m){
+  return `<svg viewBox="0 0 170 130" width="170" role="img" aria-label="Balance reading ${f2(m)} grams">
+    <rect x="10" y="70" width="150" height="46" rx="8" fill="#2b3352" stroke="#4a5682"/>
+    <rect x="34" y="82" width="102" height="24" rx="4" fill="#06120c"/><text x="128" y="100" font-family="JetBrains Mono,monospace" font-size="17" font-weight="700" fill="#7fffd4" text-anchor="end">${f2(m)} g</text>
+    <rect x="40" y="56" width="90" height="10" rx="3" fill="#aab3cc"/><rect x="80" y="62" width="10" height="10" fill="#6b7596"/>
+    <path d="M66,56 l8,-18 l14,-3 l12,12 l-5,9 z" fill="#8a8f9c" stroke="#c0c6d4"/></svg>`;
+}
+function tubeSVG(p){
+  const c = UI_COLORS[p];
+  return `<svg viewBox="0 0 90 240" width="80" role="img" aria-label="Test tube with universal indicator">
+    <path d="M28,18 v170 a17,17 0 0 0 34,0 v-170" fill="rgba(255,255,255,.06)" stroke="#c9cfdf" stroke-width="2.5"/>
+    <path d="M30,92 v96 a15,15 0 0 0 30,0 v-96 z" fill="${c}" opacity=".9"/><ellipse cx="45" cy="92" rx="15" ry="3" fill="#fff" opacity=".25"/>
+    <rect x="22" y="12" width="46" height="8" rx="3" fill="#8c96b4"/></svg>`;
+}
+function uiScale(){ return `<div style="display:flex;margin-top:8px;border-radius:6px;overflow:hidden;max-width:420px">${UI_COLORS.map((c,i)=>`<div style="flex:1;background:${c};color:${i>4&&i<9?'#111':'#fff'};font:700 .65rem var(--mono);text-align:center;padding:3px 0">${i}</div>`).join('')}</div><div class="muted small">Universal indicator color chart (pH 0–14)</div>`; }
+
+/* ---------------- Views ---------------- */
+function vHome(){
+  return `<section class="hero pop">
+    <div class="badge">CASE FILES · CHEMISTRY UNIT · GRADES 9–11</div>
+    <h1>Chem <span>Detectives</span></h1>
+    <p class="lead">Crack the case with real forensic chemistry. Analyze evidence at four lab stations, rule out suspects, and name the culprit. Every case code has a different answer.</p>
+    <div class="mode-grid">
+      <button class="mode" onclick="act.mode('solo')"><div class="big">🕵️</div><h3>Solo Investigator</h3><p>One student, one device. Great for stations, homework, or catch-up work.</p></button>
+      <button class="mode" onclick="act.mode('team')"><div class="big">👥</div><h3>Team Investigation</h3><p>2–6 teams share one screen and take turns. Miss a question and the next team can steal it.</p></button>
+    </div>
+    <div class="skills-strip"><span>🔥 Flame Tests</span><span>🖊️ Paper Chromatography</span><span>⚖️ Density</span><span>🧪 pH &amp; [H⁺]</span><span>⚖️ Evidence Reasoning</span></div>
+    <details class="how card"><summary>How to play</summary><ol>
+      <li>Pick a case (or type in a case code from your teacher).</li>
+      <li>Visit all four lab stations. Each one has a <b>Concept Check</b>, a <b>Lab Analysis</b>, and an <b>Evidence Exclusion</b> step.</li>
+      <li>Each station rules out at least one suspect. Only one suspect survives all four.</li>
+      <li>Points drop with each wrong try (3 tries max). Hints cost ${HINT_COST} points.</li>
+      <li>Make your accusation: +${ACCUSE_RIGHT} if right, ${ACCUSE_WRONG} if wrong. Then review your skills report.</li>
+    </ol></details>
+  </section>`;
+}
+function vSetup(){
+  if(S.mode==='solo') return `<section class="setup card pop">
+    <div class="eyebrow">Solo Investigator</div><h2>Who’s on the case?</h2>
+    <label class="f" for="soloName">Your name (appears on your report)</label>
+    <input id="soloName" class="tx" value="${h(S.setup.solo)}" oninput="act.setSolo(this.value)" placeholder="e.g., Jordan P." onkeydown="if(event.key==='Enter')act.toCases()">
+    <div class="submit-row"><button class="btn" onclick="act.toCases()">Choose a case →</button><button class="btn ghost" onclick="act.home()">Back</button></div>
+  </section>`;
+  const n=S.setup.count;
+  return `<section class="setup card pop">
+    <div class="eyebrow">Team Investigation · Pass &amp; Play</div><h2>Assemble your teams</h2>
+    <label class="f">Number of teams</label>
+    <div class="countbtns">${[2,3,4,5,6].map(k=>`<button class="${k===n?'sel':''}" onclick="act.setCount(${k})">${k}</button>`).join('')}</div>
+    <label class="f">Team names</label>
+    ${Array.from({length:n},(_,i)=>`<div class="team-row"><span class="dot" style="background:${TEAM_COLORS[i]}"></span><input class="tx" value="${h(S.setup.names[i])}" oninput="act.setName(${i},this.value)"></div>`).join('')}
+    <p class="muted small">Teams rotate after every answer. If a team misses, the next team gets a chance to steal for reduced points. At the end, each team locks in a secret accusation.</p>
+    <div class="submit-row"><button class="btn" onclick="act.toCases()">Choose a case →</button><button class="btn ghost" onclick="act.home()">Back</button></div>
+  </section>`;
+}
+function vCases(){
+  return `<section class="pop">
+    <div class="eyebrow">Open Cases</div><h2>Choose your case file</h2>
+    <p class="muted">Each case gets a random code with its own culprit and evidence. Want the whole class (or each team) on a specific version? Use a case code.</p>
+    <div class="case-grid">${CASES.map(c=>`<button class="case-card" onclick="act.pickCase('${c.id}')">
+      <div class="top"><div class="ico">${c.icon}</div><span class="stamp">UNSOLVED</span><h3>${h(c.title)}</h3><div class="muted small" style="font-family:var(--mono)">${h(c.location)}</div></div>
+      <div class="body">${h(c.teaser||c.story.split('. ')[0]+'.')}</div></button>`).join('')}</div>
+    <div class="card codebox"><div><b>Have a case code?</b><div class="muted small">Same code → same suspects, evidence, and answers.</div></div>
+      <input id="codeIn" class="tx" placeholder="FW-4821" onkeydown="if(event.key==='Enter')act.enterCode()"><button class="btn" onclick="act.enterCode()">Open case</button></div>
+  </section>`;
+}
+function vBrief(){
+  const g=S.game, t=g.tpl;
+  return `<section class="pop">
+    <div class="eyebrow">Case ${g.code}</div><h2>${t.icon} ${h(t.title)}</h2>
+    <div class="meta-row"><span>📍 ${h(t.location)}</span><span>🕒 ${h(t.time)}</span><span>👤 5 suspects</span></div>
+    <div class="dossier">
+      <div class="card"><h3>Incident report</h3><p class="story">${h(t.story)}</p>
+        <h3>Evidence collected</h3><ul class="mission">${ORDER.map(st=>`<li>${META[st].icon} ${h(t.evidence[st])}</li>`).join('')}</ul></div>
+      <div class="card"><h3>Your mission</h3><ol class="mission">
+        <li>Analyze the evidence at all <b>four lab stations</b>.</li>
+        <li>Use each result to <b>rule out</b> suspects.</li>
+        <li>Name the one suspect who fits <b>all</b> the evidence.</li></ol>
+        <p class="muted small">Scoring: Concept Check ${BASE.mcq} · Lab Analysis ${BASE.lab} · Exclusion ${BASE.ex} (halves after each miss). Hints −${HINT_COST}. Accusation +${ACCUSE_RIGHT} / ${ACCUSE_WRONG}.</p>
+        <button class="btn" onclick="act.go('board')">Open the case board →</button></div>
+    </div>
+    <h3 class="sec">Persons of interest</h3>
+    <div class="suspects">${g.suspects.map(s=>suspectCard(s,{alibi:true,tags:false})).join('')}</div>
+  </section>`;
+}
+function vBoard(){
+  const g=S.game, done=ORDER.filter(stationDone).length, left=g.suspects.filter(s=>!isExcluded(s.id)).length;
+  return `<section class="pop">
+    <div class="board-head"><div><div class="eyebrow">Case ${g.code} · Case Board</div><h2>${g.tpl.icon} ${h(g.tpl.title)}</h2></div>
+      <div class="row gap"><button class="btn ghost small" onclick="act.go('brief')">📁 Case file</button><button class="btn ${done<4?'ghost':'warn'}" onclick="act.toAccuse()">⚖️ Make accusation</button></div></div>
+    <div class="progress"><div style="width:${done*25}%"></div></div>
+    <p class="muted small">${done}/4 stations complete · ${left} suspect${left!==1?'s':''} remaining. Each station rules out at least one suspect—only one survives all four.</p>
+    <h3 class="sec">Lab stations</h3>
+    <div class="stations">${ORDER.map((st,i)=>{
+      const its=['mcq','lab','ex'].map(sp=>S.items[st+'.'+sp]), pts=its.reduce((a,b)=>a+b.points,0), started=its.some(x=>x.attempts||x.resolved);
+      return `<button class="stn ${stationDone(st)?'done':''}" onclick="act.openStation('${st}')">
+        <div class="ico">${META[st].icon}</div><div class="eyebrow">Station ${i+1}</div><h3>${META[st].title}</h3><div class="muted small">${META[st].sub}</div>
+        <div class="dots">${its.map(x=>`<i class="${x.correct?'g':x.revealed?'r':''}"></i>`).join('')}</div>
+        <div class="st">${stationDone(st)?`<span style="color:var(--good)">✔ Complete</span> · ${pts} pts`:started?'<span style="color:var(--warn)">In progress</span>':'<span class="muted">Not started</span>'}</div></button>`;}).join('')}</div>
+    <h3 class="sec">Suspects</h3>
+    <div class="suspects">${g.suspects.map(s=>suspectCard(s)).join('')}</div>
+  </section>`;
+}
+function stepWrap(st,sp,num,title,locked,body){
+  const id=st+'.'+sp, it=S.items[id];
+  const hintTxt = sp==='mcq' ? S.game.st[st].mcq.hint : HINTS[st][sp];
+  const cls=['step', locked?'locked':'', it.correct?'ok':'', it.revealed?'rev':''].join(' ');
+  const pts = it.resolved ? (it.correct?`+${it.points}${S.mode==='team'&&it.by?' · '+h(it.by):''}`:'0 pts') : `worth ${Math.round(BASE[sp]*DECAY[Math.min(it.attempts,2)])} · try ${Math.min(it.attempts+1,3)}/3`;
+  return `<div class="${cls}" id="step-${st}-${sp}">
+    <div class="step-h"><div class="t"><span class="n">${it.correct?'✔':it.revealed?'!':num}</span>${title}</div>
+      <div class="row gap"><span class="ptchip">${locked?'🔒 locked':pts}</span>
+      ${!locked&&!it.resolved&&!it.hint?`<button class="iconbtn" onclick="act.hint('${id}')">💡 Hint (−${HINT_COST})</button>`:''}</div></div>
+    <div class="step-b">${locked?'Finish the step above to unlock.':body}
+      ${!locked&&it.hint?`<div class="hintbox">💡 ${hintTxt}</div>`:''}
+      ${it.msg?`<div class="msg ${it.msg.type}">${it.msg.text}</div>`:''}</div></div>`;
+}
+function stepMCQ(st){
+  const q=S.game.st[st].mcq, it=S.items[st+'.mcq'];
+  // bank text is trusted, written by the teacher in this file, and may contain <sub>/<sup>
+  return stepWrap(st,'mcq',1,'Concept Check',false,`<p class="q">${q.q}</p>
+    <div class="opts">${q.opts.map((o,i)=>{ const w=it.wrong.includes(i), r=it.resolved&&i===q.ans;
+      return `<button class="opt ${w?'wrong':''} ${r?'right':''}" ${it.resolved||w?'disabled':''} onclick="act.mcq('${st}',${i})"><span class="key">${'ABCD'[i]}</span><span>${o.t}</span></button>`;}).join('')}</div>
+    ${it.resolved?`<p class="why">📘 ${q.why}</p>`:''}`);
+}
+function choiceButtons(st, list, d, R){
+  const sel=S.ui[st].sel;
+  return `<div class="bgrid">${list.map(([v,label])=>`<button class="tbtn ${sel===v&&!R?'sel':''} ${R&&v===d?'right':''}" ${R?'disabled':''} onclick='act.sel("${st}",${JSON.stringify(v)})'>${label}</button>`).join('')}</div>
+    ${!R?`<div class="submit-row"><button class="btn" ${sel===null?'disabled':''} onclick="act.labSubmit('${st}')">Submit analysis</button></div>`:''}`;
+}
+function stepLab(st){
+  const g=S.game, d=g.st[st], it=S.items[st+'.lab'], locked=!S.items[st+'.mcq'].resolved, R=it.resolved;
+  let body='';
+  if(st==='flame'){
+    const m=METALS[d.scene];
+    body=`<div class="labwrap"><div class="bench">${flameSVG(m.hex)}</div>
+      <div class="side"><p class="q">The powder turned the flame this color. Which metal ion is in the powder?</p>
+      ${choiceButtons('flame', METALS.map((x,i)=>[i,`${x.name} (${x.ion})`]), d.scene, R)}
+      ${R?`<p class="why">🔥 ${m.name} ions give a ${m.color} flame.</p>`:''}
+      ${it.revealed?`<div class="reveal">Answer: ${m.name} (${m.ion})</div>`:''}</div></div>`;
+  }
+  if(st==='ink'){
+    body=`<div class="labwrap"><div class="bench" style="overflow-x:auto">${chromaSVG([{label:'Scene',spots:d.scene,star:d.target,color:'#333'}], d.F, {measure:{rf:d.target,d:d.d}})}</div>
+      <div class="side"><p class="q">The ★ spot traveled ${f1(d.d)} cm from the start line. The solvent front traveled ${f1(d.F)} cm. What is the R<sub>f</sub> of the ★ dye?</p>
+      ${choiceButtons('ink', d.options.map(o=>[o,o]), d.ans, R)}
+      ${it.revealed?`<div class="reveal">Answer: R<sub>f</sub> = ${f1(d.d)} ÷ ${f1(d.F)} = ${d.ans}</div>`:''}</div></div>`;
+  }
+  if(st==='density'){
+    const met=DMETALS[d.scene];
+    body=`<div class="labwrap"><div class="bench">${balanceSVG(d.m)}${cylinderSVG(d.V1,'Before',false)}${cylinderSVG(d.V2,'After',true)}</div>
+      <div class="side"><p class="q">The fragment’s mass is ${f2(d.m)} g. The water rose from ${f1(d.V1)} mL to ${f1(d.V2)} mL when it was dropped in. What is the fragment’s density?</p>
+      ${choiceButtons('density', d.options.map(o=>[o,o+' g/mL']), d.ans, R)}
+      ${R?`<p class="why">⚖️ ${f2(d.m)} g ÷ ${d.dV}.0 mL = ${d.ans} g/mL. That matches <b>${met.name}</b> (${met.d.toFixed(2)} g/mL).</p>`:''}
+      ${it.revealed?`<div class="reveal">Answer: ${d.ans} g/mL</div>`:''}
+      <table class="reftab"><tr><td colspan="2" class="muted small" style="font-family:var(--sans);text-align:left">Reference densities (g/mL)</td></tr>${DMETALS.map(x=>`<tr><td>${x.name}</td><td>${x.d.toFixed(2)}</td></tr>`).join('')}</table></div></div>`;
+  }
+  if(st==='ph'){
+    body=`<div class="labwrap"><div class="bench">${tubeSVG(d.p)}</div>
+      <div class="side"><p class="q">The ion meter reads:</p><div class="readout">${phText(d.p,d.fmt)}</div>
+      <p class="q">What is the pH of the liquid?</p>
+      ${choiceButtons('ph', Array.from({length:15},(_,i)=>[i,String(i)]), d.p, R)}
+      ${R?`<p class="why">🧪 ${d.fmt==='OH'?`pOH = ${14-d.p}, so pH = 14 − ${14-d.p} = ${d.p}`:`pH = −log(${sci(d.p)}) = ${d.p}`}. That’s ${d.p<7?'acidic':d.p>7?'basic':'neutral'}, and the indicator color agrees.</p>`:''}
+      ${it.revealed?`<div class="reveal">Answer: pH ${d.p}</div>`:''}
+      ${uiScale()}</div></div>`;
+  }
+  return stepWrap(st,'lab',2,'Lab Analysis',locked,body);
+}
+function stepEx(st){
+  const g=S.game, d=g.st[st], it=S.items[st+'.ex'], locked=!S.items[st+'.lab'].resolved, R=it.resolved;
+  const P={flame:'Records show the one metal compound each suspect handled this week. Select every suspect whose compound does NOT contain the metal found in the powder.',
+    ink:'Each suspect’s pen was run on the same paper with the same solvent. Select every suspect whose ink does NOT match the scene ink exactly.',
+    density:'The lab measured a metal item taken from each suspect. Select every suspect whose item has a DIFFERENT density from the fragment.',
+    ph:'Liquids taken from each suspect were tested. The readings come in different forms. Select every suspect whose liquid has a DIFFERENT pH from the scene.'}[st];
+  let rec='';
+  if(st==='flame') rec=`<table class="dbtable"><tr><th>Suspect</th><th>Compound handled</th></tr>${g.suspects.map(s=>`<tr><td>${h(s.name)}</td><td class="mono">${s.cmpd}</td></tr>`).join('')}</table>
+    <p class="muted small">Metal in the powder: <b>${METALS[d.scene].name} (${METALS[d.scene].sym})</b></p>`;
+  if(st==='ink') rec=`<div class="labwrap"><div class="bench" style="overflow-x:auto;max-width:100%">${chromaSVG([{label:'Scene',spots:d.scene,color:'#333'},...g.suspects.map(s=>({label:initials(s.name),spots:s.ink,color:'#333'}))], d.F)}</div>
+    <div class="legend">${g.suspects.map(s=>`<div><b style="color:${s.color}">${initials(s.name)}</b> = ${h(s.name)}</div>`).join('')}</div></div>`;
+  if(st==='density') rec=`<table class="dbtable"><tr><th>Suspect</th><th>Item</th><th>Mass</th><th>Volume (displacement)</th></tr>${g.suspects.map(s=>`<tr><td>${h(s.name)}</td><td>${h(s.item)}</td><td class="mono">${f2(s.mass)} g</td><td class="mono">${f1(s.vol)} mL</td></tr>`).join('')}</table>
+    <p class="muted small">Fragment density: <b>${d.ans} g/mL</b></p>`;
+  if(st==='ph') rec=`<table class="dbtable"><tr><th>Suspect</th><th>Sample</th><th>Reading</th></tr>${g.suspects.map(s=>`<tr><td>${h(s.name)}</td><td>${h(s.sample)}</td><td class="mono">${phText(s.ph,s.phFmt)}</td></tr>`).join('')}</table>
+    <p class="muted small">Scene liquid: <b>pH ${d.p}</b></p>`;
+  const chosen = R ? d.excluded : S.ui.ex[st];
+  const body=`<p class="q">${P}</p>${rec}
+    <div class="chips">${g.suspects.map(s=>`<button class="chip ${chosen.includes(s.id)?'sel':''}" ${R?'disabled':''} onclick="act.exToggle('${st}',${s.id})">${avatar(s)}${h(s.name)}</button>`).join('')}</div>
+    ${!R?`<div class="submit-row"><button class="btn" onclick="act.exSubmit('${st}')">Submit exclusions</button><span class="muted small">${S.ui.ex[st].length} selected</span></div>`:
+      `<p class="why">🗂️ Ruled out: <b>${d.excluded.map(i=>h(g.suspects[i].name)).join(', ')}</b></p>`}`;
+  return stepWrap(st,'ex',3,'Evidence Exclusion',locked,body);
+}
+function vStation(){
+  const st=S.station, g=S.game, m=META[st];
+  return `<section class="pop">
+    <div class="station-head"><button class="btn ghost small" onclick="act.go('board')">← Case board</button>
+      <div><div class="eyebrow">${m.icon} Station ${ORDER.indexOf(st)+1} · ${m.sub}</div><h2>${m.title}</h2><p class="muted" style="margin:0">Evidence: ${h(g.tpl.evidence[st])}</p></div></div>
+    <div class="intro">${INTRO[st]}</div>
+    ${stepMCQ(st)}${stepLab(st)}${stepEx(st)}
+    ${stationDone(st)?`<div class="done-row" id="stationDone"><button class="btn" onclick="act.go('board')">Station complete — back to the case board →</button></div>`:''}
+  </section>`;
+}
+function vAccuse(){
+  const g=S.game, a=S.acc, done=ORDER.filter(stationDone).length, p=S.players[a.i];
+  if(a.phase==='handoff') return `<section class="handoff card pop"><div class="lock">🔒</div><h2>Accusation locked</h2>
+    <p class="muted">Hide the screen and pass the device to</p><h2 style="color:${p.color}">${h(p.name)}</h2>
+    <button class="btn" onclick="act.ready()">We’re ${h(p.name)} — ready</button></section>`;
+  return `<section class="pop">
+    <div class="eyebrow">Case ${g.code} · Final Accusation</div>
+    <h2>${S.mode==='team'?`<span style="color:${p.color}">${h(p.name)}</span>, choose secretly`:'Who did it?'}</h2>
+    ${done<4?`<div class="msg bad">⚠️ Only ${done}/4 stations are complete, so more than one suspect may still fit the evidence. <button class="btn ghost small" onclick="act.go('board')">Back to the board</button></div>`:''}
+    <p class="muted">Choose the one suspect who matches all of the evidence. Correct: +${ACCUSE_RIGHT}. Wrong: ${ACCUSE_WRONG}.</p>
+    <div class="suspects">${g.suspects.map(s=>suspectCard(s,{pick:true,picked:a.sel===s.id,noOut:false})).join('')}</div>
+    <div class="submit-row"><button class="btn warn" ${a.sel===null?'disabled':''} onclick="act.lockVote()">⚖️ Lock in accusation${a.sel!==null?': '+h(g.suspects[a.sel].name):''}</button>
+    ${S.mode==='team'?`<span class="muted small">Team ${a.i+1} of ${S.players.length}</span>`:''}</div>
+  </section>`;
+}
+function mastery(p){
+  return SKILLS.map(([k,label])=>{ const L=p.log.filter(x=>x.skill===k); const c=L.filter(x=>x.ok).length;
+    return {k,label,att:L.length,cor:c,pct:L.length?Math.round(c/L.length*100):null}; });
+}
+const pctColor = v => v===null?'var(--line)':v>=80?'var(--good)':v>=50?'var(--warn)':'var(--bad)';
+function culpritWhy(g){
+  const c=g.suspects[g.culprit], d=g.st;
+  return `${h(c.name)} was the only suspect consistent with all four lines of evidence: they handled <b>${c.cmpd}</b> (contains ${METALS[d.flame.scene].name.toLowerCase()}), their pen ink matched every spot, their ${h(c.item.toLowerCase())} has the fragment’s density (${(c.mass/c.vol).toFixed(2)} g/mL, ${DMETALS[d.density.scene].name.toLowerCase()}), and their ${h(c.sample.toLowerCase())} held a liquid with pH ${c.ph}.`;
+}
+function vResult(){
+  const g=S.game, c=g.suspects[g.culprit], ranked=S.players.slice().sort((a,b)=>b.score-a.score), secs=Math.round((S.end-S.start)/1000);
+  return `<section class="pop">
+    <div class="eyebrow">Case ${g.code} · Closed</div><h2>${g.tpl.icon} ${h(g.tpl.title)}: Case solved</h2>
+    <div class="dossier">
+      <div class="card"><h3>The culprit</h3>
+        <div class="suspects" style="grid-template-columns:1fr">${suspectCard(c,{guilty:true,noOut:true,tags:false,alibi:true})}</div>
+        <p class="muted small">${culpritWhy(g)}</p></div>
+      <div class="card"><h3>${S.mode==='team'?'Final standings':'Your result'}</h3>
+        <div class="scoreboard">${ranked.map((p,i)=>`<div class="sb-row ${i===0&&S.players.length>1?'first':''}"><span class="rk">${S.players.length>1?(i===0?'🏆':'#'+(i+1)):'🕵️'}</span>
+          <span><b style="color:${p.color}">${h(p.name)}</b><br><span class="muted small">Accused ${h(g.suspects[p.vote].name)} ${p.vote===g.culprit?'✔':'✕'}</span></span>
+          <span class="muted small">${p.hints} hint${p.hints!==1?'s':''}</span><span class="pts">${p.score}</span></div>`).join('')}</div>
+        <p class="muted small">Time: ${Math.floor(secs/60)}m ${secs%60}s</p></div>
+    </div>
+    <h3 class="sec">Skills report (formative)</h3>
+    <div class="card tablewrap"><table class="mastery"><tr><th>${S.mode==='team'?'Team':'Student'}</th>${SKILLS.map(s=>`<th>${s[1]}</th>`).join('')}</tr>
+      ${S.players.map(p=>`<tr><td><b style="color:${p.color}">${h(p.name)}</b></td>${mastery(p).map(m=>`<td>${m.pct===null?'<span class="muted">—</span>':`${m.cor}/${m.att} correct<div class="bar"><i style="width:${m.pct}%;background:${pctColor(m.pct)}"></i></div>`}</td>`).join('')}</tr>`).join('')}
+    </table><p class="muted small" style="margin-top:10px">Counts every attempt answered by that ${S.mode==='team'?'team':'student'} (first tries and retries). Under 50% = reteach; 50–79% = practice; 80%+ = mastery.</p>
+    ${S.players.map(p=>{const weak=mastery(p).filter(m=>m.pct!==null&&m.pct<60).map(m=>m.label);return weak.length?`<p class="small"><b>${h(p.name)}</b> → review: ${weak.join(', ')}</p>`:'';}).join('')}</div>
+    <h3 class="sec">How the evidence pointed</h3>
+    <div class="card tablewrap"><table class="mastery">${ORDER.map(st=>`<tr><td>${META[st].icon} <b>${META[st].title}</b></td><td>Ruled out: ${g.st[st].excluded.map(i=>h(g.suspects[i].name)).join(', ')}</td></tr>`).join('')}</table></div>
+    <div class="submit-row noprint" style="justify-content:center;margin-top:24px">
+      <button class="btn" onclick="act.replay()">🔁 Same case, new culprit</button>
+      <button class="btn ghost" onclick="act.otherCase()">📂 Another case</button>
+      <button class="btn ghost" onclick="act.copyReport()">📋 Copy report</button>
+      <button class="btn ghost" onclick="act.csv()">⬇️ Download CSV</button>
+      <button class="btn ghost" onclick="window.print()">🖨️ Print</button></div>
+  </section>`;
+}
+
+/* ---------------- Reports ---------------- */
+function fullReport(){
+  const g=S.game, secs=Math.round((S.end-S.start)/1000);
+  return [`CHEM DETECTIVES — ${g.tpl.title} (Case ${g.code})`, `Date: ${new Date().toLocaleString()} · Time: ${Math.floor(secs/60)}m ${secs%60}s`, `Culprit: ${g.suspects[g.culprit].name}`, '',
+    ...S.players.map(p=>[`${S.mode==='team'?'Team':'Student'}: ${p.name}`, `  Score: ${p.score} · Hints: ${p.hints} · Accusation: ${g.suspects[p.vote].name} (${p.vote===g.culprit?'correct':'incorrect'})`,
+      ...mastery(p).map(m=>`  ${m.label}: ${m.pct===null?'—':`${m.cor}/${m.att} (${m.pct}%)`}`)].join('\n'))].join('\n');
+}
+function downloadCSV(){
+  const g=S.game, secs=Math.round((S.end-S.start)/1000);
+  const head=['case_code','case_title','mode','name','score','hints','accused','accusation_correct',...SKILLS.map(s=>s[1]+' %'),'time_seconds','date'];
+  const rows=S.players.map(p=>[g.code,g.tpl.title,S.mode,p.name,p.score,p.hints,g.suspects[p.vote].name,p.vote===g.culprit?'yes':'no',...mastery(p).map(m=>m.pct===null?'':m.pct),secs,new Date().toISOString().slice(0,10)]);
+  const csv=[head,...rows].map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download=`chem-detectives-${g.code}.csv`; a.click();
+}
+function copyText(t){
+  const ok=()=>toast('Report copied','good');
+  if(navigator.clipboard&&window.isSecureContext) navigator.clipboard.writeText(t).then(ok,()=>fallback());
+  else fallback();
+  function fallback(){const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');ok();}catch(e){toast('Copy failed','bad');}ta.remove();}
+}
+
+/* ---------------- Teacher key ---------------- */
+function openTeacher(){
+  const card=document.getElementById('modalCard');
+  if(!S.teacherOK){
+    card.innerHTML=`<button class="iconbtn x" onclick="act.closeModal()">✕</button><div class="eyebrow">Teacher tools</div><h2>Enter PIN</h2>
+      <p class="muted small">Default PIN is set at the top of index.html (TEACHER_PIN).</p>
+      <div class="row gap"><input id="pinIn" type="password" class="tx" style="max-width:180px" onkeydown="if(event.key==='Enter')act.pin()"><button class="btn" onclick="act.pin()">Unlock</button></div>`;
+  } else {
+    const code=S.keyCode||(S.game&&S.game.code)||'';
+    const g=code?buildCase(code):null;
+    card.innerHTML=`<button class="iconbtn x" onclick="act.closeModal()">✕</button><div class="eyebrow">Teacher tools</div><h2>Answer key</h2>
+      <div class="row gap"><input id="keyIn" class="tx" style="max-width:180px;font-family:var(--mono)" value="${h(code)}" placeholder="FW-4821" onkeydown="if(event.key==='Enter')act.keyLoad()"><button class="btn small" onclick="act.keyLoad()">Show key</button></div>
+      ${g?keyTable(g):code?'<p class="msg bad">Invalid code.</p>':'<p class="muted">Enter a case code to see its answers.</p>'}
+      <h3 class="sec">Generate case codes</h3><p class="muted small">Give each team or student a different code so every group has a different culprit.</p>
+      <div class="row gap"><select id="genCase" class="tx" style="max-width:260px">${CASES.map(c=>`<option value="${c.id}">${c.icon} ${h(c.title)}</option>`).join('')}</select>
+      <input id="genN" type="number" min="1" max="40" value="6" class="tx" style="max-width:90px"><button class="btn small" onclick="act.genCodes()">Generate</button></div>
+      <div id="codesOut" class="codes"></div>`;
+  }
+  document.getElementById('modal').classList.remove('hidden');
+  const f=document.getElementById('pinIn'); if(f) f.focus();
+}
+function keyTable(g){
+  const d=g.st, n=i=>h(g.suspects[i].name), ans=st=>d[st].mcq.opts[d[st].mcq.ans].t;
+  return `<p style="margin-top:14px">${g.tpl.icon} <b>${h(g.tpl.title)}</b> — Culprit: <b style="color:var(--bad)">${n(g.culprit)}</b> (${h(g.suspects[g.culprit].role)})</p>
+  <table class="keyt"><tr><th>Station</th><th>Concept check</th><th>Lab answer</th><th>Excludes</th></tr>
+  <tr><td>🔥 Flame</td><td>${ans('flame')}</td><td>${METALS[d.flame.scene].name} (${METALS[d.flame.scene].color})</td><td>${d.flame.excluded.map(n).join(', ')}</td></tr>
+  <tr><td>🖊️ Ink</td><td>${ans('ink')}</td><td>R<sub>f</sub> ${d.ink.ans} (${f1(d.ink.d)} ÷ ${f1(d.ink.F)} cm)</td><td>${d.ink.excluded.map(n).join(', ')}</td></tr>
+  <tr><td>⚖️ Density</td><td>${ans('density')}</td><td>${d.density.ans} g/mL = ${DMETALS[d.density.scene].name}</td><td>${d.density.excluded.map(n).join(', ')}</td></tr>
+  <tr><td>🧪 pH</td><td>${ans('ph')}</td><td>pH ${d.ph.p}</td><td>${d.ph.excluded.map(n).join(', ')}</td></tr></table>`;
+}
+
+/* ---------------- Chrome: HUD, turn bar, toast ---------------- */
+function renderHud(){
+  const hud=document.getElementById('hud'), g=S.game, inGame=g&&['brief','board','station','accuse'].includes(S.screen);
+  hud.innerHTML = (inGame?`<span class="pill">Case <strong>${g.code}</strong></span><span class="pill">⏱ <strong id="timer">${elapsed()}</strong></span>${S.mode==='solo'?`<span class="pill">Score <strong>${S.players[0].score}</strong></span>`:''}`:'')
+    + `<button class="iconbtn" onclick="act.scale()" title="Bigger text for projectors">A⁺</button><button class="iconbtn" onclick="act.teacher()">🔑 Teacher</button>`;
+  const tb=document.getElementById('turnbar');
+  tb.innerHTML = (S.mode==='team'&&g&&['board','station'].includes(S.screen)) ? `<div class="turnbar">${S.players.map((p,i)=>`<div class="tchip ${i===S.turn?'active':''}" style="${i===S.turn?`border-color:${p.color}`:''}"><span class="dot" style="background:${p.color}"></span>${h(p.name)} <span class="sc">${p.score}</span></div>`).join('')}</div>` : '';
+}
+function elapsed(){ const s=Math.round(((S.end||Date.now())-S.start)/1000); return `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`; }
+setInterval(()=>{ const t=document.getElementById('timer'); if(t&&S.game&&!S.end) t.textContent=elapsed(); },1000);
+let toastT;
+function toast(msg,type){ const t=document.getElementById('toast'); t.textContent=msg; t.className='toast show '+(type||''); clearTimeout(toastT); toastT=setTimeout(()=>t.className='toast',1800); }
+
+/* ---------------- Render ---------------- */
+function render(){
+  const views={home:vHome,setup:vSetup,cases:vCases,brief:vBrief,board:vBoard,station:vStation,accuse:vAccuse,result:vResult};
+  document.getElementById('app').innerHTML=(views[S.screen]||vHome)();
+  renderHud();
+  if(S.scrollTo){ const el=document.getElementById(S.scrollTo); S.scrollTo=null; if(el) setTimeout(()=>el.scrollIntoView({behavior:'smooth',block:'center'}),60); }
+}
+// a link like ?case=FW-4821 opens that case straight away (handy for posting one link per team)
+(function(){ const c=new URLSearchParams(location.search).get('case'); if(c && buildCase(c)){ startGame(c); } })();
+render();
+</script>
+</body>
+</html>
