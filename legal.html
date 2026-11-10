@@ -61,6 +61,8 @@ a { color: var(--accent); text-underline-offset: 2px; }
 .card ul { padding-left: 20px; margin: 8px 0 12px; }
 .card li { margin: 5px 0; }
 .card li::marker { color: var(--muted); }
+.ko { margin: 6px 0 18px; padding: 12px 16px; border: 1px solid var(--line); border-radius: 12px; }
+.ko ul { margin: 6px 0 0; }
 .tw { overflow-x: auto; margin: 12px 0 16px; border: 1px solid var(--line); border-radius: 12px; }
 table { width: 100%; border-collapse: collapse; font-size: 14.5px; min-width: 560px; }
 th, td { text-align: left; vertical-align: top; padding: 10px 14px; border-bottom: 1px solid var(--line); line-height: 1.5; }
@@ -178,32 +180,57 @@ th:nth-child(1) { width: 24%; } th:nth-child(2) { width: 42%; }
   <!-- PRIVACY -->
   <section class="doc" id="privacy" aria-labelledby="h-privacy">
     <div class="head"><h1 id="h-privacy">Privacy Policy</h1>
-      <div class="chips"><span class="chip">Effective October 29, 2026</span><span class="chip">Applies to Comma, Scholar Lab &amp; Educator Space</span></div></div>
+      <div class="chips"><span class="chip">Effective November 10, 2026</span><span class="chip">Applies to Comma, Scholar Lab &amp; Educator Space</span></div></div>
     <div class="grid">
       <aside class="toc" aria-label="On this page"></aside>
       <div>
         <details class="mtoc"><summary>On this page</summary></details>
         <div class="short"><h2>In short</h2><ul>
-          <li>We collect only your name, email and the details you choose to give us.</li>
+          <li><b>Students:</b> we never ask for your name or email. You use a class code and a number from your teacher.</li>
+          <li><b>Teachers:</b> we collect only your name, email and the details you choose to give us.</li>
           <li>No ads, no tracking and no analytics. We never sell your information.</li>
           <li>Your information is stored with Google, and our websites are hosted on GitHub.</li>
           <li>Email us at any time to see, correct or delete your information.</li></ul></div>
         <article class="card"><h3 id="privacy-1">1. What we collect</h3>
     <div class="tw"><table>
       <tr><th>When</th><th>What</th><th>Why</th></tr>
-      <tr><td>You sign up</td><td>Name, email, and what you choose to add: school or organization, subject you teach, class code, your teacher’s email. Whether you agreed to these rules and when.</td><td>To approve your sign-up, send your access code and keep a record of your agreement.</td></tr>
+      <tr><td>A teacher (or a Comma member) signs up</td><td>Name, email, and what you choose to add: school or organization, subject you teach. Whether you agreed to these rules and when.</td><td>To approve your sign-up, send your access code and keep a record of your agreement.</td></tr>
       <tr><td>You opt in to news</td><td>That you said yes, when, and the exact wording you agreed to.</td><td>To send product news. This is optional and you can unsubscribe anytime.</td></tr>
       <tr><td>A teacher makes a class code or test (Educator Space, Scholar Lab)</td><td>Teacher email, class name, which labs, games or tests are included, open/close dates.</td><td>To open and close class codes and tests.</td></tr>
-      <tr><td>A student finishes a lab or game (Educator Space)</td><td>The name, email and class period the student types in, the lab, mistakes, quiz score, time taken, stars and topics to review.</td><td>So the student’s teacher can see the results.</td></tr>
+      <tr><td>A student finishes a lab or game (Educator Space)</td><td>The class code, the <b>student number</b> the teacher gave them (for example 14), the lab, mistakes, quiz score, time taken, stars and topics to review. <b>No name or email.</b></td><td>So the student’s teacher can see the results. Only the teacher can tell who a number is.</td></tr>
+      <tr><td>A student practices or takes a test (Scholar Lab)</td><td>Nothing is sent to us. Practice history stays in the student’s browser. Test results go from the student straight to their teacher (by the student’s own email, or the teacher’s own Google account), labelled with the student’s number.</td><td>So the teacher gets the results without us holding them.</td></tr>
       <tr><td>You use the website</td><td>Your progress, settings and sign-in are saved in your own browser (local storage) on your device.</td><td>So you stay signed in and keep your progress. This stays on your device; clearing your browser data removes it.</td></tr>
       <tr><td>Any visit</td><td>Technical information such as your IP address, which our hosting and font providers receive automatically.</td><td>To deliver the web pages. We don’t use it to identify or track you.</td></tr>
     </table></div>
     <p>We don’t ask for, and you shouldn’t send us, sensitive information such as ID numbers, health information or passwords for other services.</p>
 
+    <h3 id="privacy-students">Students: where your data goes</h3>
+    <div class="tw"><table>
+      <tr><th>Question</th><th>Answer</th></tr>
+      <tr><td>Do I need an account?</td><td>No. On Scholar Lab you type your teacher’s <b>class code</b>. On Educator Space you type the class code and your <b>student number</b>.</td></tr>
+      <tr><td>Do you know my name or email?</td><td>No. We never ask for them. Please don’t type your name in any box.</td></tr>
+      <tr><td>Where do my test results go?</td><td>Straight to your teacher, labelled “Student 14” (your number). Your teacher matches numbers to names on their own computer. We don’t keep Scholar Lab test results.</td></tr>
+      <tr><td>Where do my lab and game results go? (Educator Space)</td><td>To your teacher’s results page, saved in our Google Sheet with only your number, the class code and your scores, until your teacher deletes them.</td></tr>
+      <tr><td>What stays on my device?</td><td>Your practice history, settings and unfinished tests, in your browser. Clearing your browser data removes them.</td></tr>
+      <tr><td>Who can see my results?</td><td>Only your teacher. Our service providers (Google, GitHub) store and deliver them for us; see section 3.</td></tr>
+      <tr><td>I’m under 14. Is that OK?</td><td>Yes. We don’t collect your name, email or anything else that says who you are, so there’s no account for a parent to set up. If your school asks for permission to use websites in class, your teacher arranges it.</td></tr>
+    </table></div>
+    <div class="ko" lang="ko">
+      <p><b>학생 안내 (한국어)</b></p>
+      <ul>
+        <li>계정이 필요 없습니다. 선생님이 주신 <b>학급 코드</b>와 <b>학생 번호</b>만 입력합니다.</li>
+        <li>이름이나 이메일을 묻지 않으며, 어떤 칸에도 이름을 입력하지 마세요.</li>
+        <li>시험 결과는 “Student 14”처럼 번호로만 선생님께 전달됩니다. 번호가 누구인지는 선생님만 알 수 있습니다.</li>
+        <li>연습 기록은 내 기기의 브라우저에만 저장됩니다.</li>
+        <li>Educator Space 실험 결과는 번호·학급 코드·점수만 Google 시트에 저장되며, 선생님이 삭제할 때까지 보관됩니다.</li>
+        <li>문의: <a href="mailto:admin@comma-ltd.com">admin@comma-ltd.com</a></li>
+      </ul>
+    </div>
+
     <h3 id="privacy-2">2. How we use it</h3>
     <ul>
-      <li>To approve sign-ups, send access codes and monthly code updates, and check whether access is still active.</li>
-      <li>To show teachers the results of students in their own classes.</li>
+      <li>To approve teacher sign-ups, send access codes and monthly code updates, and check whether access is still active.</li>
+      <li>To open and close class codes, and to show teachers the (numbered) results of their own classes.</li>
       <li>To answer your questions, keep the Services safe and fix problems.</li>
       <li>To send product news, only if you opted in.</li>
     </ul>
@@ -212,17 +239,17 @@ th:nth-child(1) { width: 24%; } th:nth-child(2) { width: 42%; }
     <h3 id="privacy-3">3. Who we share it with</h3>
     <p>We use a few service providers that process information on our behalf:</p>
     <ul>
-      <li><b>Google</b> (Google Workspace: Apps Script, Sheets and Gmail) stores sign-ups and results and sends our emails.</li>
-      <li><b>GitHub</b> (GitHub Pages) hosts the websites.</li>
+      <li><b>Google LLC</b> (Google Workspace: Apps Script, Sheets and Gmail; United States) stores teacher sign-ups, class codes and Educator Space numbered results, and sends our emails. Data goes there over the internet each time you sign up or a result is sent, and is kept for the periods in section 4.</li>
+      <li><b>GitHub, Inc.</b> (GitHub Pages; United States) hosts the websites. It receives technical information such as IP addresses when pages load.</li>
       <li><b>Google Fonts</b> provides the fonts some pages use.</li>
     </ul>
     <p>These providers may store information on servers outside your country, including in the United States. Apart from them, we share information only with a student’s own teacher (for that teacher’s class results), when the law requires it, or to protect someone’s safety.</p>
 
     <h3 id="privacy-4">4. How long we keep it</h3>
-    <p>We keep sign-up information while your account is active. Student lab and game results are kept for the teacher who owns the class code, and we delete them when the teacher or the student asks. If you ask us to delete your information, we’ll do so within 30 days, except for a short record we may need to keep to respect your request (for example, so a removed email stays blocked) or to meet a legal obligation.</p>
+    <p>We keep teacher sign-up information while the account is active. Class codes are kept while they are in use. Educator Space results (student number and scores only) are kept for the teacher who owns the class code until the teacher deletes them, or we delete them when asked. If you ask us to delete your information, we’ll do so within 30 days, except for a short record we may need to keep to respect your request (for example, so a removed email stays blocked) or to meet a legal obligation.</p>
 
     <h3 id="privacy-5">5. Children and students</h3>
-    <p>Students under 14 should use the Services only with a parent’s or guardian’s permission, or through their teacher. Students on Educator Space don’t create accounts; they type a name to send results to their teacher, and we recommend using a first name and last initial. Teachers who use the Services with students are responsible for having any permission their school or local law requires. If a parent believes their child gave us information without permission, email us and we’ll delete it.</p>
+    <p>Students under 14 should use the Services only with a parent’s or guardian’s permission, or through their teacher. Students don’t create accounts on Scholar Lab or Educator Space and are never asked for a name or email: they use a class code and a number from their teacher. Teachers who use the Services with students are responsible for having any permission their school or local law requires. If a parent believes their child gave us information without permission, email us and we’ll delete it.</p>
 
     <h3 id="privacy-6">6. Your choices and rights</h3>
     <ul>

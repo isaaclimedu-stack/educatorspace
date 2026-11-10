@@ -856,6 +856,44 @@ const LS = {
 const normEmail = e => String(e || '').trim().toLowerCase();
 const normCode = c => String(c || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
 const isEmail = e => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+/* Students are known only by the number their teacher gives them (1–999). Educator Space never asks for, sends or keeps a
+   student's name or email; the teacher matches numbers to names on their own computer (Student results → Names for numbers). */
+const stuNo = v => { const m = String(v == null ? '' : v).trim().replace(/^#/, '').match(/^\d{1,3}$/); return m && +m[0] > 0 ? String(+m[0]) : ''; };
+const stuLabel = s => s && s.no ? 'Student ' + s.no : 'Student';
+/* the student saved on this device. Students who joined before numbers were used had a name/email saved: forget it,
+   along with any unsent result that carried them, and ask for the number instead. */
+function stuClean() {
+  const s = LS.get('student', null), ob = LS.get('outbox', []);
+  if (ob.some(p => p && (p.name || p.email || !stuNo(p.no)))) LS.set('outbox', ob.filter(p => p && stuNo(p.no) && !p.name && !p.email));
+  if (s && !stuNo(s.no)) { LS.del('student'); APP.gateTab = 'student'; APP.joinCode = APP.joinCode || s.code || ''; APP.gateMsgStu = 'Educator Space now uses student numbers instead of names. Enter your class code and the number your teacher gave you.'; return null; }
+  return s;
+}
+/* teacher side: which name goes with a number, typed by the teacher and kept only in this browser (never sent anywhere) */
+const rosterKey = () => 'roster.' + normEmail(APP.user ? APP.user.email : '');
+const rosterOf = code => (LS.get(rosterKey(), {})[normCode(code).slice(0, 13)] || {});
+const rosterName = (code, no) => (no ? rosterOf(code)[no] || '' : '');
+const rsWhoText = r => r.no ? (rosterName(r.code, r.no) ? `${rosterName(r.code, r.no)} (${r.no})` : 'Student ' + r.no) : (r.name || 'Student');
+const rsWho = r => r.no ? (rosterName(r.code, r.no) ? `<b>${esc(rosterName(r.code, r.no))}</b><div class="small muted">Student ${esc(r.no)}</div>` : `<b>Student ${esc(r.no)}</b><div class="small muted">no name on this computer</div>`) : `<b>${esc(r.name || 'Student')}</b><div class="small muted">older result</div>`;
+function openRoster(codes, done) {
+  const list = codes.filter(c => c && c.code); const sc = document.createElement('div'); sc.className = 'scrim';
+  let cur = list.length ? normCode(list[list.length - 1].code).slice(0, 13) : '';
+  const txt = core => Object.entries(LS.get(rosterKey(), {})[core] || {}).sort((a, b) => a[0] - b[0]).map(([n, v]) => n + ' ' + v).join('\n');
+  sc.innerHTML = `<div class="modal" role="dialog" aria-modal="true" aria-labelledby="roT"><div class="mh"><span class="eyebrow">Kept only on this computer</span><h2 id="roT">Names for numbers</h2>
+      <p class="muted">Type one student per line: their number, then their name (for example <span class="mono">14 Jenny Park</span>). Student results then show the name next to the number. These names stay in this browser. They are never sent to Educator Space, so on another computer you’d type them again.</p></div>
+    <div class="mb">${list.length ? `<label class="fld" for="roC">Class code<select id="roC">${list.map(c => { const k = normCode(c.code).slice(0, 13); return `<option value="${k}" ${k === cur ? 'selected' : ''}>${esc(c.label || 'Untitled')} · ${esc(c.code.slice(0, 15))}</option>`; }).join('')}</select></label>
+      <label class="fld" for="roT2">Numbers and names<textarea id="roT2" rows="10" class="mono" style="font-size:16px" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="1 Jenny Park&#10;2 Sam Lee"></textarea></label><p class="small err" id="roErr" role="alert"></p>`
+      : '<div class="empty"><b>No class codes yet.</b><span class="small">Make a class code under Assign first.</span></div>'}</div>
+    <div class="mf"><button class="btn" id="roX">Close</button>${list.length ? '<button class="btn primary" id="roGo">Save on this computer</button>' : ''}</div></div>`;
+  document.body.appendChild(sc); const close = () => sc.remove();
+  $('#roX', sc).onclick = close; sc.addEventListener('pointerdown', e => { if (e.target === sc) close(); });
+  if (!list.length) return;
+  const ta = $('#roT2', sc); ta.value = txt(cur);
+  $('#roC', sc).onchange = e => { cur = e.target.value; ta.value = txt(cur); $('#roErr', sc).textContent = ''; };
+  $('#roGo', sc).onclick = () => { const map = {}, bad = [];
+    ta.value.split(/\n+/).map(l => l.trim()).filter(Boolean).forEach(l => { const m = l.match(/^#?(\d{1,3})[\s.,:;)\-]+(.+)$/); const n = m && stuNo(m[1]); if (n && m[2].trim()) map[n] = m[2].trim().slice(0, 60); else bad.push(l); });
+    if (bad.length) { $('#roErr', sc).textContent = 'Start each line with a number from 1 to 999, then the name. Check: ' + bad.slice(0, 3).join(' / '); return; }
+    const all = LS.get(rosterKey(), {}); all[cur] = map; LS.set(rosterKey(), all); close(); if (done) done(); };
+}
 
 /* SHA-256 (WebCrypto, with a small fallback for pages opened from disk) */
 function sha256js(ascii) {
@@ -999,8 +1037,8 @@ async function boot() {
   const h = (location.hash || '').slice(1), qj = new URLSearchParams(location.search).get('j'), pj = (location.pathname.match(/\/j\/([A-Za-z0-9-]{10,32})/) || [])[1];
   const join = (h.startsWith('j-') ? h.slice(2) : '') || qj || pj;
   if (join) { APP.joinCode = join.toUpperCase(); APP.gateTab = 'student'; }
-  else if (!APP.user) { const stu = LS.get('student', null); if (stu && stu.code) { const k = await readLabCode(stu.code); if (k) APP.student = Object.assign(stu, { k }); } }
-  if (join && !APP.user) { const stu = LS.get('student', null); if (stu && normCode(stu.code) === normCode(join)) { const k = await readLabCode(stu.code); if (k) { APP.student = Object.assign(stu, { k }); APP.joinCode = ''; } } }
+  else if (!APP.user) { const stu = stuClean(); if (stu && stu.code) { const k = await readLabCode(stu.code); if (k) APP.student = Object.assign(stu, { k, name: stuLabel(stu) }); } }
+  if (join && !APP.user) { const stu = stuClean(); if (stu && normCode(stu.code) === normCode(join)) { const k = await readLabCode(stu.code); if (k) { APP.student = Object.assign(stu, { k, name: stuLabel(stu) }); APP.joinCode = ''; } } }
   const pv = location.pathname.replace(/^\/+|\/+$/g, '');
   if (pv && VIEWS().includes(pv)) APP.view = pv; else if (h && VIEWS().includes(h)) APP.view = h;
   setPath(join ? 'home' : APP.view, true); /* drops any old # or /j/ from the address bar */
@@ -1039,28 +1077,26 @@ function renderGate() {
       </form>` : `<form id="sForm" novalidate style="display:grid;gap:16px">
         <div style="display:grid;gap:6px"><h2>Join your teacher\u2019s lab</h2><p class="muted small">Enter the code your teacher gave you. No account needed.</p></div>
         <label class="fld" for="sCode">Code from your teacher<input type="text" id="sCode" class="mono" autocomplete="off" placeholder="XXXX-XXXX-XXXXX(-XXXXXX)" value="${esc(APP.joinCode || stu.code || '')}" style="text-transform:uppercase;letter-spacing:.06em"></label>
-        <label class="fld" for="sName">Your name<input type="text" id="sName" autocomplete="name" maxlength="40" placeholder="First name and last initial" value="${esc(stu.name || '')}"></label>
-        <div class="row" style="gap:12px;align-items:start"><label class="fld" for="sEmail" style="flex:1 1 180px">School email <span class="muted" style="font-weight:400">(optional)</span><input type="email" id="sEmail" autocomplete="email" maxlength="80" placeholder="you@school.org" value="${esc(stu.email || '')}"></label>
-        <label class="fld" for="sPer" style="flex:1 1 120px">Class or period <span class="muted" style="font-weight:400">(optional)</span><input type="text" id="sPer" maxlength="30" placeholder="e.g. Period 3" value="${esc(stu.period || '')}"></label></div>
+        <label class="fld" for="sNo">Your student number<input type="text" id="sNo" class="mono stu-no" inputmode="numeric" pattern="[0-9]*" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" maxlength="3" placeholder="e.g. 14" value="${esc(stu.no || '')}"></label>
+        <p class="small muted" style="margin:-8px 0 0">Your teacher gives every student a number. Type only the number, not your name.</p>
         <div class="err" id="sErr" role="alert">${esc(APP.gateMsgStu || '')}</div>
         <button class="btn primary" id="sGo" type="submit" style="justify-content:center;padding:12px">Start</button>
-        <p class="contact">Your name and results go only to your teacher.</p>
+        <p class="contact">Educator Space never asks for your name or email. Your results go to your teacher under your number. <a href="/legal.html#privacy" target="_blank" rel="noopener">Where your data goes</a></p>
       </form>`}
     </div></div></div>`;
   APP.gateMsg = ''; APP.gateMsgStu = '';
   $$('[data-tab]').forEach(b => b.onclick = () => { APP.gateTab = b.dataset.tab; renderGate(); });
   if (tab === 'student') {
-    (APP.joinCode ? $('#sName') : $('#sCode')).focus();
+    (APP.joinCode ? $('#sNo') : $('#sCode')).focus();
     $('#sForm').addEventListener('submit', async e => {
-      e.preventDefault(); const err = $('#sErr'), code = $('#sCode').value, name = $('#sName').value.trim().replace(/\s+/g, ' '), em = normEmail($('#sEmail').value), per = $('#sPer').value.trim();
+      e.preventDefault(); const err = $('#sErr'), code = $('#sCode').value, no = stuNo($('#sNo').value);
       const k = await readLabCode(code);
       if (!k) { err.textContent = 'That code doesn\u2019t look right. Check it with your teacher (it has 13 to 25 letters and numbers).'; return; }
       if (!k.labs.length && !k.games.length) { err.textContent = 'This code doesn\u2019t include any labs or games. Ask your teacher for a new one.'; return; }
-      if (name.length < 2) { err.textContent = 'Enter your name so your teacher knows whose results these are.'; return; }
-      if (em && !isEmail(em)) { err.textContent = 'That email doesn\u2019t look right. You can also leave it blank.'; return; }
+      if (!no) { err.textContent = 'Enter the student number your teacher gave you (a number from 1 to 999).'; $('#sNo').focus(); return; }
       const b = $('#sGo'); b.disabled = true; b.textContent = 'Checking code…'; const op = await codeOpen(k.code); b.disabled = false; b.textContent = 'Start';
       if (op === false) { err.textContent = 'This class code has been closed by your teacher. Ask your teacher for a new one.'; return; }
-      const stu = { code: k.code, name, email: em, period: per }; LS.set('student', stu); APP.student = Object.assign({}, stu, { k }); APP.joinCode = ''; APP.view = 'home';
+      const stu = { code: k.code, no }; LS.set('student', stu); APP.student = Object.assign({}, stu, { k, name: stuLabel(stu) }); APP.joinCode = ''; APP.view = 'home';
       setPath('home', true);
       SND.ac(); render();
     });
@@ -1211,7 +1247,7 @@ function openBrief(l, cid) {
   document.body.appendChild(sc); ($('#stName', sc) || $('#bGo', sc)).focus();
   const close = () => sc.remove();
   $('#bX', sc).onclick = close; sc.addEventListener('pointerdown', e => { if (e.target === sc) close(); });
-  if (APP.student) { const nf = $('#stName', sc).closest('label'); nf.innerHTML = `<span class="small">Working as <b>${esc(APP.student.name)}</b>${APP.student.period ? ' · ' + esc(APP.student.period) : ''}. Your results go to your teacher when you finish.</span>`; }
+  if (APP.student) { const nf = $('#stName', sc).closest('label'); nf.innerHTML = `<span class="small">Working as <b>${esc(APP.student.name)}</b>. Your results go to your teacher when you finish.</span>`; }
   $('#bGo', sc).onclick = () => { const nm = APP.student ? APP.student.name : $('#stName', sc).value.trim(); if (!APP.student) LS.set('lastStudent', nm); close(); SND.ac(); APP.curLab = l.id; Kit.noHints = !!(APP.student && !(APP.student.k.opts & 1)); l.run({ student: nm, course: c, back: APP.student ? 'home' : APP.view, labId: l.id }); };
 }
 
@@ -7323,7 +7359,7 @@ const labTitle = id => (LABS.find(l => l.id === id) || {}).title || id;
 /* ═════ teacher: assign labs ═════ */
 function pageAssign(m) {
   const codes = myCodes(), sel = new Set(APP.assignSel || []), gsel = new Set(APP.assignGames || []), ao = Object.assign({ hints: true, rep: true, label: '', close: '2w', date: '' }, APP.assignOpts || {});
-  m.innerHTML = `<header style="display:grid;gap:6px"><span class="eyebrow">Your classes</span><h1>Assign labs and games</h1><p class="muted" style="max-width:64ch">Pick labs and games, make a code, and share it. Students open the link (or type the code under <b>I’m a student</b>) on their laptops. No student accounts needed. Results come back to <b>Student results</b>.</p></header>
+  m.innerHTML = `<header style="display:grid;gap:6px"><span class="eyebrow">Your classes</span><h1>Assign labs and games</h1><p class="muted" style="max-width:64ch">Pick labs and games, make a code, and share it. Students open the link (or type the code under <b>I’m a student</b>) on their laptops, then type the <b>student number</b> you gave them. No student accounts, names or emails are needed. Results come back to <b>Student results</b>, where you can match numbers to names on your own computer.</p></header>
     <section class="setup">
       <div style="display:grid;gap:8px"><span class="eyebrow">1 · Choose labs</span>
         <div class="pick-grid">${LABS.filter(l => LAB_ORDER.includes(l.id)).map(l => { const c = COURSES.find(x => l.courses.includes(x.id)); return `<label class="pick ${sel.has(l.id) ? 'on' : ''}" for="pk-${l.id}"><input type="checkbox" id="pk-${l.id}" data-lab="${l.id}" ${sel.has(l.id) ? 'checked' : ''}><span class="thumb">${l.thumb ? l.thumb() : ''}</span><span><b>${esc(l.title)}</b><span class="small muted">${esc(c.band.replace(' Science', ''))} · ${esc(c.name)} · ${esc(l.time)}</span></span></label>`; }).join('')}</div></div>
@@ -7355,7 +7391,7 @@ function pageAssign(m) {
     APP.assignOpts = { hints: $('#oHints', m).checked, rep: $('#oRep', m).checked, label, close: copt, date: cdate };
     const list = myCodes(); list.push({ code, label, labs, games, opts, set, closes, at: new Date().toISOString() }); saveMyCodes(list);
     const reg = sheetCall('', { type: 'labcode', email: APP.user.email, ck: APP.user.ck, code, label, items: itemsOf({ labs, games }).join(', '), closes });
-    const link = joinLink(code), how = `Open ${link} on your laptop (or go to ${SITE_URL.replace('https://', '')}, choose "I'm a student" and enter code ${code}). Type your name, then do: ${labs.map(labTitle).concat(games.map(gameTitle)).join(', ')}.`;
+    const link = joinLink(code), how = `Open ${link} on your laptop (or go to ${SITE_URL.replace('https://', '')}, choose "I'm a student" and enter code ${code}). Type your student number (not your name), then do: ${labs.map(labTitle).concat(games.map(gameTitle)).join(', ')}.`;
     $('#mkOut', m).innerHTML = `<div class="code-out"><span class="eyebrow">${esc(label || 'New class code')}</span><div class="big-code mono">${code}</div>
       <div class="row"><button class="btn primary" id="cpLink">${ico('copy')}Copy student link</button><button class="btn" id="cpCode">${ico('copy')}Copy code</button><button class="btn" id="cpHow">${ico('copy')}Copy instructions</button></div>
       <p class="small muted" style="word-break:break-all">${esc(link)}</p><p class="small" id="mkReg"><b>Closes:</b> ${closes ? fmtDay(closes) + ' (works through the end of that day)' : 'never, until you close it'} · <span class="muted">saving…</span></p></div>`;
@@ -7399,8 +7435,10 @@ function rsNotes(t) { t = String(t || '').trim(); if (!t) return []; if (/;\s/.t
 async function pageResults(m) {
   const codes = myCodes(), labelOf = c => { const x = codes.find(k => normCode(k.code).slice(0, 13) === normCode(c)); return x ? (x.label || 'Untitled') : 'Code ' + c; };
   m.innerHTML = `<header style="display:grid;gap:6px"><span class="eyebrow">Your classes</span><h1>Student results</h1><p class="muted" style="max-width:64ch">Every lab and game your students finish with one of your class codes. To clear scores, delete one result with its trash button, or delete everything the filters show.</p></header>
-    <div class="row" id="rsBar"><button class="btn sm" id="rsRef">Refresh</button><span class="small muted" id="rsMsg">Loading…</span></div><div id="rsBody"></div>`;
+    <div class="row" id="rsBar"><button class="btn sm" id="rsRef">Refresh</button><button class="btn sm" id="rsNames">${ico('users')}Names for numbers</button><span class="small muted" id="rsMsg">Loading…</span></div>
+    <p class="small muted" style="margin:0;max-width:70ch">Students send results under the number you gave them, never their name. Tip: make one class code per class, so numbers don’t overlap.</p><div id="rsBody"></div>`;
   $('#rsRef', m).onclick = () => pageResults(m);
+  $('#rsNames', m).onclick = () => openRoster(myCodes(), () => pageResults(m));
   let d = null;
   if (!APP.user.ck) { $('#rsMsg', m).textContent = 'Sign out and sign in again to load results.'; return; }
   try {
@@ -7423,7 +7461,7 @@ async function pageResults(m) {
       <button class="btn sm" id="cpT" style="align-self:end">${ico('copy')}Copy table</button>${vis.some(x => x.review) ? `<button class="btn sm ghost" id="rsAll" style="align-self:end">${f.all ? 'Hide all details' : 'Show all details'}</button>` : ''}${vis.length ? `<button class="btn sm" id="rsDel" style="align-self:end" ${vis.some(x => x.id) ? '' : 'disabled title="Deleting isn’t available yet"'}>${ico('trash')}Delete shown results (${vis.length})</button>` : ''}</div>
       <div class="grid" style="margin-bottom:14px">${Object.entries(byLab).map(([lab, rs]) => { const ready = rs.filter(r => r.result === 'Lab ready').length; return `<div class="card"><span class="eyebrow">${esc(lab)}</span><b style="font-family:var(--f-display);font-size:26px">${ready}/${rs.length}</b><span class="small muted">${/\(game\)$/.test(lab) ? 'students scored well' : 'students lab ready'} · average ${(rs.reduce((a, r) => a + (+r.mistakes || 0), 0) / rs.length).toFixed(1)} mistakes</span></div>`; }).join('')}</div>
       <div class="tbl-wrap"><table class="rec"><thead><tr><th>Student</th><th>Class</th><th>Lab</th><th>Date</th><th>Mistakes</th><th>Quiz / score</th><th>Time</th><th>Result</th><th><span class="small muted">Delete</span></th></tr></thead><tbody>
-      ${vis.map((r, i) => `<tr class="${r.review && f.all ? 'rs-has' : ''}" data-ri="${i}"><td><b>${esc(r.name)}</b>${r.email ? `<div class="small muted">${esc(r.email)}</div>` : ''}</td><td>${esc(r.period || '')}<div class="small muted">${esc(labelOf(r.code))}</div></td><td>${esc(r.lab)}</td><td>${new Date(r.at).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</td><td><div class="rs-mk"><b>${r.mistakes}</b>${r.review ? `<button class="rs-dt" data-dt="${i}" aria-expanded="${f.all ? 'true' : 'false'}" title="${esc(r.review)}">Details</button>` : ''}</div></td><td>${esc(r.quiz)}</td><td class="mono">${esc(r.time)}</td><td>${(g => r.result === 'Lab ready' ? `<span class="chip ok">${g ? 'Great score' : 'Lab ready'}</span>` : r.result === 'Almost ready' ? `<span class="chip acc">${g ? 'Good score' : 'Almost ready'}</span>` : `<span class="chip warn">${g ? 'Keep practicing' : 'Practice again'}</span>`)(/\(game\)$/.test(r.lab))}</td><td>${r.id ? `<button class="btn sm ghost rs-x" data-del="${esc(r.id)}" aria-label="Delete ${esc(r.name)}’s ${esc(r.lab)} result" title="Delete this result">${ico('trash')}</button>` : ''}</td></tr>${r.review ? `<tr class="rs-det" data-dr="${i}" ${f.all ? '' : 'hidden'}><td colspan="9"><ul>${rsNotes(r.review).map(x => `<li${/:$/.test(x) ? ' class="h"' : ''}>${esc(x)}</li>`).join('')}</ul></td></tr>` : ''}`).join('')}</tbody></table></div>`;
+      ${vis.map((r, i) => `<tr class="${r.review && f.all ? 'rs-has' : ''}" data-ri="${i}"><td>${rsWho(r)}</td><td>${esc(labelOf(r.code))}</td><td>${esc(r.lab)}</td><td>${new Date(r.at).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</td><td><div class="rs-mk"><b>${r.mistakes}</b>${r.review ? `<button class="rs-dt" data-dt="${i}" aria-expanded="${f.all ? 'true' : 'false'}" title="${esc(r.review)}">Details</button>` : ''}</div></td><td>${esc(r.quiz)}</td><td class="mono">${esc(r.time)}</td><td>${(g => r.result === 'Lab ready' ? `<span class="chip ok">${g ? 'Great score' : 'Lab ready'}</span>` : r.result === 'Almost ready' ? `<span class="chip acc">${g ? 'Good score' : 'Almost ready'}</span>` : `<span class="chip warn">${g ? 'Keep practicing' : 'Practice again'}</span>`)(/\(game\)$/.test(r.lab))}</td><td>${r.id ? `<button class="btn sm ghost rs-x" data-del="${esc(r.id)}" aria-label="Delete ${esc(rsWhoText(r))}’s ${esc(r.lab)} result" title="Delete this result">${ico('trash')}</button>` : ''}</td></tr>${r.review ? `<tr class="rs-det" data-dr="${i}" ${f.all ? '' : 'hidden'}><td colspan="9"><ul>${rsNotes(r.review).map(x => `<li${/:$/.test(x) ? ' class="h"' : ''}>${esc(x)}</li>`).join('')}</ul></td></tr>` : ''}`).join('')}</tbody></table></div>`;
     $$('[data-dt]', m).forEach(b => b.onclick = () => { const i = b.dataset.dt, open = b.getAttribute('aria-expanded') !== 'true'; b.setAttribute('aria-expanded', open); $(`[data-dr="${i}"]`, m).hidden = !open; $(`[data-ri="${i}"]`, m).classList.toggle('rs-has', open); });
     if ($('#rsAll', m)) $('#rsAll', m).onclick = () => { f.all = !f.all; draw(); };
     $('#fC', m).onchange = e => { f.code = e.target.value; draw(); }; $('#fL', m).onchange = e => { f.lab = e.target.value; draw(); };
@@ -7437,7 +7475,7 @@ async function pageResults(m) {
       else { btn.disabled = false; btn.dataset.sure = ''; btn.classList.remove('warn'); btn.innerHTML = ico('trash') + label; $('#rsMsg', m).textContent = r && r.msg ? 'Couldn’t delete: ' + r.msg : 'Couldn’t delete right now. Check your connection and try again.'; } };
     if ($('#rsDel', m)) $('#rsDel', m).onclick = e => del(vis.filter(x => x.id).map(x => x.id), e.currentTarget, `Click again to delete ${vis.length} result${vis.length === 1 ? '' : 's'}`, `Delete shown results (${vis.length})`);
     $$('[data-del]', m).forEach(b => b.onclick = () => del([b.dataset.del], b, 'Delete?', ''));
-    $('#cpT', m).onclick = e => copyBtn(e.currentTarget, ['Student\tEmail\tClass\tCode\tLab\tDate\tMistakes\tQuiz\tTime\tResult\tWhat to review'].concat(vis.map(r => [r.name, r.email, r.period, r.code, r.lab, new Date(r.at).toLocaleString(), r.mistakes, r.quiz, r.time, r.result, r.review].map(v => String(v == null ? '' : v).replace(/\t|\n/g, ' ')).join('\t'))).join('\n'));
+    $('#cpT', m).onclick = e => copyBtn(e.currentTarget, ['Student\tStudent no.\tClass\tCode\tLab\tDate\tMistakes\tQuiz\tTime\tResult\tWhat to review'].concat(vis.map(r => [rosterName(r.code, r.no) || (r.no ? 'Student ' + r.no : r.name || ''), r.no || '', labelOf(r.code), r.code, r.lab, new Date(r.at).toLocaleString(), r.mistakes, r.quiz, r.time, r.result, r.review].map(v => String(v == null ? '' : v).replace(/\t|\n/g, ' ')).join('\t'))).join('\n'));
   };
   draw();
 }
@@ -7447,14 +7485,14 @@ function renderStudent() {
   if (typeof GameHub !== 'undefined') GameHub.stopAll();
   const S = APP.student, games = S.k.games || [], v = games.includes(APP.view) ? APP.view : 'home', done = LS.get('stuDone', {});
   root().innerHTML = `<div class="stu"><header class="stu-top"><div class="brand" style="padding:0">${logo()}${brandWord()}</div><span class="chip acc">Student</span>
-      <div class="stu-me"><span class="small"><b>${esc(S.name)}</b>${S.period ? ' · ' + esc(S.period) : ''}</span><button class="btn sm ghost" id="stSnd" aria-label="Sound">${ico(SND.on ? 'sound' : 'mute')}</button><button class="btn sm" id="stOut">${ico('out')}Leave</button></div></header>
+      <div class="stu-me"><span class="small"><b>${esc(S.name)}</b></span><button class="btn sm ghost" id="stSnd" aria-label="Sound">${ico(SND.on ? 'sound' : 'mute')}</button><button class="btn sm" id="stOut">${ico('out')}Leave</button></div></header>
     <main class="stu-main" id="stMain"></main></div>`;
   $('#stOut').onclick = () => { if (!$('#stOut').dataset.sure) { $('#stOut').dataset.sure = 1; $('#stOut').textContent = 'Click again to leave'; return; } LS.del('student'); APP.student = null; APP.gateTab = 'student'; render(); };
   $('#stSnd').onclick = () => { SND.on = !SND.on; LS.set('sound', SND.on); renderStudent(); };
   const m = $('#stMain');
   if (v !== 'home') { codeOpen(S.k.code).then(op => { if (op === false && APP.student === S) closeStudent(); }); const g = GAMES.find(x => x.id === v); m.innerHTML = `<div class="gh-top"><button class="btn sm" id="stBack">${ico('back')}Back to my assignments</button>${GFS.btn()}</div><div id="stG" class="gh-body"></div>`; $('#stBack').onclick = () => go('home'); GH.runT0 = performance.now(); if (g.ext) extGame($('#stG'), g); else g.page($('#stG')); return; }
   const labs = S.k.labs.map(id => LABS.find(l => l.id === id)).filter(Boolean), gl = games.map(id => GAMES.find(g => g.id === id)).filter(Boolean), out = LS.get('outbox', []).filter(o => o.code === (S.k.core || S.k.code));
-  m.innerHTML = `<header style="display:grid;gap:6px"><span class="eyebrow">Class code ${esc(S.k.code)}</span><h1>Hi ${esc(S.name.split(' ')[0])}! Here are your ${labs.length && gl.length ? 'labs and games' : labs.length ? 'labs' : 'games'}.</h1><p class="muted" style="max-width:62ch">${labs.length ? 'Do each lab with your mouse. Mistakes are part of practice: you’ll see what goes wrong and why. ' : ''}When you finish, your results go to your teacher.</p></header>
+  m.innerHTML = `<header style="display:grid;gap:6px"><span class="eyebrow">Class code ${esc(S.k.code)}</span><h1>Hi, student ${esc(S.no)}! Here are your ${labs.length && gl.length ? 'labs and games' : labs.length ? 'labs' : 'games'}.</h1><p class="muted" style="max-width:62ch">${labs.length ? 'Do each lab with your mouse. Mistakes are part of practice: you’ll see what goes wrong and why. ' : ''}When you finish, your results go to your teacher.</p></header>
     ${out.length ? `<div class="send-box warn"><b>${out.length} result${out.length > 1 ? 's' : ''} not sent yet.</b><span class="small">Your computer was offline. <button class="btn sm" id="stRetry">Send now</button></span></div>` : ''}
     ${labs.length ? `<section class="sec"><div class="sec-h"><h2>Labs</h2></div>${labs.map(l => { const key = S.k.code + '|' + l.id, d = done[key], c = COURSES.find(x => l.courses.includes(x.id));
       const lock = d && !(S.k.opts & OPT.repeat);
@@ -7481,14 +7519,14 @@ async function postResult(p) {
 }
 async function submitResult(rec) {
   const S = APP.student; if (!S) return;
-  const p = { type: 'labresult', code: S.k.core || S.k.code, name: S.name, email: S.email, period: S.period, lab: rec.lab, labId: APP.curLab, mistakes: rec.mistakes, quiz: rec.quiz, secs: rec.secs, stars: rec.stars, at: rec.at,
+  const p = { type: 'labresult', code: S.k.core || S.k.code, no: S.no, lab: rec.lab, labId: APP.curLab, mistakes: rec.mistakes, quiz: rec.quiz, secs: rec.secs, stars: rec.stars, at: rec.at,
     review: (Kit.mistakes || []).map(x => x.step + ': ' + x.title).join('; ').slice(0, 400) };
   const done = LS.get('stuDone', {}), key = S.k.code + '|' + APP.curLab; done[key] = { stars: rec.stars, sent: false, at: rec.at }; LS.set('stuDone', done);
   showSend('pending', 'Sending your results to your teacher…');
   const r = await postResult(p);
   if (r === 'ok') { done[key].sent = true; LS.set('stuDone', done); showSend('ok', '✓ Sent to your teacher.'); return; }
   if (r === 'offline') { const ob = LS.get('outbox', []); ob.push(p); LS.set('outbox', ob.slice(-30)); }
-  const txt = `${S.name}${S.period ? ' (' + S.period + ')' : ''} · ${rec.lab} · mistakes ${rec.mistakes} · quiz ${rec.quiz} · time ${fmtTime(rec.secs)} · code ${S.k.code}`;
+  const txt = `Student ${S.no} · ${rec.lab} · mistakes ${rec.mistakes} · quiz ${rec.quiz} · time ${fmtTime(rec.secs)} · code ${S.k.code}`;
   showSend('bad', r === 'offline' ? 'Couldn’t reach your teacher’s results right now. They’ll be sent automatically next time you open Educator Space. You can also show your teacher this:' : 'Your results weren’t accepted (' + esc(r) + '). Show your teacher this:', txt);
 }
 let SEND_ID = 0;
@@ -7709,7 +7747,7 @@ const GH = {
   report(id, r) {
     const S = APP.student; if (!S || !(S.k.games || []).includes(id)) return;
     const g = GAMES.find(x => x.id === id), secs = Math.round((performance.now() - (GH.runT0 || performance.now())) / 1000), at = new Date().toISOString(); GH.runT0 = performance.now();
-    const p = { type: 'labresult', code: S.k.core || S.k.code, name: S.name, email: S.email, period: S.period, lab: g.title + ' (game)', labId: id, mistakes: Math.max(0, Math.round(r.mistakes || 0)), quiz: String(r.score).slice(0, 10), secs, stars: r.stars || 1, at, review: String(r.review || '').slice(0, 400) };
+    const p = { type: 'labresult', code: S.k.core || S.k.code, no: S.no, lab: g.title + ' (game)', labId: id, mistakes: Math.max(0, Math.round(r.mistakes || 0)), quiz: String(r.score).slice(0, 10), secs, stars: r.stars || 1, at, review: String(r.review || '').slice(0, 400) };
     const key = S.k.code + '|' + id, done = LS.get('stuDone', {}); done[key] = { stars: p.stars, score: p.quiz, sent: false, at }; LS.set('stuDone', done);
     GH.toast('Sending your score to your teacher…');
     postResult(p).then(res => { const d = LS.get('stuDone', {}); if (res === 'ok') { if (d[key]) d[key].sent = true; LS.set('stuDone', d); GH.toast('✓ Score sent to your teacher'); }
