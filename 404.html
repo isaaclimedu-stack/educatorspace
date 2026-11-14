@@ -840,7 +840,7 @@ p.contact { display: block; line-height: 1.55; margin: 0; }
    { id, courses:['hs-bio', ...], title, time, summary, ngss:[[code, text]], run: () => MyLab.start(meta) }
    It then shows up on its course pages, the home page, and in the rail counts. */
 
-const SITE_KEY = 'es-8b4329cccd8db72e69978a0829794f41';            /* Educator Space's own key (same as SITES.educatorspace in the Apps Script) */
+const SITE_KEY = 'es-8b4329cccd8db72e69978a0829794f41';            /* the OLD key (Nov 2026): teacher codes and class codes are now made and checked only by the sign-up Apps Script, with a key this page never sees */
 const CODE_ABC = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
 const BRAND = 'Educator Space', OWNER_EMAIL = 'admin@educator-space.com', SITE_URL = 'https://educator-space.com', SIGNUP_SITE = 'educatorspace';
 const SIGNUP_ENDPOINT = 'https://script.google.com/macros/s/AKfycby1jWaTEgqIqPZGIKKeDXFbhmuzOPlP304fAmFJJJLSNPPYTHNWHqNY5bdJhckTxm62/exec';
@@ -1029,8 +1029,10 @@ window.addEventListener('popstate', () => { const v = location.pathname.replace(
 
 async function boot() {
   const s = LS.get('session', null);
-  if (s && s.email && s.ck && s.exp && Date.parse(s.exp) > Date.now() && s.ck === await ckOf(s.email, await teacherCode(s.email))) {
+  if (s && s.email && s.ck && s.exp && Date.parse(s.exp) > Date.now() && /^[0-9a-f]{64}$/.test(s.ck)) {
     APP.user = { email: s.email, ck: s.ck };
+    /* the sign-up script checks the remembered sign-in (only it knows the key); a sign-in from before Nov 2026 or a reset code signs out */
+    sheetCall(`a=echeck&e=${encodeURIComponent(s.email)}&ck=${s.ck}`).then(d => { if (d && d.ok === false && APP.user && APP.user.ck === s.ck) { LS.del('session'); APP.user = null; APP.gateMsg = 'Please sign in again with your teacher code. (Teacher codes changed in November 2026: check your email for the new one.)'; render(); } });
     liveAccess(s.email).then(on => { if (on === false) { LS.del('session'); APP.user = null; APP.gateMsg = `Your teacher access has been turned off. If you think this is a mistake, email ${OWNER_EMAIL}.`; render(); } });
   }
   /* a student link: #j-CODE, ?j=CODE or /j/CODE (the 404 page serves the app for that path) */
@@ -1095,7 +1097,7 @@ function renderGate() {
       if (!k.labs.length && !k.games.length) { err.textContent = 'This code doesn\u2019t include any labs or games. Ask your teacher for a new one.'; return; }
       if (!no) { err.textContent = 'Enter the student number your teacher gave you (a number from 1 to 999).'; $('#sNo').focus(); return; }
       const b = $('#sGo'); b.disabled = true; b.textContent = 'Checking code…'; const op = await codeOpen(k.code); b.disabled = false; b.textContent = 'Start';
-      if (op === false) { err.textContent = 'This class code has been closed by your teacher. Ask your teacher for a new one.'; return; }
+      if (op === false) { err.textContent = 'This class code isn’t valid or has been closed by your teacher. Ask your teacher for the right code.'; return; }
       const stu = { code: k.code, no }; LS.set('student', stu); APP.student = Object.assign({}, stu, { k, name: stuLabel(stu) }); APP.joinCode = ''; APP.view = 'home';
       setPath('home', true);
       SND.ac(); render();
@@ -1109,11 +1111,10 @@ function renderGate() {
     if (!isEmail(em)) { err.textContent = 'Enter the email you use for your teacher account.'; return; }
     if (normCode(code).length < 8) { err.textContent = 'Enter your 8-character teacher access code (like ABCD-2345).'; return; }
     b.disabled = true; b.textContent = 'Checking…';
-    const good = normCode(code) === normCode(await teacherCode(em));
-    if (!good) { b.disabled = false; b.textContent = 'Sign in'; err.textContent = "That email and teacher code don't match. Check the code in your welcome email, or email " + OWNER_EMAIL + '.'; return; }
-    const live = await liveAccess(em);
-    if (live === false) { b.disabled = false; b.textContent = 'Sign in'; err.textContent = `Your teacher access has been turned off. If you think this is a mistake, email ${OWNER_EMAIL}.`; return; }
-    LS.set('lastEmail', em); const ck = await ckOf(em, code);
+    /* the sign-up script checks the code (only it can make teacher codes) and returns the sign-in fingerprint */
+    const r = await sheetCall('', { type: 'esign', email: em, code: normCode(code) });
+    if (!r || !r.ok) { b.disabled = false; b.textContent = 'Sign in'; err.textContent = r ? (r.msg || "That email and teacher code don't match.") : 'Couldn’t reach the sign-in service. Check your connection and try again.'; return; }
+    LS.set('lastEmail', em); const ck = r.ck;
     if ($('#gKeep').checked) LS.set('session', { email: em, ck, exp: new Date(Date.now() + SESSION_DAYS * 864e5).toISOString() }); else LS.del('session');
     APP.user = { email: em, ck }; APP.student = null; SND.ac(); render();
   });
@@ -7309,24 +7310,22 @@ async function makeLabCode(email, labIds, opts, set, gameIds = []) {
   if (gameIds.length || labIds.some(id => LAB_ORDER.indexOf(id) >= 10)) {
     let mask = 0n; labIds.forEach(id => { const i = LAB_ORDER.indexOf(id); if (i >= 0) mask |= 1n << BigInt(labBit(i)); }); gameIds.forEach(id => { const i = GAME_ORDER.indexOf(id); if (i >= 0) mask |= 1n << BigInt(gameBit(i)); });
     let mm = mask; do { ext = CODE_ABC[Number(mm % 31n)] + ext; mm /= 31n; } while (mm > 0n); while (ext.length < 6) ext = CODE_ABC[0] + ext;
-    labs = await extHash(ext); ver = 2n;
+    ver = 2n; /* the script fills in the check of the tail */
   } else labIds.forEach(id => { const i = LAB_ORDER.indexOf(id); if (i >= 0) labs |= 1 << i; });
-  const th = await teacherKey(email);
-  const payload = (ver << 38n) | (BigInt(labs) << 28n) | (BigInt(opts & 15) << 24n) | (BigInt(set & 15) << 20n) | BigInt(th);
-  const sg = parseInt((await sha256hex(SITE_KEY + '|lab|' + payload.toString(16).padStart(10, '0'))).slice(0, 6), 16);
-  let n = (payload << 24n) | BigInt(sg), s = '';
-  for (let i = 0; i < 13; i++) { s = CODE_ABC[Number(n % 31n)] + s; n /= 31n; }
-  return fmtLabCode(s) + (ext ? '-' + ext : '');
+  /* the sign-up script adds the teacher key and the signature (Nov 2026: this page no longer has the key). null = couldn't reach it */
+  const r = await sheetCall('', { type: 'labsign', email, ck: APP.user && APP.user.ck, ver: Number(ver), labs, opts: opts & 15, set: set & 15, ext });
+  if (!r || !r.ok || !r.core) return null;
+  return r.core + (ext ? '-' + ext : '');
 }
 async function readLabCode(code) {
   const all = normCode(code); if (all.length !== 13 && (all.length < 19 || all.length > 25)) return null; const c = all.slice(0, 13), ext = all.slice(13);
   let n = 0n; for (const ch of c) { const i = CODE_ABC.indexOf(ch); if (i < 0) return null; n = n * 31n + BigInt(i); }
   if (n >= (1n << 64n)) return null;
   const payload = n >> 24n, sg = Number(n & 0xFFFFFFn);
-  if (parseInt((await sha256hex(SITE_KEY + '|lab|' + payload.toString(16).padStart(10, '0'))).slice(0, 6), 16) !== sg) return null;
+  void sg; /* the signature is checked by the sign-up script when the code is used (codestatus), since only it has the key */
   const p = Number(payload), ver = Math.floor(p / 2 ** 38), field = Math.floor(p / 2 ** 28) % 1024, opts = Math.floor(p / 2 ** 24) % 16;
   let labs, games = [];
-  if (ext) { if (ver !== 2 || field !== await extHash(ext)) return null; let mk = 0n; for (const ch of ext) { const i = CODE_ABC.indexOf(ch); if (i < 0) return null; mk = mk * 31n + BigInt(i); }
+  if (ext) { if (ver !== 2) return null; let mk = 0n; for (const ch of ext) { const i = CODE_ABC.indexOf(ch); if (i < 0) return null; mk = mk * 31n + BigInt(i); }
     labs = LAB_ORDER.filter((id, i) => (mk >> BigInt(labBit(i))) & 1n); games = GAME_ORDER.filter((id, i) => (mk >> BigInt(gameBit(i))) & 1n); }
   else { if (ver === 2) return null; labs = LAB_ORDER.filter((id, i) => field & (1 << i)); if (opts & OPT.blaster) games = ['blaster']; }
   return { code: fmtLabCode(c) + (ext ? '-' + ext : ''), core: fmtLabCode(c), labs, games, opts, set: Math.floor(p / 2 ** 20) % 16, th: p % 2 ** 20 };
@@ -7338,7 +7337,7 @@ async function sheetCall(q, body) {
     const r = await fetch(body ? SIGNUP_ENDPOINT : `${SIGNUP_ENDPOINT}?${q}`, body ? { method: 'POST', signal: ac.signal, body: JSON.stringify(body) } : { signal: ac.signal }); clearTimeout(tm); return await r.json(); }
   catch (e) { return null; }
 }
-async function codeOpen(code) { const d = await sheetCall('a=codestatus&c=' + normCode(code).slice(0, 13)); return d && d.ok ? d.open : null; }
+async function codeOpen(code) { const d = await sheetCall('a=codestatus&c=' + normCode(code).slice(0, 13)); return d && d.ok ? d.open : d && d.bad ? false : null; } /* not a real code: treated like a closed one */
 const CLOSE_OPTS = [['1d', 'In 1 day', 1], ['1w', 'In 1 week', 7], ['2w', 'In 2 weeks', 14], ['1m', 'In 1 month', 30], ['3m', 'In 3 months', 91], ['date', 'On a date I choose…'], ['never', 'Never (open until I close it)']];
 const ymd = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 const dayPassed = s => { if (!s) return false; const [y, mo, d] = String(s).slice(0, 10).split('-').map(Number); return Date.now() >= new Date(y, mo - 1, d + 1).getTime(); };
@@ -7390,6 +7389,7 @@ function pageAssign(m) {
     if (copt === 'date') { if (!cdate || dayPassed(cdate)) { err.textContent = 'Pick a closing date that’s today or later.'; return; } closes = cdate; }
     else if (copt !== 'never') { const t = new Date(); t.setDate(t.getDate() + CLOSE_OPTS.find(o => o[0] === copt)[2]); closes = ymd(t); }
     const code = await makeLabCode(APP.user.email, labs, opts, set, games), label = $('#oLabel', m).value.trim();
+    if (!code) { err.textContent = 'Couldn’t make the code: the sign-up service didn’t answer. Check your connection, or sign out and sign in again.'; return; }
     APP.assignOpts = { hints: $('#oHints', m).checked, rep: $('#oRep', m).checked, label, close: copt, date: cdate };
     const list = myCodes(); list.push({ code, label, labs, games, opts, set, closes, at: new Date().toISOString() }); saveMyCodes(list);
     const reg = sheetCall('', { type: 'labcode', email: APP.user.email, ck: APP.user.ck, code, label, items: itemsOf({ labs, games }).join(', '), closes });
