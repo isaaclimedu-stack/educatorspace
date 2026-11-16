@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3D Brain Explorer</title>
+<meta name="description" content="Interactive 3D brain for high school biology: rotate the brain, slice it in sagittal, coronal and horizontal planes, and click any region to learn its functions, everyday skills and what happens when it is damaged.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0f1c;--bg2:#0e1628;--panel:#131d33;--panel2:#1a2742;--line:#283b62;
+  --text:#e8eef9;--muted:#9fb0cf;--accent:#3ee6c4;--accent-ink:#03231c;--accent2:#7c9cff;
+  --bad:#ff6b81;--good:#4ade80;--warn:#fbbf24;--radius:16px;
+  --mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+  --sans:'Space Grotesk',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+*{box-sizing:border-box}
+html{font-size:16px}
+body{margin:0;min-height:100vh;color:var(--text);font-family:var(--sans);line-height:1.5;
+  background:radial-gradient(900px 500px at 85% -10%,#18305c 0%,transparent 60%),radial-gradient(700px 400px at -10% 110%,#0f3a3a 0%,transparent 60%),var(--bg)}
+button{font:inherit;color:inherit}
+header.top{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 18px;background:rgba(10,15,28,.9);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.logo{display:flex;align-items:center;gap:9px;font-weight:700;letter-spacing:.03em;font-size:1.05rem}
+.logo b{color:var(--accent)}
+.logo svg{width:22px;height:22px;color:var(--accent)}
+.hud{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pill{font:600 .78rem var(--mono);padding:5px 10px;border-radius:999px;background:var(--panel);border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.pill strong{color:var(--text)}
+.app{display:grid;grid-template-columns:250px minmax(0,1fr) 360px;gap:14px;padding:14px 16px 18px;max-width:1700px;margin:0 auto}
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:var(--radius);padding:14px}
+.side{align-self:start;display:grid;gap:14px}
+.eyebrow{font:600 .7rem var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+.grp{display:grid;gap:8px}
+.views{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.vb{display:flex;align-items:center;gap:7px;padding:8px 9px;border-radius:10px;border:1px solid var(--line);background:var(--panel2);cursor:pointer;font-weight:600;font-size:.88rem}
+.vb svg{width:16px;height:16px;flex:none;color:var(--muted)}
+.vb:hover{border-color:var(--accent)}
+.vb.on{border-color:var(--accent);background:rgba(62,230,196,.12)}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:3px;gap:3px}
+.seg button{border:0;background:none;padding:6px 4px;border-radius:7px;cursor:pointer;font-size:.8rem;font-weight:600;color:var(--muted)}
+.seg button.on{background:var(--accent);color:var(--accent-ink)}
+.seg button:not(.on):hover{color:var(--text)}
+.slider{display:grid;gap:6px}
+.slider[hidden]{display:none}
+.slider .row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.slider output{font:600 .75rem var(--mono);color:var(--text)}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.lbtn{border:1px solid var(--line);background:var(--panel2);border-radius:9px;padding:5px 10px;font-size:.8rem;font-weight:600;cursor:pointer}
+.lbtn:hover{border-color:var(--accent)}
+.tog{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:.9rem}
+.sw{position:relative;width:38px;height:22px;border-radius:22px;background:#2a3a5e;border:0;cursor:pointer;flex:none;transition:background .15s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .15s}
+.sw.on{background:var(--accent)}.sw.on::after{left:19px}
+.hint{font-size:.78rem;color:var(--muted);margin:0}
+.search{position:relative}
+.search input{width:100%;padding:9px 11px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font:inherit;font-size:.9rem}
+.search input:focus{outline:none;border-color:var(--accent)}
+.results{position:absolute;left:0;right:0;top:calc(100% + 4px);background:var(--panel);border:1px solid var(--line);border-radius:12px;max-height:300px;overflow:auto;z-index:20;display:none;box-shadow:0 14px 40px rgba(0,0,0,.45)}
+.results button{display:flex;gap:8px;align-items:center;width:100%;border:0;background:none;padding:8px 11px;text-align:left;cursor:pointer;font-size:.88rem}
+.results button:hover,.results button.act{background:var(--panel2)}
+.dot{width:10px;height:10px;border-radius:50%;flex:none;box-shadow:0 0 0 1px rgba(255,255,255,.18)}
+.center{min-width:0;display:grid;gap:10px;align-content:start}
+.tags{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.tags .lab{font:600 .7rem var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-right:4px}
+.chip{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:4px 11px;font-size:.8rem;font-weight:600;cursor:pointer;color:var(--muted)}
+.chip:hover{border-color:var(--accent);color:var(--text)}
+.chip.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.stage{position:relative;height:calc(100vh - 150px);min-height:520px;border-radius:var(--radius);overflow:hidden;border:1px solid var(--line);
+  background:radial-gradient(ellipse at 50% 38%,#22324f 0%,#121b2e 55%,#0a0f1c 100%)}
+.stage canvas{display:block;width:100%;height:100%;cursor:grab;touch-action:none}
+.stage canvas:active{cursor:grabbing}
+.vtag{position:absolute;left:14px;top:12px;font:600 .72rem var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);pointer-events:none}
+.vtag b{color:var(--text)}
+.orient{position:absolute;inset:0;pointer-events:none}
+.orient span{position:absolute;transform:translate(-50%,-50%);font:600 .64rem var(--mono);letter-spacing:.14em;text-transform:uppercase;color:#b9c8e6;background:rgba(10,15,28,.55);border:1px solid rgba(124,156,255,.25);padding:2px 7px;border-radius:999px;white-space:nowrap;transition:opacity .2s}
+.tip{position:fixed;pointer-events:none;background:#0b1222;border:1px solid var(--line);color:var(--text);padding:5px 10px;border-radius:8px;font-size:.82rem;font-weight:600;opacity:0;transition:opacity .1s;z-index:40;white-space:nowrap;box-shadow:0 6px 20px rgba(0,0,0,.4)}
+.loading{position:absolute;inset:0;display:grid;place-items:center;background:rgba(10,15,28,.82);z-index:5;transition:opacity .4s}
+.loading.done{opacity:0;pointer-events:none}
+.loading div{text-align:center;display:grid;gap:10px;justify-items:center}
+.spin{width:38px;height:38px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--accent);animation:sp .9s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.loading p{margin:0;font:600 .8rem var(--mono);color:var(--muted)}
+.quizbar{display:none;position:absolute;left:50%;top:12px;transform:translateX(-50%);background:rgba(11,18,34,.94);border:1px solid var(--accent);border-radius:14px;padding:8px 10px 8px 16px;align-items:center;gap:12px;z-index:4;max-width:calc(100% - 24px);box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.quizbar.show{display:flex;flex-wrap:wrap}
+.quizbar .q{font-size:.95rem}
+.quizbar .q b{color:var(--accent);font-size:1.05rem}
+.quizbar .fb{font-size:.82rem;font-weight:600}
+.quizbar .sc{font:600 .75rem var(--mono);color:var(--muted)}
+.zoom{position:absolute;right:12px;bottom:12px;display:flex;flex-direction:column;gap:6px;z-index:3}
+.zoom button{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:rgba(19,29,51,.9);font-weight:700;font-size:1rem;cursor:pointer}
+.zoom button:hover{border-color:var(--accent)}
+.legend{position:absolute;left:12px;bottom:12px;display:flex;flex-wrap:wrap;gap:6px 12px;max-width:calc(100% - 80px);font-size:.75rem;color:var(--muted);pointer-events:none}
+.legend span{display:flex;align-items:center;gap:6px}
+.info{align-self:start;position:sticky;top:66px;max-height:calc(100vh - 80px);overflow:auto;padding:18px}
+.info h2{font-size:1.55rem;line-height:1.15;margin:6px 0 2px}
+.info .aka{color:var(--muted);font-size:.88rem}
+.info .where{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:12px 0 2px;font-size:.92rem}
+.info h3{font:600 .7rem var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:16px 0 6px}
+.info ul{margin:0;padding-left:18px}
+.info li{margin:3px 0;font-size:.93rem}
+.info p{margin:0;font-size:.93rem}
+.fact{border-left:3px solid var(--accent2);padding:4px 0 4px 12px;color:#cfdaf0}
+.cat{display:inline-flex;align-items:center;gap:7px;font:600 .68rem var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.show{margin-top:14px;display:flex;gap:8px;flex-wrap:wrap}
+.btn{background:var(--accent);color:var(--accent-ink);border:0;padding:9px 14px;border-radius:10px;font-weight:700;cursor:pointer;font-size:.88rem}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
+.btn.ghost:hover{border-color:var(--accent)}
+.mtags{display:flex;flex-wrap:wrap;gap:5px;margin-top:12px}
+.mtags span{font-size:.75rem;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:2px 9px;color:var(--muted)}
+.welcome dl{margin:6px 0 0}
+.welcome dt{font-weight:700;margin-top:10px;font-size:.93rem}
+.welcome dd{margin:2px 0 0;color:var(--muted);font-size:.9rem}
+.picks{display:flex;flex-wrap:wrap;gap:6px}
+@media (max-width:1240px){.app{grid-template-columns:240px minmax(0,1fr)}.info{grid-column:1/-1;position:static;max-height:none}}
+@media (max-width:820px){.app{grid-template-columns:1fr}.stage{height:62vh;min-height:380px}.side{order:2}.center{order:1}.info{order:3}}
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+</head>
+<body>
+<header class="top">
+  <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 3.5a3 3 0 0 0-3 3 3 3 0 0 0-2.5 4.6A3.2 3.2 0 0 0 5 17a3 3 0 0 0 4.5 2.6V3.6z"/><path d="M14.5 3.5a3 3 0 0 1 3 3 3 3 0 0 1 2.5 4.6A3.2 3.2 0 0 1 19 17a3 3 0 0 1-4.5 2.6V3.6z"/></svg><span>Brain <b>Explorer</b></span></div>
+  <div class="hud"><span class="pill">View <strong id="hudView">Left side</strong></span><span class="pill" id="hudCut">No cut</span></div>
+</header>
+
+<div class="app">
+  <aside class="side">
+    <section class="card grp">
+      <span class="eyebrow">Turn the brain</span>
+      <div class="views" id="views"></div>
+      <p class="hint">Drag to rotate. Scroll or pinch to zoom. Right-drag or two fingers to move it.</p>
+    </section>
+    <section class="card grp">
+      <span class="eyebrow">Cut it open</span>
+      <div class="seg" id="cutSeg"><button data-c="none">None</button><button data-c="sagittal">Sagittal</button><button data-c="coronal">Coronal</button><button data-c="horizontal">Horizontal</button></div>
+      <div class="slider" id="cutCtl" hidden>
+        <div class="row"><span class="hint" id="cutDesc"></span></div>
+        <input type="range" id="cutPos" min="-1" max="1" step="0.005" aria-label="Cut position">
+        <div class="row"><output id="cutOut"></output><button class="lbtn" id="flip">Flip side</button></div>
+      </div>
+    </section>
+    <section class="card grp">
+      <span class="eyebrow">Colour</span>
+      <div class="seg" id="modeSeg"><button data-m="natural">Natural</button><button data-m="lobes">Lobes</button><button data-m="areas">Areas</button></div>
+      <div class="tog"><span>See-through cortex</span><button class="sw" id="ghostSw" aria-label="See-through cortex"></button></div>
+      <div class="tog"><span>Quiz me</span><button class="sw" id="quizSw" aria-label="Quiz mode"></button></div>
+    </section>
+    <section class="card grp search">
+      <span class="eyebrow">Find a structure</span>
+      <input id="q" type="search" placeholder="e.g. hippocampus, memory" autocomplete="off" aria-label="Find a structure">
+      <div class="results" id="results"></div>
+    </section>
+  </aside>
+
+  <main class="center">
+    <div class="tags" id="tags"></div>
+    <div class="stage" id="stage">
+      <div class="vtag" id="vtag"></div>
+      <div class="orient" id="orient"></div>
+      <div class="quizbar" id="quizbar"><span class="q">Find: <b id="qT"></b></span><span class="fb" id="qFb"></span><span class="sc" id="qSc"></span><button class="lbtn" id="qSkip">Skip</button></div>
+      <div class="legend" id="legend"></div>
+      <div class="zoom"><button id="zin" aria-label="Zoom in">+</button><button id="zout" aria-label="Zoom out">−</button><button id="zre" aria-label="Reset view" style="font-size:.85rem">⟲</button></div>
+      <div class="loading" id="loading"><div><div class="spin"></div><p id="loadMsg">Building the brain…</p></div></div>
+    </div>
+  </main>
+
+  <aside class="card info" id="info"></aside>
+</div>
+<div class="tip" id="tip"></div>
+
+<script src="../shared/fullscreen.js"></script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+const TAGS={movement:"Movement",coordination:"Balance & coordination",senses:"Body senses",vision:"Vision",hearing:"Hearing",language:"Language",memory:"Memory",emotion:"Emotion",thinking:"Thinking & planning",body:"Body regulation",connections:"Wiring & fluid"};
+
+const REG={
+frontal:{n:"Frontal lobe",cat:"Cerebral lobe",c:"#F2C4B3",tags:["movement","thinking","language","emotion"],
+ where:"Front of each hemisphere, in front of the central sulcus and above the lateral sulcus. The largest lobe, about a third of the cortex.",
+ fn:["Plans and carries out voluntary movement","Executive functions: planning, decision-making, working memory, self-control","Personality, motivation and social behaviour","Speech production (left side, Broca’s area)","Directs attention and voluntary eye movements"],
+ sk:["Planning your week or a multi-step project","Holding back an impulsive comment","Switching between tasks","Speaking fluently"],
+ dmg:"Personality change, impulsivity or apathy, poor planning, weakness on the opposite side of the body, and (left side) difficulty producing speech.",
+ fact:"In 1848 railway worker Phineas Gage survived an iron rod passing through his frontal lobe. His reported change in personality became a landmark case linking this lobe to behaviour."},
+parietal:{n:"Parietal lobe",cat:"Cerebral lobe",c:"#F5DFA0",tags:["senses","thinking","language"],
+ where:"Top-back of each hemisphere, between the central sulcus and the parieto-occipital sulcus.",
+ fn:["Processes touch, pain, temperature and body position","Builds your sense of space and where your body is in it","Directs attention to locations around you","Supports reading, writing and arithmetic (left side)","Guides reaching and tool use"],
+ sk:["Finding a light switch in the dark","Judging whether your car fits a parking space","Doing mental maths","Using a fork without watching your hand"],
+ dmg:"Numbness or poor touch discrimination on the opposite side. Right-side damage often causes hemispatial neglect (ignoring the left side of space); left-side damage can disrupt reading, writing and calculation.",
+ fact:"People with neglect after a right parietal stroke may eat from only the right half of the plate or shave only half of their face."},
+temporal:{n:"Temporal lobe",cat:"Cerebral lobe",c:"#B8DDD3",tags:["hearing","language","memory","emotion","vision"],
+ where:"Lower side of each hemisphere, below the lateral (Sylvian) sulcus, roughly behind the ears.",
+ fn:["Hearing and sound processing","Understanding language (left side, Wernicke’s area)","Forming new long-term memories (hippocampus on its inner side)","Recognising objects and faces","Emotional processing (amygdala on its inner side)"],
+ sk:["Following a conversation","Recognising a familiar song or voice","Remembering where you parked","Spotting a friend’s face in a crowd"],
+ dmg:"Trouble understanding speech, memory loss, difficulty recognising faces or objects. It is also the most common source of focal seizures in adults.",
+ fact:"Temporal-lobe seizures can begin with an intense feeling of déjà vu, an odd smell, or a rising sensation in the stomach."},
+occipital:{n:"Occipital lobe",cat:"Cerebral lobe",c:"#CFC3E8",tags:["vision"],
+ where:"Back of the brain, behind the parieto-occipital sulcus and above the cerebellum.",
+ fn:["Primary processing of vision (V1)","Analyses shape, colour, motion and depth in visual association areas","Sends visual information forward along the “what” (temporal) and “where” (parietal) streams"],
+ sk:["Reading text","Seeing colours","Tracking a ball in flight"],
+ dmg:"Loss of part of the visual field (often the same half of vision in both eyes), cortical blindness, or difficulty recognising what is seen.",
+ fact:"Each occipital lobe sees the opposite half of the world: the left one handles everything in your right visual field."},
+cerebellum:{n:"Cerebellum",aka:"“Little brain”",cat:"Hindbrain",c:"#C9D9A8",tags:["movement","coordination"],
+ where:"Below the occipital lobes at the back of the skull, behind the brainstem.",
+ fn:["Coordinates the timing and accuracy of movements","Maintains balance and posture","Motor learning: fine-tunes skills with practice","Contributes to speech fluency, attention and some thinking tasks"],
+ sk:["Riding a bike","Typing or playing an instrument","Touching your nose with your eyes closed","Walking on uneven ground"],
+ dmg:"Clumsy, uncoordinated movement (ataxia), tremor when reaching, unsteady wide-based walking and slurred speech. Unlike the cerebrum, each side controls the same side of the body.",
+ fact:"It is only about 10% of brain volume but holds roughly 80% of the brain’s neurons, around 69 billion of 86 billion."},
+pons:{n:"Pons",aka:"Middle of the brainstem",cat:"Brainstem",c:"#B9C2D0",tags:["body","movement","connections"],
+ where:"The rounded bulge in the middle of the brainstem, between the midbrain and medulla, in front of the cerebellum.",
+ fn:["Relays signals between the cerebrum and cerebellum","Helps regulate breathing rhythm","Involved in sleep and REM (dreaming) sleep","Nuclei for facial sensation, chewing, facial expression, outward eye movement and hearing/balance (cranial nerves V–VIII)"],
+ sk:["Chewing","Smiling and frowning","Dreaming during REM sleep"],
+ dmg:"Damage to the front of the pons can cause locked-in syndrome: the person is fully aware but can move only their eyes.",
+ fact:"“Pons” is Latin for bridge: it links the cerebrum to the cerebellum."},
+medulla:{n:"Medulla oblongata",cat:"Brainstem",c:"#A9B2C2",tags:["body","connections"],
+ where:"Lowest part of the brainstem, continuous with the spinal cord at the base of the skull.",
+ fn:["Controls heart rate and blood pressure","Sets the basic rhythm of breathing","Reflexes: swallowing, coughing, sneezing, vomiting","Carries every signal between brain and spinal cord","Nuclei for cranial nerves IX–XII (swallowing, tongue, vagus nerve)"],
+ sk:["Breathing while you sleep","Swallowing","Coughing to clear your airway"],
+ dmg:"Can be immediately life-threatening because breathing and circulation depend on it; also causes swallowing and speech problems.",
+ fact:"Most motor fibres cross sides here (the pyramidal decussation), which is why the left brain controls the right side of the body."},
+midbrain:{n:"Midbrain",aka:"Mesencephalon",cat:"Brainstem",c:"#D2D7E0",tags:["movement","vision","hearing","body"],
+ where:"Top part of the brainstem, just below the thalamus.",
+ fn:["Controls eye movements and pupil reflexes (cranial nerves III and IV)","Superior colliculi: reflexive turning toward sights","Inferior colliculi: relay for hearing","Substantia nigra: dopamine for movement and reward","Reticular formation helps keep you awake and alert"],
+ sk:["Snapping your eyes toward a sudden flash","Pupils shrinking in bright light","Startling at a loud bang"],
+ dmg:"Eye-movement problems, a drooping eyelid and reduced consciousness. Loss of substantia nigra neurons causes Parkinson’s disease."},
+m1:{n:"Primary motor cortex",s:"Primary motor",aka:"Precentral gyrus · Brodmann area 4",cat:"Frontal lobe",c:"#E26D5A",tags:["movement"],
+ where:"The strip of cortex directly in front of the central sulcus.",
+ fn:["Sends the final commands for voluntary movement to muscles via the spinal cord","Controls the opposite side of the body","Laid out as a “motor homunculus”, with huge areas for the hands, lips and tongue"],
+ sk:["Writing","Buttoning a shirt","Kicking a ball","Moving your lips to speak"],
+ dmg:"Weakness or paralysis on the opposite side of the body, a classic sign of stroke.",
+ fact:"Neurosurgeon Wilder Penfield mapped this strip from the 1930s to the 1950s by gently stimulating the cortex of awake patients during surgery."},
+premotor:{n:"Premotor cortex",s:"Premotor",aka:"Lateral Brodmann area 6",cat:"Frontal lobe",c:"#F09A7B",tags:["movement","thinking"],
+ where:"Just in front of the primary motor cortex.",
+ fn:["Plans and prepares movements before they happen","Sequences movements, especially those guided by sight or sound","Contains the frontal eye fields (voluntary eye movements) in its upper part","Helps in understanding other people’s actions"],
+ sk:["Reaching for a cup you see","Learning the steps of a dance","Copying someone’s gesture"],
+ dmg:"Difficulty planning or sequencing movements (apraxia) even though the muscles are not weak."},
+dlpfc:{n:"Dorsolateral prefrontal cortex",s:"Prefrontal (DLPFC)",aka:"DLPFC",cat:"Frontal lobe",c:"#E7B3C6",tags:["thinking","memory"],
+ where:"Front and side of the frontal lobe, mainly the middle frontal gyrus.",
+ fn:["Working memory: holding and manipulating information","Planning and organising","Switching strategy when the rules change","Abstract reasoning","Overriding automatic responses"],
+ sk:["Doing mental arithmetic","Following a recipe while chatting","Solving a puzzle","Saying the ink colour of the word “RED” printed in blue"],
+ dmg:"Dysexecutive problems: poor planning, rigid thinking and repeating the same action (perseveration).",
+ fact:"The prefrontal cortex is one of the last brain regions to mature, continuing to develop into the mid-20s."},
+broca:{n:"Broca’s area",s:"Broca’s area",aka:"Left inferior frontal gyrus · Brodmann areas 44 & 45",cat:"Frontal lobe · language",c:"#B5523B",tags:["language"],
+ where:"Lower part of the left frontal lobe, just above the front of the lateral sulcus.",
+ fn:["Speech production and planning the movements of speech","Grammar and sentence structure","Helps understand complex sentences","Verbal working memory"],
+ sk:["Speaking in full sentences","Reading aloud","Using correct grammar"],
+ dmg:"Broca’s (expressive) aphasia: slow, effortful, telegraphic speech (“want… coffee… now”) while understanding stays relatively intact.",
+ fact:"Paul Broca described it in 1861 from a patient nicknamed “Tan”, the only syllable he could say."},
+broca_r:{n:"Right inferior frontal gyrus",s:"R. inferior frontal",aka:"Right-side partner of Broca’s area",cat:"Frontal lobe",c:"#C9765F",tags:["language","thinking","emotion"],
+ where:"Lower part of the right frontal lobe, the mirror position of Broca’s area.",
+ fn:["Prosody: putting emotion and emphasis into your voice","Stopping actions you have already started (response inhibition)","Shifting attention"],
+ sk:["Sounding excited, sad or sarcastic on purpose","Stopping at a light that just turned red"],
+ dmg:"Flat, monotone speech (expressive aprosodia) and more impulsive behaviour.",
+ fact:"Language is left-dominant in about 95% of right-handers and roughly 70% of left-handers, so the right side usually takes these supporting roles."},
+s1:{n:"Primary somatosensory cortex",s:"Primary somatosensory",aka:"Postcentral gyrus · Brodmann areas 3, 1, 2",cat:"Parietal lobe",c:"#E8B83E",tags:["senses"],
+ where:"The strip of cortex directly behind the central sulcus.",
+ fn:["Receives touch, pressure, vibration, pain and temperature","Proprioception: knowing where your limbs are","Maps the opposite side of the body as a “sensory homunculus”"],
+ sk:["Feeling the texture of fabric","Knowing which finger was touched","Feeling a mosquito land on your arm"],
+ dmg:"Numbness or loss of fine touch on the opposite side; inability to identify objects by touch alone (astereognosis)."},
+spl:{n:"Superior parietal lobule",s:"Sup. parietal lobule",aka:"Brodmann areas 5 & 7",cat:"Parietal lobe",c:"#F4D27A",tags:["senses","movement","vision"],
+ where:"Upper parietal lobe, behind the somatosensory strip and above the intraparietal sulcus.",
+ fn:["Combines vision and body sense to guide reaching","Body schema: your internal model of your body","Spatial attention and mental rotation"],
+ sk:["Catching a moving object","Mentally rotating a shape","Moving through a crowded room"],
+ dmg:"Misreaching for objects you can clearly see (optic ataxia). Damage on both sides contributes to Bálint’s syndrome."},
+smg:{n:"Supramarginal gyrus",s:"Supramarginal",aka:"Brodmann area 40",cat:"Parietal lobe",c:"#DDBB4F",tags:["language","senses","emotion"],
+ where:"Lower parietal lobe, curving around the end of the lateral sulcus.",
+ fn:["Phonological processing: handling speech sounds (left side)","Verbal short-term memory","Planning skilled movements and tool use","Separating your own feelings from other people’s (right side, empathy)"],
+ sk:["Repeating a phone number in your head","Sounding out an unfamiliar word","Miming how to use scissors"],
+ dmg:"Conduction aphasia (trouble repeating words) and apraxia of learned movements."},
+angular:{n:"Angular gyrus",s:"Angular gyrus",aka:"Brodmann area 39",cat:"Parietal lobe",c:"#C99A2E",tags:["language","thinking","memory"],
+ where:"Lower parietal lobe, near where the parietal, temporal and occipital lobes meet.",
+ fn:["Reading and writing","Arithmetic and number facts","Understanding meaning, metaphor and concepts","Spatial cognition and attention"],
+ sk:["Reading a paragraph","Recalling 7 × 8","Understanding a metaphor"],
+ dmg:"Left-side damage can cause Gerstmann syndrome (trouble writing, calculating, naming fingers and telling left from right) and loss of reading (alexia).",
+ fact:"Electrical stimulation of the right angular gyrus has triggered out-of-body experiences in patients."},
+a1:{n:"Primary auditory cortex",s:"Auditory cortex",aka:"Heschl’s gyrus · Brodmann areas 41 & 42",cat:"Temporal lobe",c:"#3FA58E",tags:["hearing"],
+ where:"Upper surface of the temporal lobe, mostly tucked inside the lateral sulcus.",
+ fn:["First cortical stage of hearing","Processes pitch and loudness (a tonotopic map from low to high frequencies)","Helps locate sounds","Receives input from both ears"],
+ sk:["Telling two musical notes apart","Hearing your name across a room","Locating a ringing phone"],
+ dmg:"Damage on one side rarely causes deafness because each side hears both ears; damage on both sides can cause cortical deafness."},
+wernicke:{n:"Wernicke’s area",s:"Wernicke’s area",aka:"Posterior superior temporal gyrus · part of Brodmann area 22",cat:"Temporal lobe · language",c:"#2E7F86",tags:["language","hearing"],
+ where:"Back part of the upper left temporal lobe, near the auditory cortex.",
+ fn:["Understanding spoken and written language","Linking the sounds of words to their meanings","Monitoring your own speech"],
+ sk:["Understanding a lecture","Following instructions","Picking the right word"],
+ dmg:"Wernicke’s (receptive) aphasia: fluent but often meaningless speech with poor understanding. People are frequently unaware of their errors.",
+ fact:"Carl Wernicke described it in 1874 at just 26. It connects to Broca’s area through a fibre bundle called the arcuate fasciculus."},
+wernicke_r:{n:"Right posterior superior temporal gyrus",s:"R. sup. temporal",aka:"Right-side partner of Wernicke’s area",cat:"Temporal lobe",c:"#4E9BA1",tags:["language","hearing","emotion"],
+ where:"Back of the upper right temporal lobe.",
+ fn:["Understanding the emotional tone of voices","Processing melody and music","Grasping humour, sarcasm and the gist of a story"],
+ sk:["Hearing that a friend is upset from their voice","Recognising a melody","Getting a joke"],
+ dmg:"Difficulty understanding tone of voice, sarcasm and emotional prosody (receptive aprosodia)."},
+itg:{n:"Middle & inferior temporal gyri",s:"Mid/inf. temporal gyri",cat:"Temporal lobe",c:"#8CCBBE",tags:["vision","memory","language"],
+ where:"Middle and lower parts of the side of the temporal lobe.",
+ fn:["Recognising objects: the “what” pathway of vision","Semantic memory: knowing what words and things mean","Visual motion area (MT/V5) near the temporal–occipital junction"],
+ sk:["Recognising a chair as a chair","Knowing that a zebra is an animal","Seeing a car move"],
+ dmg:"Visual agnosia (seeing but not recognising) and, in semantic dementia, loss of word meaning. Damage to MT can cause motion blindness."},
+v1:{n:"Primary visual cortex",s:"Primary visual (V1)",aka:"Striate cortex · V1 · Brodmann area 17",cat:"Occipital lobe",c:"#8A6FC4",tags:["vision"],
+ where:"Back tip of the occipital lobe, mostly lining the calcarine sulcus on the inner surface.",
+ fn:["First cortical stage of vision","Detects edges, orientation, contrast and simple motion","Maps the opposite visual field point by point, with central vision taking the most space"],
+ sk:["Seeing the edges of letters","Noticing that a line is tilted","Seeing anything consciously at all"],
+ dmg:"Loss of the opposite visual field (homonymous hemianopia); damage on both sides causes cortical blindness. Some patients still react to things they cannot consciously see (“blindsight”).",
+ fact:"It is called “striate” because a visible white stripe, the line of Gennari, runs through it."},
+central_sulcus:{n:"Central sulcus",aka:"Fissure of Rolando",cat:"Landmark groove",c:"#5B4A3E",tags:["movement","senses"],
+ where:"Deep groove running down the side of each hemisphere from the top.",
+ fn:["Separates the frontal lobe (in front) from the parietal lobe (behind)","The movement strip lies in front of it, the body-sensation strip behind it"],
+ sk:["A key landmark surgeons use to protect the motor cortex"],
+ dmg:"Not a functional area itself; damage nearby affects movement and sensation."},
+lateral_sulcus:{n:"Lateral sulcus",aka:"Sylvian fissure",cat:"Landmark groove",c:"#5B4A3E",tags:["connections"],
+ where:"Deep cleft on the side of the brain.",
+ fn:["Separates the temporal lobe from the frontal and parietal lobes above","Hides the insula and the auditory cortex in its depths","The middle cerebral artery runs inside it"],
+ sk:[],
+ dmg:"The middle cerebral artery territory around this fissure is the most common site of stroke.",
+ fact:"It is one of the earliest grooves to appear as the fetal brain develops."},
+mpfc:{n:"Medial prefrontal cortex",s:"Medial prefrontal",aka:"mPFC",cat:"Frontal lobe (inner surface)",c:"#EFA8A0",tags:["thinking","emotion"],
+ where:"Inner surface of the frontal lobe, facing the other hemisphere.",
+ fn:["Thinking about yourself and your future","Understanding what other people think (theory of mind)","Weighing options and making decisions","Regulating emotion","Core hub of the default mode network, active during daydreaming"],
+ sk:["Daydreaming about a holiday","Guessing how a friend will react","Calming yourself down"],
+ dmg:"Apathy, reduced social insight and difficulty making decisions."},
+sma:{n:"Supplementary motor area",s:"SMA",aka:"Medial Brodmann area 6",cat:"Frontal lobe (inner surface)",c:"#F08B6E",tags:["movement"],
+ where:"Inner surface of the frontal lobe, just in front of the leg area of the motor cortex.",
+ fn:["Starts self-initiated movements","Plans movement sequences","Coordinates the two hands together"],
+ sk:["Deciding to stand up","Playing piano with both hands","Tapping a rhythm from memory"],
+ dmg:"Reduced spontaneous movement and speech, sometimes “alien hand” behaviour.",
+ fact:"Electrical activity here, called the readiness potential, starts before people report deciding to move."},
+paracentral:{n:"Paracentral lobule",s:"Paracentral lobule",cat:"Frontal & parietal lobes (inner surface)",c:"#E8A06A",tags:["movement","senses","body"],
+ where:"Where the motor and sensory strips continue onto the inner surface, at the top middle of the brain.",
+ fn:["Movement and sensation of the opposite leg and foot","Voluntary control of the bladder and bowel"],
+ sk:["Wiggling your toes","Feeling a pebble in your shoe","Holding in urine"],
+ dmg:"Weakness and numbness of the opposite leg (typical of anterior cerebral artery stroke) and incontinence."},
+precuneus:{n:"Precuneus",s:"Precuneus",cat:"Parietal lobe (inner surface)",c:"#EFCB6A",tags:["memory","thinking"],
+ where:"Inner surface of the parietal lobe, in front of the cuneus.",
+ fn:["Recalling personal memories (episodic memory)","Visual imagery and spatial planning","Self-reflection and awareness","Major hub of the default mode network"],
+ sk:["Picturing your childhood home","Mentally walking a familiar route","Reflecting on your day"],
+ dmg:"Shows early changes in Alzheimer’s disease and can affect memory and self-awareness.",
+ fact:"It is one of the most metabolically active regions of the brain at rest."},
+cuneus:{n:"Cuneus",aka:"Latin for “wedge”",cat:"Occipital lobe (inner surface)",c:"#B5A3DE",tags:["vision"],
+ where:"Wedge-shaped area above the calcarine sulcus on the inner occipital lobe.",
+ fn:["Processes the opposite lower quarter of the visual field","Basic visual processing alongside V1"],
+ sk:["Seeing the ground ahead as you walk"],
+ dmg:"Loss of the opposite lower quarter of vision (inferior quadrantanopia)."},
+lingual:{n:"Lingual gyrus",cat:"Occipital lobe (inner surface)",c:"#9E8DD0",tags:["vision","memory"],
+ where:"Below the calcarine sulcus on the inner occipital lobe.",
+ fn:["Processes the opposite upper quarter of the visual field","Colour processing (with the fusiform gyrus)","Recognising letters and visual memory"],
+ sk:["Seeing a bird above you","Perceiving colours","Recognising letters"],
+ dmg:"Loss of the upper quarter of vision; together with fusiform damage, loss of colour vision (cerebral achromatopsia)."},
+ofc:{n:"Orbitofrontal cortex",s:"Orbitofrontal",aka:"OFC",cat:"Frontal lobe (underside)",c:"#F3B07A",tags:["emotion","thinking","senses"],
+ where:"Underside of the frontal lobes, just above the eye sockets (orbits).",
+ fn:["Judges the value of rewards and outcomes","Emotional and social decision-making","Learning from consequences and changing behaviour","Combines smell and taste into flavour"],
+ sk:["Choosing between two desserts","Sensing a bad deal","Changing tactics after a mistake"],
+ dmg:"Impulsivity, poor social judgement and risky decisions despite knowing the consequences.",
+ fact:"Much of Phineas Gage’s famous injury was to his orbitofrontal and medial prefrontal cortex."},
+cingulate:{n:"Cingulate gyrus",s:"Cingulate gyrus",cat:"Limbic system",c:"#E9A2C0",tags:["emotion","thinking","memory"],
+ where:"Arches around the corpus callosum on the inner surface of each hemisphere.",
+ fn:["Front part: detects errors and conflicts, drives motivation, feels the unpleasantness of pain","Back part: memory and the default mode network","Links emotion with attention and action"],
+ sk:["Noticing you made a typo","Feeling how unpleasant pain is","Staying motivated toward a goal"],
+ dmg:"Apathy and reduced motivation; severe damage on both sides can cause akinetic mutism."},
+cc:{n:"Corpus callosum",s:"Corpus callosum",cat:"White matter",c:"#F4D7A1",tags:["connections"],
+ where:"Thick arched band of fibres at the floor of the longitudinal fissure.",
+ fn:["Connects the left and right hemispheres with about 200 million axons","Lets the two halves share information","Parts: rostrum, genu (front), body and splenium (back)"],
+ sk:["Naming an object you hold in your left hand","Coordinating both hands"],
+ dmg:"Split-brain effects: once it is cut, an object felt only by the left hand may not be named aloud.",
+ fact:"Surgeons sometimes cut it (callosotomy) to stop severe seizures spreading between the hemispheres."},
+fornix:{n:"Fornix",cat:"Limbic system · white matter",c:"#E7B6CE",tags:["memory","connections"],
+ where:"Arching bundle of fibres beneath the corpus callosum.",
+ fn:["Main output pathway of the hippocampus","Carries memory signals to the mammillary bodies and septal area","Part of the Papez circuit for memory and emotion"],
+ sk:["Turning today’s events into lasting memories"],
+ dmg:"Can cause anterograde amnesia, difficulty forming new memories."},
+septum:{n:"Septum pellucidum",cat:"Midline membrane",c:"#EDE3D6",tags:["connections"],
+ where:"Thin membrane between the corpus callosum and the fornix.",
+ fn:["Separates the front horns of the left and right lateral ventricles"],
+ sk:[],
+ dmg:"Its absence can occur with septo-optic dysplasia, a developmental condition affecting vision and hormones."},
+thalamus:{n:"Thalamus",cat:"Diencephalon",c:"#8FB4E0",tags:["senses","vision","hearing","connections","body"],
+ where:"Paired egg-shaped masses in the centre of the brain, on either side of the third ventricle.",
+ fn:["Relays almost every sense to the cortex (smell is the exception)","Lateral geniculate nucleus for vision, medial geniculate nucleus for hearing","Part of movement loops with the basal ganglia and cerebellum","Regulates alertness, sleep and consciousness"],
+ sk:["Consciously feeling, seeing and hearing anything","Staying awake","Focusing attention"],
+ dmg:"Sensory loss on the opposite side, sometimes severe chronic pain (thalamic pain syndrome); damage on both sides can cause coma."},
+hypothalamus:{n:"Hypothalamus",cat:"Diencephalon",c:"#6F95CF",tags:["body","emotion"],
+ where:"Below the thalamus, forming the floor of the third ventricle. About the size of an almond.",
+ fn:["Regulates body temperature, hunger and thirst","Controls the pituitary gland and therefore many hormones","Sleep–wake rhythm: the suprachiasmatic nucleus is the body clock","Fight-or-flight and other autonomic responses","Stress responses and sex drive"],
+ sk:["Feeling hungry or thirsty","Shivering or sweating","Waking at the same time each day"],
+ dmg:"Problems with temperature, weight, thirst (diabetes insipidus), sleep and hormones."},
+pituitary:{n:"Pituitary gland",aka:"Hypophysis, the “master gland”",cat:"Endocrine gland",c:"#5577B8",tags:["body"],
+ where:"Pea-sized gland hanging from the hypothalamus on a stalk, sitting in a bony pocket (the sella turcica).",
+ fn:["Front lobe releases growth hormone, TSH, ACTH, prolactin, FSH and LH","Back lobe releases ADH (water balance) and oxytocin, which are made in the hypothalamus","Controls growth, metabolism, stress, reproduction and milk production"],
+ sk:["Growing taller in childhood","Concentrating urine overnight"],
+ dmg:"Too much or too little of certain hormones. Tumours can press on the optic chiasm and cause loss of outer (peripheral) vision on both sides."},
+optic_chiasm:{n:"Optic chiasm",aka:"With the optic nerves and tracts",cat:"Visual pathway",c:"#E9CF57",tags:["vision"],
+ where:"X-shaped crossing under the hypothalamus, just in front of the pituitary stalk.",
+ fn:["Fibres from the inner (nasal) half of each retina cross to the other side","Makes sure each hemisphere receives the opposite visual field","Continues as the optic tracts to the thalamus"],
+ sk:["Seeing one unified view of the world"],
+ dmg:"Pressure on the chiasm, often from a pituitary tumour, causes bitemporal hemianopia: loss of the outer half of vision in both eyes (“tunnel vision”)."},
+mammillary:{n:"Mammillary bodies",s:"Mammillary bodies",cat:"Diencephalon (hypothalamus)",c:"#4D6FB0",tags:["memory"],
+ where:"Two small round bumps on the underside of the brain, behind the pituitary stalk.",
+ fn:["Relay in the memory circuit: hippocampus → fornix → mammillary bodies → thalamus","Contributes to recollection memory"],
+ sk:["Remembering what happened earlier today"],
+ dmg:"Damaged in Wernicke–Korsakoff syndrome (thiamine deficiency, often linked to alcohol): severe memory loss and confabulation."},
+pineal:{n:"Pineal gland",cat:"Endocrine gland",c:"#7E8FD0",tags:["body"],
+ where:"Tiny pine-cone-shaped gland behind the third ventricle, above the midbrain.",
+ fn:["Releases melatonin in darkness","Helps set daily (circadian) and seasonal rhythms"],
+ sk:["Feeling sleepy as night falls","Adjusting to jet lag"],
+ dmg:"Tumours here can block CSF flow (hydrocephalus) and affect upward eye movements.",
+ fact:"Descartes called it the “principal seat of the soul”. It often calcifies with age, which makes it visible on CT scans."},
+ventricle4:{n:"Fourth ventricle",s:"4th ventricle",cat:"Ventricular system (CSF)",c:"#A9D2EE",tags:["connections"],
+ where:"Diamond-shaped space between the pons/medulla and the cerebellum.",
+ fn:["Holds cerebrospinal fluid (CSF)","Lets CSF flow out around the brain and spinal cord through small openings"],
+ sk:[],
+ dmg:"Blockage causes hydrocephalus, a build-up of fluid and pressure."},
+lat_ventricle:{n:"Lateral ventricles",s:"Lateral ventricle",cat:"Ventricular system (CSF)",c:"#A9D2EE",tags:["connections"],
+ where:"C-shaped fluid cavities, one deep in each hemisphere, with horns reaching into the frontal, occipital and temporal lobes.",
+ fn:["Produce CSF through the choroid plexus, about 500 mL a day","CSF cushions the brain, clears waste and keeps its chemistry stable"],
+ sk:[],
+ dmg:"Enlarge in hydrocephalus and when the brain shrinks, for example in Alzheimer’s disease.",
+ fact:"Only about 150 mL of CSF is present at any moment, so it is replaced roughly three to four times a day."},
+ventricle3:{n:"Third ventricle",s:"3rd ventricle",cat:"Ventricular system (CSF)",c:"#A9D2EE",tags:["connections"],
+ where:"Narrow midline slit between the two thalami.",
+ fn:["Connects the lateral ventricles to the fourth ventricle through the cerebral aqueduct","Its walls are formed by the thalamus and hypothalamus"],
+ sk:[],
+ dmg:"Narrowing of the aqueduct below it is a common cause of hydrocephalus."},
+caudate:{n:"Caudate nucleus",s:"Caudate",cat:"Basal ganglia (striatum)",c:"#E8C26A",tags:["movement","thinking","memory"],
+ where:"C-shaped nucleus hugging the lateral ventricle; its head bulges into the front horn.",
+ fn:["Goal-directed behaviour and learning from feedback","Habit and procedural learning","Part of planning loops with the prefrontal cortex"],
+ sk:["Learning which choice gets rewarded","Forming routines"],
+ dmg:"Shrinks early in Huntington’s disease (involuntary jerky movements and changes in thinking); also implicated in OCD."},
+putamen:{n:"Putamen",cat:"Basal ganglia (striatum)",c:"#D9A441",tags:["movement","memory"],
+ where:"Outer part of the lentiform nucleus, lateral to the internal capsule.",
+ fn:["Regulates and smooths movement","Motor skill and habit learning","Receives dopamine from the substantia nigra"],
+ sk:["Automatic skills like typing or driving a familiar route"],
+ dmg:"Loss of its dopamine input underlies Parkinson’s disease. It is also a common site of brain bleeds from high blood pressure."},
+globus_pallidus:{n:"Globus pallidus",s:"Globus pallidus",cat:"Basal ganglia",c:"#BF8530",tags:["movement"],
+ where:"Inner part of the lentiform nucleus, between the putamen and the internal capsule.",
+ fn:["Main output of the basal ganglia","Inhibits the thalamus to suppress unwanted movements"],
+ sk:["Keeping still","Making smooth, controlled movements"],
+ dmg:"Movement disorders such as dystonia. It is a target for deep brain stimulation in Parkinson’s disease."},
+internal_capsule:{n:"Internal capsule",s:"Internal capsule",cat:"White matter",c:"#E9CFA0",tags:["movement","senses","connections"],
+ where:"V-shaped band of white matter between the caudate and thalamus on one side and the lentiform nucleus on the other.",
+ fn:["Carries motor fibres from the cortex down to the brainstem and spinal cord","Carries sensory fibres from the thalamus up to the cortex"],
+ sk:["Every voluntary movement command passes through here"],
+ dmg:"Because the fibres are tightly packed, a tiny stroke here can paralyse the whole opposite side of the body."},
+insula:{n:"Insula",aka:"Insular cortex, Latin for “island”",cat:"Hidden cortex",c:"#F2A97E",tags:["senses","emotion","body"],
+ where:"Cortex folded deep inside the lateral sulcus, hidden by the frontal, parietal and temporal lobes.",
+ fn:["Interoception: sensing your heartbeat, breathing and hunger","Primary taste cortex","Disgust and emotional awareness","Pain and craving"],
+ sk:["Noticing your heart racing","Tasting food","Feeling disgusted"],
+ dmg:"Changes in taste and in awareness of emotions and body states.",
+ fact:"Smokers whose strokes damaged the insula were found to quit easily, losing the urge to smoke (Naqvi et al., 2007)."},
+hippocampus:{n:"Hippocampus",aka:"Greek for “seahorse”",cat:"Limbic system (medial temporal lobe)",c:"#D97FA8",tags:["memory"],
+ where:"Curled structure on the inner floor of each temporal lobe, beside the temporal horn of the lateral ventricle.",
+ fn:["Forms new memories of facts and events","Spatial memory and navigation (place cells)","Consolidates memories for long-term storage in the cortex"],
+ sk:["Remembering what you had for breakfast","Learning your way around a new city","Studying for an exam"],
+ dmg:"Inability to form new memories (anterograde amnesia). One of the first areas affected in Alzheimer’s disease.",
+ fact:"After both hippocampi were removed in 1953, patient Henry Molaison (H.M.) could no longer form new long-term memories, yet he could still learn new motor skills."},
+amygdala:{n:"Amygdala",aka:"Greek for “almond”",cat:"Limbic system (medial temporal lobe)",c:"#C2577F",tags:["emotion","memory"],
+ where:"Almond-shaped cluster at the front of each medial temporal lobe, just in front of and above the hippocampus.",
+ fn:["Detects threats and triggers fear","Strengthens emotional memories","Reads emotional facial expressions","Fear conditioning and learning"],
+ sk:["Jumping back from a snake-shaped stick","Vividly remembering an embarrassing moment","Spotting fear on someone’s face"],
+ dmg:"Reduced fear and difficulty recognising fearful faces. Damage to both temporal lobes can cause Klüver–Bucy syndrome.",
+ fact:"Patient S.M., whose amygdalae were damaged by Urbach–Wiethe disease, has been reported to show almost no fear."},
+substantia_nigra:{n:"Substantia nigra",s:"Substantia nigra",aka:"Latin for “black substance”",cat:"Midbrain · basal ganglia",c:"#4A4458",tags:["movement","emotion"],
+ where:"Dark band in the midbrain, coloured by the pigment neuromelanin.",
+ fn:["Makes dopamine for the striatum (caudate and putamen)","Starting and smoothing movement","Reward and learning"],
+ sk:["Starting to walk","Getting going on any action"],
+ dmg:"Loss of its dopamine neurons causes Parkinson’s disease: tremor, stiffness and slow movement.",
+ fact:"Parkinson’s symptoms usually appear only after a large share of these neurons, often cited as more than half, has already been lost."},
+cortex:{n:"Cerebral cortex",s:"Cortex",aka:"Grey matter",cat:"Cerebrum",c:"#D9CFC4",tags:["thinking"],
+ where:"The outer 2–4 mm layer of the cerebrum, folded into ridges (gyri) and grooves (sulci).",
+ fn:["Perception, thought, language, memory and voluntary action","Mostly six-layered neocortex","Contains about 16 billion neurons"],
+ sk:["Everything from reading to planning to recognising faces"],
+ dmg:"The effects depend entirely on location, which is why the brain is mapped into regions.",
+ fact:"About two-thirds of the cortex is hidden inside the sulci. Folding lets a large sheet fit inside the skull."},
+white_matter:{n:"Cerebral white matter",s:"White matter",cat:"Cerebrum",c:"#FBF6EA",tags:["connections"],
+ where:"Beneath the cortex, filling much of each hemisphere.",
+ fn:["Myelinated axons that connect brain areas","Association fibres (within a hemisphere), commissural fibres (across) and projection fibres (up and down)","Speeds up signal transmission"],
+ sk:["Fast, coordinated thinking that links many regions"],
+ dmg:"Multiple sclerosis and small-vessel disease damage white matter, slowing thinking and causing weakness or numbness.",
+ fact:"It looks white because of the fatty myelin wrapped around the axons."},
+olfactory:{n:"Olfactory bulb & tract",s:"Olfactory bulb",cat:"Smell pathway (cranial nerve I)",c:"#C9B26B",tags:["senses","emotion","memory"],
+ where:"Under the frontal lobes, lying on the bone above the nasal cavity.",
+ fn:["Receives smell signals from the nose","Sends them to the olfactory cortex, amygdala and entorhinal cortex"],
+ sk:["Smelling coffee","Detecting smoke","Tasting the flavour of food"],
+ dmg:"Loss of smell (anosmia), often after head injury. A reduced sense of smell can be an early sign of Parkinson’s or Alzheimer’s disease.",
+ fact:"Smell is the only sense that reaches the cortex without passing through the thalamus first, one reason smells trigger vivid emotional memories."},
+fusiform:{n:"Fusiform gyrus",s:"Fusiform",cat:"Temporal & occipital lobes (underside)",c:"#5FB3A3",tags:["vision","language"],
+ where:"Underside of the temporal and occipital lobes.",
+ fn:["Face recognition (fusiform face area)","Recognising written words (visual word form area, left side)","Colour and fine object recognition"],
+ sk:["Recognising a friend’s face","Reading words at a glance","Telling car models apart"],
+ dmg:"Prosopagnosia (face blindness); pure alexia if the left side is affected."},
+parahippocampal:{n:"Parahippocampal gyrus",s:"Parahippocampal",cat:"Limbic system / temporal lobe",c:"#7FA9C9",tags:["memory","vision"],
+ where:"Inner underside of the temporal lobe, around the hippocampus; its front part is the entorhinal cortex.",
+ fn:["Recognising scenes and places (parahippocampal place area)","Gateway for information into the hippocampus (entorhinal cortex)","Grid cells that help map space"],
+ sk:["Recognising your street","Remembering where something happened"],
+ dmg:"Difficulty recognising places and forming memories. The entorhinal cortex is one of the first areas affected in Alzheimer’s disease."},
+fissure_long:{n:"Longitudinal fissure",cat:"Landmark groove",c:"#5B4A3E",tags:["connections"],
+ where:"Deep midline groove dividing the cerebrum into left and right hemispheres.",
+ fn:["Separates the two hemispheres","Contains the falx cerebri, a fold of dura","The corpus callosum lies at its floor"],
+ sk:[],dmg:"Not a functional area itself."}
+};
+
+
+
+/* ============================ noise + SDF helpers ============================ */
+const grad3 = new Float32Array([1,1,0,-1,1,0,1,-1,0,-1,-1,0,1,0,1,-1,0,1,1,0,-1,-1,0,-1,0,1,1,0,-1,1,0,1,-1,0,-1,-1]);
+const perm = new Uint8Array(512), pm12 = new Uint8Array(512);
+(() => { const p = new Uint8Array(256); for (let i = 0; i < 256; i++) p[i] = i; let s = 20261116;
+  for (let i = 255; i > 0; i--) { s = (s * 16807) % 2147483647; const j = s % (i + 1); const t = p[i]; p[i] = p[j]; p[j] = t; }
+  for (let i = 0; i < 512; i++) { perm[i] = p[i & 255]; pm12[i] = perm[i] % 12; } })();
+function noise3(x, y, z) {
+  const F3 = 1 / 3, G3 = 1 / 6; const s = (x + y + z) * F3; const i = Math.floor(x + s), j = Math.floor(y + s), k = Math.floor(z + s);
+  const t = (i + j + k) * G3; const x0 = x - (i - t), y0 = y - (j - t), z0 = z - (k - t); let i1, j1, k1, i2, j2, k2;
+  if (x0 >= y0) { if (y0 >= z0) { i1 = 1; j1 = 0; k1 = 0; i2 = 1; j2 = 1; k2 = 0; } else if (x0 >= z0) { i1 = 1; j1 = 0; k1 = 0; i2 = 1; j2 = 0; k2 = 1; } else { i1 = 0; j1 = 0; k1 = 1; i2 = 1; j2 = 0; k2 = 1; } }
+  else { if (y0 < z0) { i1 = 0; j1 = 0; k1 = 1; i2 = 0; j2 = 1; k2 = 1; } else if (x0 < z0) { i1 = 0; j1 = 1; k1 = 0; i2 = 0; j2 = 1; k2 = 1; } else { i1 = 0; j1 = 1; k1 = 0; i2 = 1; j2 = 1; k2 = 0; } }
+  const x1 = x0 - i1 + G3, y1 = y0 - j1 + G3, z1 = z0 - k1 + G3, x2 = x0 - i2 + 2 * G3, y2 = y0 - j2 + 2 * G3, z2 = z0 - k2 + 2 * G3, x3 = x0 - 1 + 3 * G3, y3 = y0 - 1 + 3 * G3, z3 = z0 - 1 + 3 * G3;
+  const ii = i & 255, jj = j & 255, kk = k & 255; let n = 0, tt, g;
+  tt = .6 - x0 * x0 - y0 * y0 - z0 * z0; if (tt > 0) { g = pm12[ii + perm[jj + perm[kk]]] * 3; tt *= tt; n += tt * tt * (grad3[g] * x0 + grad3[g + 1] * y0 + grad3[g + 2] * z0); }
+  tt = .6 - x1 * x1 - y1 * y1 - z1 * z1; if (tt > 0) { g = pm12[ii + i1 + perm[jj + j1 + perm[kk + k1]]] * 3; tt *= tt; n += tt * tt * (grad3[g] * x1 + grad3[g + 1] * y1 + grad3[g + 2] * z1); }
+  tt = .6 - x2 * x2 - y2 * y2 - z2 * z2; if (tt > 0) { g = pm12[ii + i2 + perm[jj + j2 + perm[kk + k2]]] * 3; tt *= tt; n += tt * tt * (grad3[g] * x2 + grad3[g + 1] * y2 + grad3[g + 2] * z2); }
+  tt = .6 - x3 * x3 - y3 * y3 - z3 * z3; if (tt > 0) { g = pm12[ii + 1 + perm[jj + 1 + perm[kk + 1]]] * 3; tt *= tt; n += tt * tt * (grad3[g] * x3 + grad3[g + 1] * y3 + grad3[g + 2] * z3); }
+  return 32 * n;
+}
+const clamp01 = t => t < 0 ? 0 : t > 1 ? 1 : t;
+const sstep = (a, b, x) => { const t = clamp01((x - a) / (b - a)); return t * t * (3 - 2 * t); };
+const smin = (a, b, k) => { const h = Math.max(k - Math.abs(a - b), 0) / k; return Math.min(a, b) - h * h * k * .25; };
+const smax = (a, b, k) => -smin(-a, -b, k);
+function sdE(x, y, z, cx, cy, cz, rx, ry, rz) {
+  const px = (x - cx) / rx, py = (y - cy) / ry, pz = (z - cz) / rz; const k0 = Math.sqrt(px * px + py * py + pz * pz);
+  const qx = px / rx, qy = py / ry, qz = pz / rz; const k1 = Math.sqrt(qx * qx + qy * qy + qz * qz); return k1 > 1e-9 ? k0 * (k0 - 1) / k1 : -Math.min(rx, ry, rz);
+}
+function sdSeg(x, y, z, a, b, r0, r1) {
+  const bx = b[0] - a[0], by = b[1] - a[1], bz = b[2] - a[2], px = x - a[0], py = y - a[1], pz = z - a[2];
+  const h = clamp01((px * bx + py * by + pz * bz) / (bx * bx + by * by + bz * bz)); const dx = px - bx * h, dy = py - by * h, dz = pz - bz * h;
+  return Math.sqrt(dx * dx + dy * dy + dz * dz) - (r0 + (r1 - r0) * h);
+}
+function chain(x, y, z, pts, r0, r1 = r0) { let d = 1e9; const n = pts.length - 1; for (let i = 0; i < n; i++) { const a = r0 + (r1 - r0) * i / n, b = r0 + (r1 - r0) * (i + 1) / n; d = Math.min(d, sdSeg(x, y, z, pts[i], pts[i + 1], a, b)); } return d; }
+
+/* ============================ anatomy (units ≈ 10 cm; +x = patient's left, +y up, +z front) ============================ */
+const ys = z => -0.06 + Math.max(0, -z) * 0.35 - Math.max(0, z - 0.3) * 0.3;    /* lateral (Sylvian) sulcus height */
+const zc = y => 0.07 - 0.22 * y;                                                  /* central sulcus */
+const zpo = y => -0.42 - 0.1 * y;                                                 /* parieto-occipital boundary */
+const yTop = z => 0.235 - 0.4 * z * z + 0.05 * z;                                 /* top of the corpus callosum */
+const CC_ARC = [[0.03, 0.3], [0.1, 0.35], [0.17, 0.29], [0.2, 0.1], [0.205, -0.08], [0.18, -0.24], [0.11, -0.32], [0.05, -0.29]];
+function ccDist(y, z) { let d = 1e9; for (let i = 0; i < CC_ARC.length - 1; i++) { const [ay, az] = CC_ARC[i], [by, bz] = CC_ARC[i + 1]; const vy = by - ay, vz = bz - az; const h = clamp01(((y - ay) * vy + (z - az) * vz) / (vy * vy + vz * vz)); d = Math.min(d, Math.hypot(y - ay - vy * h, z - az - vz * h)); } return d; }
+
+function cereBase(x, y, z) {
+  const X = Math.abs(x);
+  let d = sdE(X, y, z, 0.34, 0.17, -0.02, 0.37, 0.47, 0.80);
+  d = smin(d, sdE(X, y, z, 0.30, 0.06, 0.42, 0.33, 0.40, 0.44), 0.1);
+  d = smin(d, sdE(X, y, z, 0.27, 0.10, -0.52, 0.31, 0.37, 0.33), 0.1);
+  d = smax(d, -0.16 - y - Math.max(0, 0.32 - z) * 1.5, 0.04);                       /* orbital (underside) surface of the frontal lobe */
+  d = smax(d, -0.2 - y - Math.max(0, z + 0.3) * 1.5, 0.04);                         /* tentorium above the cerebellum */
+  d = smin(d, sdE(X, y, z, 0.47, -0.22, 0.06, 0.21, 0.19, 0.47), 0.06);             /* temporal lobe */
+  d = smax(d, -Math.max(X - 0.12, y + 0.12, z - 0.28, -0.42 - z), 0.03);            /* space under the brain for the brainstem */
+  if (z > -0.36 && z < 0.55 && X > 0.25) { const e = sstep(0.25, 0.45, X) * sstep(-0.36, -0.25, z) * (1 - sstep(0.45, 0.55, z)); const q = (y - ys(z)) / 0.026; d += 0.12 * e * Math.exp(-q * q); }
+  { const yv = ys(z); const up = sstep(yv, yv + 0.06, y); const q = (z - zc(y)) / 0.016; d += 0.035 * up * Math.exp(-q * q); }
+  if (X < 0.12) { const m = 1 - sstep(0.04, 0.12, X); let q = (z - zpo(y)) / 0.016; d += 0.03 * m * Math.exp(-q * q) * sstep(-0.05, 0, y);
+    if (z < -0.4) { const yc = -0.03 + (z + 0.45) * 0.08; q = (y - yc) / 0.014; d += 0.03 * m * Math.exp(-q * q); } }
+  const s = Math.max(sstep(yTop(z) - 0.01, yTop(z) + 0.03, y), sstep(0.36, 0.42, z), sstep(0.36, 0.42, -z));
+  return Math.max(d, (0.014 - X) - (1 - s) * 0.4);                                   /* longitudinal fissure */
+}
+function groove(x, y, z) {
+  const w = noise3(x * 2.2 + 3.1, y * 2.2 - 1.7, z * 2.2 + 5.3);
+  const n = noise3(x * 6.2 + w * 0.9, y * 6.2 - w * 0.7, z * 5.4 + w * 0.8);
+  const a = 1 - Math.abs(n); const a2 = a * a; return a2 * a2 * a2;
+}
+const cereFn = (x, y, z) => { const b = cereBase(x, y, z); return (b > 0.07 || b < -0.07) ? b : b + 0.048 * groove(x, y, z); };
+const wmFn = (x, y, z) => { const b = cereBase(x, y, z) + 0.038; return (b > 0.07 || b < -0.07) ? b : b + 0.05 * groove(x, y, z); };
+function cbBase(x, y, z) { const X = Math.abs(x); let d = smin(sdE(X, y, z, 0.2, -0.38, -0.55, 0.27, 0.17, 0.26), sdE(x, y, z, 0, -0.38, -0.5, 0.12, 0.16, 0.22), 0.08); d += 0.02 * Math.exp(-((x / 0.03) ** 2)) * sstep(-0.5, -0.65, z); return d; }
+const folia = (x, y, z) => { const r = y + 0.9 * (z + 0.55) * (z + 0.55) + 0.35 * x * x; const a = 1 - Math.abs(Math.sin(r * 95 + 0.9 * noise3(x * 4, y * 4, z * 4))); const a2 = a * a; return a2 * a2 * a2; };
+const cbFn = (x, y, z) => { const b = cbBase(x, y, z); return Math.abs(b) > 0.05 ? b : b + 0.012 * folia(x, y, z); };
+const cbwmFn = (x, y, z) => { const b = cbBase(x, y, z) + 0.045; return Math.abs(b) > 0.05 ? b : b + 0.03 * folia(x, y, z); };
+function bsFn(x, y, z) {
+  const X = Math.abs(x);
+  let d = chain(x, y, z, [[0, -0.05, -0.14], [0, -0.25, -0.13], [0, -0.5, -0.16], [0, -0.7, -0.22]], 0.095, 0.066);
+  d = smin(d, sdE(x, y, z, 0, -0.4, -0.1, 0.135, 0.11, 0.11), 0.04);
+  d = smin(d, sdSeg(X, y, z, [0.06, -0.06, -0.06], [0.045, -0.26, -0.09], 0.045, 0.04), 0.03);
+  return d;
+}
+
+/* deep and basal structures: id, signed-distance function, colour of the cut face */
+const STRUCTS = [
+  { id: 'cc', fn: (x, y, z) => { const X = Math.abs(x), t = Math.min(1, X / 0.27); return smax(ccDist(y, z) - 0.036 * (1 - 0.55 * t * t), X - 0.27, 0.03); } },
+  { id: 'internal_capsule', fn: (x, y, z) => chain(Math.abs(x), y, z, [[0.15, 0.06, 0.17], [0.125, 0.03, 0.02], [0.16, 0.01, -0.17]], 0.02) },
+  { id: 'insula', fn: (x, y, z) => sdE(Math.abs(x), y, z, 0.36, 0.0, 0.05, 0.026, 0.12, 0.19) },
+  { id: 'putamen', fn: (x, y, z) => sdE(Math.abs(x), y, z, 0.25, 0.02, 0.04, 0.058, 0.125, 0.18) },
+  { id: 'globus_pallidus', fn: (x, y, z) => sdE(Math.abs(x), y, z, 0.18, 0.0, 0.02, 0.04, 0.09, 0.11) },
+  { id: 'caudate', fn: (x, y, z) => { const X = Math.abs(x); return smin(sdE(X, y, z, 0.115, 0.1, 0.17, 0.06, 0.085, 0.115), chain(X, y, z, [[0.12, 0.15, 0.1], [0.135, 0.175, -0.12], [0.17, 0.13, -0.29], [0.25, 0.0, -0.31], [0.29, -0.1, -0.18]], 0.03, 0.012), 0.03); } },
+  { id: 'thalamus', fn: (x, y, z) => sdE(Math.abs(x), y, z, 0.07, 0.0, -0.12, 0.075, 0.075, 0.15) },
+  { id: 'lat_ventricle', fn: (x, y, z) => { const X = Math.abs(x); return Math.min(sdE(X, y, z, 0.05, 0.115, 0.2, 0.03, 0.06, 0.11), chain(X, y, z, [[0.05, 0.135, 0.15], [0.065, 0.14, -0.1], [0.1, 0.1, -0.31], [0.13, 0.07, -0.52]], 0.032, 0.016), chain(X, y, z, [[0.1, 0.1, -0.31], [0.22, -0.02, -0.26], [0.29, -0.13, -0.1], [0.31, -0.17, 0.08]], 0.024, 0.014)); } },
+  { id: 'ventricle3', fn: (x, y, z) => sdE(x, y, z, 0, -0.04, -0.06, 0.009, 0.075, 0.13) },
+  { id: 'fornix', fn: (x, y, z) => chain(Math.abs(x), y, z, [[0.07, -0.08, -0.25], [0.05, 0.06, -0.28], [0.025, 0.125, -0.15], [0.015, 0.13, 0.05], [0.01, 0.09, 0.13], [0.012, -0.02, 0.11], [0.018, -0.15, -0.02]], 0.013) },
+  { id: 'hypothalamus', fn: (x, y, z) => sdE(Math.abs(x), y, z, 0.025, -0.12, 0.04, 0.035, 0.045, 0.07) },
+  { id: 'hippocampus', fn: (x, y, z) => { const X = Math.abs(x); return smin(chain(X, y, z, [[0.3, -0.21, 0.12], [0.31, -0.19, -0.02], [0.26, -0.13, -0.17], [0.17, -0.03, -0.27]], 0.036, 0.018), sdE(X, y, z, 0.3, -0.21, 0.1, 0.046, 0.04, 0.065), 0.02); } },
+  { id: 'amygdala', fn: (x, y, z) => sdE(Math.abs(x), y, z, 0.29, -0.2, 0.22, 0.052, 0.05, 0.055) },
+  { id: 'substantia_nigra', fn: (x, y, z) => sdE(Math.abs(x), y, z, 0.045, -0.17, -0.075, 0.035, 0.012, 0.03) },
+  { id: 'ventricle4', fn: (x, y, z) => sdE(x, y, z, 0, -0.43, -0.235, 0.035, 0.06, 0.02) },
+  { id: 'pineal', fn: (x, y, z) => sdE(x, y, z, 0, -0.015, -0.28, 0.018, 0.016, 0.025) },
+  { id: 'mammillary', out: 1, fn: (x, y, z) => sdE(Math.abs(x), y, z, 0.018, -0.17, -0.03, 0.018, 0.018, 0.02) },
+  { id: 'pituitary', out: 1, fn: (x, y, z) => smin(sdE(x, y, z, 0, -0.31, 0.13, 0.04, 0.028, 0.035), sdSeg(x, y, z, [0, -0.14, 0.09], [0, -0.29, 0.125], 0.011, 0.011), 0.01) },
+  { id: 'optic_chiasm', out: 1, fn: (x, y, z) => { const X = Math.abs(x); return Math.min(sdE(x, y, z, 0, -0.16, 0.15, 0.055, 0.014, 0.028), sdSeg(X, y, z, [0.035, -0.165, 0.165], [0.1, -0.175, 0.42], 0.014, 0.014), sdSeg(X, y, z, [0.035, -0.16, 0.135], [0.13, -0.14, -0.06], 0.013, 0.013)); } },
+  { id: 'olfactory', out: 1, fn: (x, y, z) => { const X = Math.abs(x); return Math.min(sdE(X, y, z, 0.05, -0.185, 0.64, 0.02, 0.015, 0.045), sdSeg(X, y, z, [0.05, -0.18, 0.6], [0.06, -0.172, 0.3], 0.009, 0.009)); } }
+];
+const THIN = new Set(['fornix', 'ventricle3', 'substantia_nigra', 'pineal', 'mammillary', 'optic_chiasm', 'olfactory', 'pituitary', 'ventricle4']);
+const PICK_ORDER = ['substantia_nigra', 'mammillary', 'pineal', 'ventricle3', 'optic_chiasm', 'pituitary', 'olfactory', 'fornix', 'hypothalamus', 'amygdala', 'hippocampus', 'lat_ventricle', 'globus_pallidus', 'putamen', 'caudate', 'internal_capsule', 'thalamus', 'insula', 'ventricle4', 'cc'];
+
+/* region of the cortex at a point (n = surface normal, or null for a cut face) */
+function classify(x, y, z, n, level) {
+  const X = Math.abs(x), L = x > 0, yv = ys(z);
+  const medial = X < 0.075 && (!n || n[0] * (L ? 1 : -1) < -0.35), under = n && n[1] < -0.55;
+  let lobe;
+  if (y < yv - 0.005 && z > -0.52 && z < 0.62 && X > 0.12) lobe = 'temporal';
+  else if (z > zc(y)) lobe = 'frontal'; else if (z > zpo(y)) lobe = 'parietal'; else lobe = 'occipital';
+  if (X < 0.15 && y < -0.04 && z > -0.44 && z < 0.3) return level === 'lobes' ? lobe : 'cortex';
+  if (medial && ccDist(y, z) < 0.11 && y > -0.06 && z < 0.4 && z > -0.42) return 'cingulate';
+  if (level === 'lobes') return lobe;
+  if (medial) {
+    if (lobe === 'frontal') { const dz = z - zc(y); if (y < 0 && z > 0.15) return 'ofc'; if (y > 0.25 && dz < 0.09) return 'paracentral'; if (y > 0.25 && dz < 0.22) return 'sma'; return 'mpfc'; }
+    if (lobe === 'parietal') return (y > 0.25 && zc(y) - z < 0.08) ? 'paracentral' : 'precuneus';
+    if (lobe === 'occipital') { const yc = -0.03 + (z + 0.45) * 0.08; if (Math.abs(y - yc) < 0.035) return 'v1'; return y > yc ? 'cuneus' : 'lingual'; }
+    return 'parahippocampal';
+  }
+  if (under) {
+    if (lobe === 'frontal') return 'ofc';
+    if (lobe === 'temporal') return X < 0.34 ? 'parahippocampal' : X < 0.5 ? 'fusiform' : 'itg';
+    if (lobe === 'occipital') return X < 0.2 ? 'lingual' : 'fusiform';
+  }
+  if (lobe === 'frontal') { const dz = z - zc(y);
+    if (dz < 0.075) return 'm1';
+    if (y < yv + 0.15 && dz > 0.07 && z < 0.45 && X > 0.3) return L ? 'broca' : 'broca_r';
+    if (dz < 0.17) return 'premotor';
+    if (y > 0.0 && X > 0.15 && z < 0.72) return 'dlpfc';
+    return 'frontal'; }
+  if (lobe === 'parietal') { const dz = zc(y) - z; if (dz < 0.075) return 's1'; if (y > 0.3) return 'spl'; if (z > -0.25) return 'smg'; return 'angular'; }
+  if (lobe === 'temporal') { const dy = yv - y; if (dy < 0.075) { if (z > -0.06 && z < 0.2) return 'a1'; if (z <= -0.06) return L ? 'wernicke' : 'wernicke_r'; return 'temporal'; } return 'itg'; }
+  return z < -0.76 ? 'v1' : 'occipital';
+}
+const bsPart = y => y > -0.21 ? 'midbrain' : y > -0.53 ? 'pons' : 'medulla';
+
+/* ============================ surface nets mesher ============================ */
+function nets(fn, b, h) {
+  const [x0, x1, y0, y1, z0, z1] = b; const nx = Math.ceil((x1 - x0) / h) + 1, ny = Math.ceil((y1 - y0) / h) + 1, nz = Math.ceil((z1 - z0) / h) + 1;
+  const F = new Float32Array(nx * ny * nz); let p = 0;
+  for (let k = 0; k < nz; k++) { const z = z0 + k * h; for (let j = 0; j < ny; j++) { const y = y0 + j * h; for (let i = 0; i < nx; i++) F[p++] = fn(x0 + i * h, y, z); } }
+  const cx = nx - 1, cy = ny - 1, cz = nz - 1, sy = nx, sz = nx * ny;
+  const C = new Int32Array(cx * cy * cz).fill(-1); const pos = [];
+  const off = [0, 1, sy, 1 + sy, sz, sz + 1, sz + sy, sz + 1 + sy], cor = [[0,0,0],[1,0,0],[0,1,0],[1,1,0],[0,0,1],[1,0,1],[0,1,1],[1,1,1]];
+  const E = [[0,1],[2,3],[4,5],[6,7],[0,2],[1,3],[4,6],[5,7],[0,4],[1,5],[2,6],[3,7]]; const v = new Float32Array(8);
+  for (let k = 0; k < cz; k++) for (let j = 0; j < cy; j++) for (let i = 0; i < cx; i++) {
+    const base = i + j * sy + k * sz; let m = 0; for (let c = 0; c < 8; c++) { v[c] = F[base + off[c]]; if (v[c] < 0) m |= 1 << c; }
+    if (m === 0 || m === 255) continue; let ax = 0, ay = 0, az = 0, n = 0;
+    for (let e = 0; e < 12; e++) { const a = E[e][0], bb = E[e][1]; if (((m >> a) & 1) !== ((m >> bb) & 1)) { const t = v[a] / (v[a] - v[bb]); ax += cor[a][0] + t * (cor[bb][0] - cor[a][0]); ay += cor[a][1] + t * (cor[bb][1] - cor[a][1]); az += cor[a][2] + t * (cor[bb][2] - cor[a][2]); n++; } }
+    C[i + j * cx + k * cx * cy] = pos.length / 3; pos.push(x0 + (i + ax / n) * h, y0 + (j + ay / n) * h, z0 + (k + az / n) * h);
+  }
+  const idx = []; const cid = (i, j, k) => C[i + j * cx + k * cx * cy];
+  const quad = (a, b, c, d, inside) => { if (a < 0 || b < 0 || c < 0 || d < 0) return; if (inside) idx.push(a, b, c, a, c, d); else idx.push(a, c, b, a, d, c); };
+  for (let k = 0; k < nz; k++) for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) {
+    const p0 = i + j * sy + k * sz, a = F[p0] < 0;
+    if (i < cx && j > 0 && k > 0 && j < cy && k < cz && (F[p0 + 1] < 0) !== a) quad(cid(i, j - 1, k - 1), cid(i, j, k - 1), cid(i, j, k), cid(i, j - 1, k), a);
+    if (j < cy && i > 0 && k > 0 && i < cx && k < cz && (F[p0 + sy] < 0) !== a) quad(cid(i - 1, j, k - 1), cid(i - 1, j, k), cid(i, j, k), cid(i, j, k - 1), a);
+    if (k < cz && i > 0 && j > 0 && i < cx && j < cy && (F[p0 + sz] < 0) !== a) quad(cid(i - 1, j - 1, k), cid(i, j - 1, k), cid(i, j, k), cid(i - 1, j, k), a);
+  }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setIndex(idx.length > 65535 ? new THREE.Uint32BufferAttribute(idx, 1) : new THREE.Uint16BufferAttribute(idx, 1));
+  smooth(g, 2); g.computeVertexNormals(); return g;
+}
+/* light Laplacian smoothing to take the voxel edge off */
+function smooth(g, passes) {
+  const P = g.attributes.position.array, I = g.index.array, n = P.length / 3;
+  const deg = new Uint32Array(n + 1); for (let t = 0; t < I.length; t++) deg[I[t] + 1] += 2;
+  for (let i = 0; i < n; i++) deg[i + 1] += deg[i];
+  const adj = new Uint32Array(deg[n]), fillp = deg.slice(0, n);
+  for (let t = 0; t < I.length; t += 3) { const a = I[t], b = I[t + 1], c = I[t + 2]; adj[fillp[a]++] = b; adj[fillp[a]++] = c; adj[fillp[b]++] = a; adj[fillp[b]++] = c; adj[fillp[c]++] = a; adj[fillp[c]++] = b; }
+  const Q = new Float32Array(P.length);
+  for (let s = 0; s < passes; s++) { for (let i = 0; i < n; i++) { const s0 = deg[i], s1 = deg[i + 1]; if (s1 === s0) { Q[i * 3] = P[i * 3]; Q[i * 3 + 1] = P[i * 3 + 1]; Q[i * 3 + 2] = P[i * 3 + 2]; continue; }
+      let x = 0, y = 0, z = 0; for (let k = s0; k < s1; k++) { const j = adj[k] * 3; x += P[j]; y += P[j + 1]; z += P[j + 2]; } const c = s1 - s0;
+      Q[i * 3] = P[i * 3] * 0.5 + x / c * 0.5; Q[i * 3 + 1] = P[i * 3 + 1] * 0.5 + y / c * 0.5; Q[i * 3 + 2] = P[i * 3 + 2] * 0.5 + z / c * 0.5; } P.set(Q); }
+}
+function boundsOf(fn) { /* coarse search for where a structure lives */
+  let b = [9, -9, 9, -9, 9, -9]; const h = 0.035;
+  for (let x = -0.8; x <= 0.8; x += h) for (let y = -0.9; y <= 0.75; y += h) for (let z = -0.95; z <= 0.95; z += h) if (fn(x, y, z) < 0.035) { b[0] = Math.min(b[0], x); b[1] = Math.max(b[1], x); b[2] = Math.min(b[2], y); b[3] = Math.max(b[3], y); b[4] = Math.min(b[4], z); b[5] = Math.max(b[5], z); }
+  const m = 0.045; return [b[0] - m, b[1] + m, b[2] - m, b[3] + m, b[4] - m, b[5] + m];
+}
+
+/* ============================ three.js scene ============================ */
+const stage = document.getElementById('stage');
+let renderer; try { renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, stencil: true }); } catch (e) { document.getElementById('loadMsg').textContent = 'This browser can’t show 3D graphics (WebGL is turned off or not supported). Try Chrome, Edge, Firefox or Safari, or turn on hardware acceleration.'; document.querySelector('.spin').remove(); throw e; }
+renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1)); renderer.localClippingEnabled = true;
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 0.95; renderer.outputColorSpace = THREE.SRGBColorSpace;
+stage.prepend(renderer.domElement);
+const scene = new THREE.Scene();
+const pmrem = new THREE.PMREMGenerator(renderer); scene.environment = pmrem.fromScene(new RoomEnvironment(renderer), 0.04).texture;
+const camera = new THREE.PerspectiveCamera(32, 1, 0.05, 50);
+const TARGET = new THREE.Vector3(0, -0.08, -0.02);
+const controls = new OrbitControls(camera, renderer.domElement); controls.enableDamping = true; controls.dampingFactor = 0.08; controls.target.copy(TARGET); controls.minDistance = 1.3; controls.maxDistance = 8; controls.rotateSpeed = 0.8;
+scene.add(new THREE.HemisphereLight(0xf4f1ff, 0x302838, 0.55));
+const key = new THREE.DirectionalLight(0xfff3e8, 1.5); key.position.set(2.5, 3, 2.2); scene.add(key);
+const rim = new THREE.DirectionalLight(0x9fc2ff, 0.7); rim.position.set(-3, 1.2, -2.5); scene.add(rim);
+const fill = new THREE.DirectionalLight(0xffe6dc, 0.35); fill.position.set(-1, -2, 2); scene.add(fill);
+
+const plane = new THREE.Plane(new THREE.Vector3(0, -1, 0), 100);
+const capGeo = new THREE.PlaneGeometry(4, 4);
+const solids = [];   /* { id, mesh, stencil:[b,f], cap, capMat, kind } */
+let order = 1;
+function addSolid(geo, visMat, capColor, info) {
+  const base = { depthWrite: false, depthTest: false, colorWrite: false, stencilWrite: true, stencilFunc: THREE.AlwaysStencilFunc, clippingPlanes: [plane] };
+  const mB = new THREE.MeshBasicMaterial({ ...base, side: THREE.BackSide, stencilFail: THREE.IncrementWrapStencilOp, stencilZFail: THREE.IncrementWrapStencilOp, stencilZPass: THREE.IncrementWrapStencilOp });
+  const mF = new THREE.MeshBasicMaterial({ ...base, side: THREE.FrontSide, stencilFail: THREE.DecrementWrapStencilOp, stencilZFail: THREE.DecrementWrapStencilOp, stencilZPass: THREE.DecrementWrapStencilOp });
+  const b = new THREE.Mesh(geo, mB), f = new THREE.Mesh(geo, mF); b.renderOrder = f.renderOrder = order;
+  const capMat = new THREE.MeshBasicMaterial({ color: capColor, side: THREE.DoubleSide, stencilWrite: true, stencilRef: 0, stencilFunc: THREE.NotEqualStencilFunc, stencilFail: THREE.ReplaceStencilOp, stencilZFail: THREE.ReplaceStencilOp, stencilZPass: THREE.ReplaceStencilOp });
+  capMat.toneMapped = false; const cap = new THREE.Mesh(capGeo, capMat); cap.renderOrder = order + 0.5; cap.onAfterRender = r => r.clearStencil();
+  order += 1;
+  visMat.clippingPlanes = [plane]; const mesh = new THREE.Mesh(geo, visMat); mesh.renderOrder = 200;
+  scene.add(b, f, cap, mesh);
+  const s = Object.assign({ mesh, stencil: [b, f], cap, capMat, capColor: new THREE.Color(capColor) }, info); solids.push(s); return s;
+}
+
+const NAT = { cortex: '#e2a99a', cere: '#d99e90', stem: '#dcb5a6', gray: '#a8877a', white: '#eee3d3', cbgray: '#a07d71', cbwhite: '#ebdfcf', stemCut: '#dccabc' };
+const surfMat = () => new THREE.MeshPhysicalMaterial({ vertexColors: true, roughness: 0.52, metalness: 0, clearcoat: 0.35, clearcoatRoughness: 0.55, sheen: 0.4, sheenColor: new THREE.Color('#ffd9cf'), sheenRoughness: 0.6 });
+let CER, WM, CB, CBWM, BS; const DEEP = {};
+const ID_LIST = [], ID_IX = {}; const ix = id => ID_IX[id] ?? (ID_IX[id] = ID_LIST.push(id) - 1);
+
+const msg = t => { document.getElementById('loadMsg').textContent = t; return new Promise(r => setTimeout(r, 16)); };
+async function build() { const T0 = performance.now(); const tl = []; const tick = n => tl.push(n + ' ' + Math.round(performance.now() - T0));
+  await msg('Folding the cortex…');
+  const gC = nets(cereFn, [-0.76, 0.76, -0.47, 0.69, -0.92, 0.92], 0.0105);
+  tick('cortex'); await msg('Adding white matter…');
+  const gW = nets(wmFn, [-0.74, 0.74, -0.45, 0.67, -0.9, 0.9], 0.014);
+  await msg('Growing the cerebellum…');
+  const gCb = nets(cbFn, [-0.5, 0.5, -0.58, -0.17, -0.86, -0.22], 0.007);
+  const gCbw = nets(cbwmFn, [-0.48, 0.48, -0.56, -0.19, -0.84, -0.24], 0.009);
+  const gBs = nets(bsFn, [-0.2, 0.2, -0.8, 0.06, -0.36, 0.06], 0.008);
+  /* cortex: per-vertex regions and sulcus shading */
+  const P = gC.attributes.position.array, N = gC.attributes.normal.array, nv = P.length / 3;
+  const shade = new Float32Array(nv), idL = new Uint8Array(nv), idA = new Uint8Array(nv);
+  for (let i = 0; i < nv; i++) { const x = P[i * 3], y = P[i * 3 + 1], z = P[i * 3 + 2], n = [N[i * 3], N[i * 3 + 1], N[i * 3 + 2]];
+    const gr = groove(x, y, z), base = cereBase(x, y, z); shade[i] = Math.max(0.28, 1 - 0.62 * gr - Math.min(0.5, Math.max(0, base) * 7));
+    idL[i] = ix(classify(x, y, z, n, 'lobes')); idA[i] = ix(classify(x, y, z, n, 'areas')); }
+  gC.setAttribute('color', new THREE.Float32BufferAttribute(new Float32Array(nv * 3), 3));
+  CER = addSolid(gC, surfMat(), NAT.gray, { kind: 'cortex', shade, idL, idA });
+  WM = addSolid(gW, new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: false }), NAT.white, { kind: 'wm' }); WM.mesh.visible = false;
+  const cbP = gCb.attributes.position.array, cbn = cbP.length / 3, cbShade = new Float32Array(cbn);
+  for (let i = 0; i < cbn; i++) cbShade[i] = 1 - 0.5 * folia(cbP[i * 3], cbP[i * 3 + 1], cbP[i * 3 + 2]) - Math.min(0.4, Math.max(0, cbBase(cbP[i * 3], cbP[i * 3 + 1], cbP[i * 3 + 2])) * 12);
+  gCb.setAttribute('color', new THREE.Float32BufferAttribute(new Float32Array(cbn * 3), 3));
+  CB = addSolid(gCb, surfMat(), NAT.cbgray, { kind: 'cb', shade: cbShade, id: 'cerebellum' });
+  CBWM = addSolid(gCbw, new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: false }), NAT.cbwhite, { kind: 'cbwm' }); CBWM.mesh.visible = false;
+  const bP = gBs.attributes.position.array, bn = bP.length / 3, bsIds = new Uint8Array(bn), bsShade = new Float32Array(bn).fill(1);
+  for (let i = 0; i < bn; i++) bsIds[i] = ix(bsPart(bP[i * 3 + 1]));
+  gBs.setAttribute('color', new THREE.Float32BufferAttribute(new Float32Array(bn * 3), 3));
+  BS = addSolid(gBs, surfMat(), NAT.stemCut, { kind: 'bs', shade: bsShade, ids: bsIds });
+  tick('cb+bs'); await msg('Placing deep structures…');
+  for (const s of STRUCTS) {
+    const b = boundsOf(s.fn), g = nets(s.fn, b, THIN.has(s.id) ? 0.005 : 0.0075); const c = REG[s.id].c;
+    const mat = new THREE.MeshPhysicalMaterial({ color: c, roughness: 0.45, metalness: 0, clearcoat: 0.3, transparent: false });
+    DEEP[s.id] = addSolid(g, mat, c, { kind: 'deep', id: s.id, out: !!s.out, box: new THREE.Box3(new THREE.Vector3(b[0], b[2], b[4]), new THREE.Vector3(b[1], b[3], b[5])) });
+    await msg('Placing deep structures… ' + REG[s.id].n);
+  }
+  /* draw order: deep structures inside the brainstem/cerebellum after them */
+  tick('deep'); window.__timing = tl;
+  for (const id of ['ventricle4', 'substantia_nigra']) { const s = DEEP[id]; const o = order++; s.stencil.forEach(m => m.renderOrder = o); s.cap.renderOrder = o + 0.5; }
+  marker = new THREE.Mesh(new THREE.SphereGeometry(0.014, 16, 12), new THREE.MeshBasicMaterial({ color: 0x3ee6c4, depthTest: false })); marker.renderOrder = 999; marker.visible = false; scene.add(marker);
+}
+let marker;
+
+/* ============================ state ============================ */
+const S = { mode: 'natural', cut: 'none', pos: { sagittal: 0, coronal: -0.1, horizontal: 0.07 }, flip: false, ghost: false, sel: null, tag: null, quiz: null, view: 'left' };
+const CUTS = {
+  sagittal: { min: -0.7, max: 0.7, axis: 0, desc: 'Splits left from right. 0 is the midline.', fmt: v => Math.abs(v) < 0.005 ? 'Midline' : `${Math.round(Math.abs(v) * 100)} mm into the ${v > 0 ? 'left' : 'right'} side` },
+  coronal: { min: -0.88, max: 0.9, axis: 2, desc: 'Splits front from back, ear to ear.', fmt: v => `${Math.round(Math.abs(v) * 100)} mm ${v >= 0 ? 'in front of' : 'behind'} the centre` },
+  horizontal: { min: -0.45, max: 0.66, axis: 1, desc: 'Splits top from bottom, parallel to the floor.', fmt: v => `${Math.round(Math.abs(v) * 100)} mm ${v >= 0 ? 'above' : 'below'} the centre` }
+};
+const VIEW_DIRS = { left: [1, 0.12, 0.0], right: [-1, 0.12, 0], front: [0, 0.12, 1], back: [0, 0.12, -1], top: [0, 1, -0.012], bottom: [0, -1, 0.012] };
+const VIEW_NAMES = { left: 'Left side', right: 'Right side', front: 'Front', back: 'Back', top: 'Top', bottom: 'Bottom' };
+const CUT_VIEW = { sagittal: ['left', 'right'], coronal: ['front', 'back'], horizontal: ['top', 'bottom'] };
+
+function applyCut() {
+  const on = S.cut !== 'none';
+  if (!on) plane.set(new THREE.Vector3(0, -1, 0), 100);
+  else { const c = S.pos[S.cut], ax = CUTS[S.cut].axis; const n = new THREE.Vector3(); n.setComponent(ax, S.flip ? 1 : -1); plane.set(n, S.flip ? -c : c); }
+  const v = new THREE.Vector3();
+  for (const s of solids) {
+    const capOn = on && !(S.ghost && (s.kind === 'cortex' || s.kind === 'wm'));
+    s.stencil.forEach(m => m.visible = capOn); s.cap.visible = capOn;
+    if (capOn) { plane.coplanarPoint(v); s.cap.position.copy(v); s.cap.lookAt(v.clone().sub(plane.normal)); }
+  }
+  document.getElementById('hudCut').textContent = on ? `${S.cut[0].toUpperCase() + S.cut.slice(1)} cut · ${CUTS[S.cut].fmt(S.pos[S.cut])}` : 'No cut';
+  const ctl = document.getElementById('cutCtl'); ctl.hidden = !on;
+  if (on) { const r = document.getElementById('cutPos'), C = CUTS[S.cut]; r.min = C.min; r.max = C.max; r.value = S.pos[S.cut]; document.getElementById('cutOut').textContent = C.fmt(S.pos[S.cut]); document.getElementById('cutDesc').textContent = C.desc; }
+  document.querySelectorAll('#cutSeg button').forEach(b => b.classList.toggle('on', b.dataset.c === S.cut));
+  if (S.quiz && on) {}
+}
+function applyGhost() {
+  const m = CER.mesh.material; m.transparent = S.ghost; m.opacity = S.ghost ? 0.13 : 1; m.depthWrite = !S.ghost; m.needsUpdate = true;
+  CB.mesh.material.transparent = S.ghost; CB.mesh.material.opacity = S.ghost ? 0.35 : 1; CB.mesh.material.depthWrite = !S.ghost; CB.mesh.material.needsUpdate = true;
+  document.getElementById('ghostSw').classList.toggle('on', S.ghost); applyCut();
+}
+
+const tmpC = new THREE.Color(), grayC = new THREE.Color('#6d7488');
+function colorAll() {
+  const lvl = S.mode === 'lobes' ? 'idL' : 'idA';
+  const active = S.quiz ? null : (S.sel || S.tag) ? (id => (S.sel && id === S.sel) || (S.tag && REG[id] && REG[id].tags.includes(S.tag))) : null;
+  const nat = new THREE.Color(NAT.cortex);
+  const paint = (s, getId, natural) => {
+    const col = s.mesh.geometry.attributes.color, a = col.array, n = a.length / 3;
+    const cache = {};
+    for (let i = 0; i < n; i++) {
+      const id = getId(i); let c = cache[id];
+      if (!c) { const hit = active && active(id); const base = new THREE.Color(S.mode === 'natural' ? natural : (REG[id] ? REG[id].c : natural));
+        if (active) { if (hit) base.set(REG[id] ? REG[id].c : natural).multiplyScalar(1.12); else base.lerp(grayC, S.mode === 'natural' ? 0.25 : 0.62); }
+        c = cache[id] = base; }
+      const sh = s.shade[i]; a[i * 3] = c.r * sh; a[i * 3 + 1] = c.g * sh; a[i * 3 + 2] = c.b * sh;
+    }
+    col.needsUpdate = true;
+  };
+  paint(CER, i => ID_LIST[CER[lvl][i]], NAT.cortex);
+  paint(CB, () => 'cerebellum', NAT.cere);
+  paint(BS, i => ID_LIST[BS.ids[i]], NAT.stem);
+  for (const id in DEEP) { const s = DEEP[id], hit = active && active(id); const c = new THREE.Color(REG[id].c);
+    s.mesh.material.emissive.set(hit ? c : 0x000000).multiplyScalar(hit ? 0.45 : 1); 
+    s.capMat.color.copy(active && !hit ? c.clone().lerp(grayC, 0.55) : hit ? c.clone().multiplyScalar(1.15) : c); s.mesh.material.color.copy(active && !hit ? c.clone().lerp(grayC, 0.55) : c); }
+  const gc = new THREE.Color(NAT.gray), wc = new THREE.Color(NAT.white);
+  WM.capMat.color.copy(active && active('white_matter') ? new THREE.Color('#fff3c4') : wc);
+  CER.capMat.color.copy(active && active('cortex') ? new THREE.Color('#e09a86') : gc);
+  renderLegend();
+}
+
+/* ============================ picking ============================ */
+const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
+function regionAtSolid(p) {
+  const [x, y, z] = p;
+  for (const id of PICK_ORDER) { const s = STRUCTS.find(t => t.id === id); if (s.fn(x, y, z) < 0) return id; }
+  if (bsFn(x, y, z) < 0) return bsPart(y);
+  if (cbFn(x, y, z) < 0) return 'cerebellum';
+  if (!S.ghost) { if (wmFn(x, y, z) < 0) return 'white_matter'; if (cereFn(x, y, z) < 0) return classify(x, y, z, null, S.mode === 'lobes' ? 'lobes' : 'areas'); }
+  return null;
+}
+function pick(clientX, clientY) {
+  const r = renderer.domElement.getBoundingClientRect(); ndc.set(((clientX - r.left) / r.width) * 2 - 1, -((clientY - r.top) / r.height) * 2 + 1);
+  ray.setFromCamera(ndc, camera);
+  const objs = [CB.mesh, BS.mesh, ...Object.values(DEEP).map(s => s.mesh)]; if (!S.ghost) objs.unshift(CER.mesh);
+  const hits = ray.intersectObjects(objs, false).filter(h => plane.distanceToPoint(h.point) >= -1e-4);
+  let best = null;
+  if (hits.length) { const h = hits[0], o = h.object; let id;
+    if (o === CER.mesh) id = ID_LIST[CER[S.mode === 'lobes' ? 'idL' : 'idA'][h.face.a]];
+    else if (o === CB.mesh) id = 'cerebellum'; else if (o === BS.mesh) id = ID_LIST[BS.ids[h.face.a]];
+    else id = Object.values(DEEP).find(s => s.mesh === o).id;
+    best = { id, d: h.distance, p: h.point.clone() }; }
+  if (S.cut !== 'none') { const pt = new THREE.Vector3(); if (ray.ray.intersectPlane(plane, pt)) { const d = pt.distanceTo(ray.ray.origin);
+      if (!best || d < best.d - 1e-4) { const id = regionAtSolid([pt.x, pt.y, pt.z]); if (id) best = { id, d, p: pt }; } } }
+  return best;
+}
+
+/* ============================ camera ============================ */
+let fly = null;
+function setView(v, instant) {
+  S.view = v; const dir = new THREE.Vector3(...VIEW_DIRS[v]).normalize(); const dist = camera.position.distanceTo(controls.target) || 3.6;
+  const from = camera.position.clone().sub(controls.target), to = dir.multiplyScalar(4.3);
+  if (instant) { camera.position.copy(controls.target).add(to); controls.update(); }
+  else fly = { from, to, t0: performance.now(), tgt0: controls.target.clone() };
+  document.getElementById('hudView').textContent = VIEW_NAMES[v];
+  document.querySelectorAll('.vb').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+}
+function stepFly(now) {
+  if (!fly) return; const t = Math.min(1, (now - fly.t0) / 750), e = t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  const a = fly.from.clone().normalize(), b = fly.to.clone().normalize(); const q = new THREE.Quaternion().setFromUnitVectors(a, b); const qi = new THREE.Quaternion().slerp(q, e);
+  const len = fly.from.length() + (fly.to.length() - fly.from.length()) * e;
+  controls.target.lerpVectors(fly.tgt0, TARGET, e);
+  camera.position.copy(controls.target).add(a.applyQuaternion(qi).multiplyScalar(len)); if (t >= 1) fly = null;
+}
+const ORIENT = [['Anterior', [0, -0.05, 1.08]], ['Posterior', [0, -0.05, -1.08]], ['Superior', [0, 0.86, 0]], ['Inferior', [0, -1.0, -0.1]], ['Left', [0.92, -0.05, 0]], ['Right', [-0.92, -0.05, 0]]];
+const orientEls = ORIENT.map(([t]) => { const s = document.createElement('span'); s.textContent = t; document.getElementById('orient').appendChild(s); return s; });
+function placeOrient() {
+  const r = stage.getBoundingClientRect(), cam = camera.position.clone().sub(controls.target).normalize();
+  ORIENT.forEach(([, p], i) => { const v = new THREE.Vector3(...p); const facing = v.clone().sub(controls.target).normalize().dot(cam); v.project(camera);
+    const el = orientEls[i]; const x = (v.x + 1) / 2 * r.width, y = (1 - v.y) / 2 * r.height;
+    el.style.left = Math.max(36, Math.min(r.width - 36, x)) + 'px'; el.style.top = Math.max(14, Math.min(r.height - 14, y)) + 'px';
+    el.style.opacity = facing > 0.9 || facing < -0.9 ? 0 : facing < -0.15 ? 0.35 : 0.95; });
+}
+
+controls.addEventListener('end', () => { if (S.quiz && !S.quiz.busy) { const ids = presentIds(); if (!ids.has(S.quiz.target)) nextQ(); } });
+function resize() { const r = stage.getBoundingClientRect(); renderer.setSize(r.width, r.height, false); camera.aspect = r.width / r.height; camera.updateProjectionMatrix(); }
+window.addEventListener('resize', resize);
+function loop(now) { requestAnimationFrame(loop); stepFly(now); controls.update(); renderer.render(scene, camera); placeOrient(); }
+
+/* ============================ UI ============================ */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+const VICON = { left: '<path d="M4 12c0-4 3.5-7 8-7s8 3 8 7c0 2-1 3-2.5 3.5L16 18h-3l-.5-2.5C7 15.5 4 14.5 4 12z"/>', right: '<path d="M20 12c0-4-3.5-7-8-7s-8 3-8 7c0 2 1 3 2.5 3.5L8 18h3l.5-2.5c4.5 0 8.5-1 8.5-3.5z"/>',
+  front: '<path d="M12 5c-4 0-7 3-7 7s2 6 5 6h4c3 0 5-2 5-6s-3-7-7-7z"/><path d="M12 5v7"/>', back: '<path d="M12 5c-4 0-7 3-7 7s2 6 5 6h4c3 0 5-2 5-6s-3-7-7-7z"/><path d="M8 16c1.5 1.5 6.5 1.5 8 0"/>',
+  top: '<path d="M11.4 4C7 4 6 8 6 12s1 8 5.4 8zM12.6 4C17 4 18 8 18 12s-1 8-5.4 8z"/>', bottom: '<path d="M11.4 4C7 4 6 8 6 12s1 8 5.4 8zM12.6 4C17 4 18 8 18 12s-1 8-5.4 8z"/><circle cx="12" cy="13" r="2"/>' };
+$('#views').innerHTML = Object.keys(VIEW_NAMES).map(v => `<button class="vb" data-v="${v}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">${VICON[v]}</svg>${VIEW_NAMES[v]}</button>`).join('');
+document.querySelectorAll('.vb').forEach(b => b.onclick = () => setView(b.dataset.v));
+$('#tags').innerHTML = '<span class="lab">Light up by function</span>' + Object.entries(TAGS).map(([k, v]) => `<button class="chip" data-t="${k}">${v}</button>`).join('');
+document.querySelectorAll('#tags .chip').forEach(b => b.onclick = () => { if (S.quiz) return; S.tag = S.tag === b.dataset.t ? null : b.dataset.t; refresh(); });
+document.querySelectorAll('#cutSeg button').forEach(b => b.onclick = () => setCut(b.dataset.c));
+function setCut(c, keepView) { S.cut = c; applyCut(); if (c !== 'none' && !keepView) setView(CUT_VIEW[c][S.flip ? 1 : 0]); if (S.quiz) nextQ(true); refreshInfo(); }
+$('#cutPos').oninput = e => { S.pos[S.cut] = +e.target.value; applyCut(); };
+$('#cutPos').onchange = () => { if (S.quiz) nextQ(true); };
+$('#flip').onclick = () => { S.flip = !S.flip; applyCut(); setView(CUT_VIEW[S.cut][S.flip ? 1 : 0]); };
+document.querySelectorAll('#modeSeg button').forEach(b => b.onclick = () => { S.mode = b.dataset.m; if (S.sel && !presentIds().has(S.sel)) S.sel = null; refresh(); if (S.quiz) nextQ(true); });
+$('#ghostSw').onclick = () => { S.ghost = !S.ghost; applyGhost(); if (S.quiz) nextQ(true); };
+$('#quizSw').onclick = () => { if (S.quiz) S.quiz = null; else { S.quiz = { score: 0, total: 0, tries: 0, target: null, last: null, busy: false }; S.sel = null; S.tag = null; marker.visible = false; }
+  tip.style.opacity = 0; $('#quizSw').classList.toggle('on', !!S.quiz); $('#quizbar').classList.toggle('show', !!S.quiz); refresh(); if (S.quiz) nextQ(); };
+$('#zin').onclick = () => dolly(0.8); $('#zout').onclick = () => dolly(1.25); $('#zre').onclick = () => { fly = null; setView(S.view); };
+function dolly(k) { const off = camera.position.clone().sub(controls.target); const L = Math.min(controls.maxDistance, Math.max(controls.minDistance, off.length() * k)); camera.position.copy(controls.target).add(off.setLength(L)); }
+document.addEventListener('keydown', e => { if (e.target.matches('input')) return; if (e.key === 'Escape') { S.sel = null; S.tag = null; marker.visible = false; refresh(); } });
+
+const UNDERSIDE = new Set(['ofc', 'fusiform', 'parahippocampal', 'lingual']);
+function presentIds() {
+  /* parts the student can actually reach from this angle and cut */
+  const set = new Set(), cam = camera.position, cut = S.cut !== 'none', sag = S.cut === 'sagittal';
+  const camDir = cam.clone().sub(controls.target).normalize(), below = camDir.y < -0.35;
+  if (!S.ghost) {
+    const arr = S.mode === 'lobes' ? CER.idL : CER.idA, P = CER.mesh.geometry.attributes.position.array, N = CER.mesh.geometry.attributes.normal.array, v = new THREE.Vector3();
+    for (let i = 0; i < arr.length; i += 5) { v.set(P[i * 3], P[i * 3 + 1], P[i * 3 + 2]); if (plane.distanceToPoint(v) < 0) continue;
+      const tx = cam.x - v.x, ty = cam.y - v.y, tz = cam.z - v.z; if (N[i * 3] * tx + N[i * 3 + 1] * ty + N[i * 3 + 2] * tz < 0.35 * Math.hypot(tx, ty, tz)) continue;
+      const X = Math.abs(v.x); if (X < 0.075 && !sag) continue;
+      if (!sag && Math.abs(camDir.x) > 0.5 && Math.sign(v.x) !== Math.sign(camDir.x)) continue;   /* far hemisphere is hidden */
+      const id = ID_LIST[arr[i]]; if (UNDERSIDE.has(id) && !below && !cut) continue; set.add(id); }
+    if (cut) set.add('white_matter');
+  }
+  if (camDir.y < 0.6 || cut) { set.add('cerebellum'); set.add('pons'); set.add('medulla'); }
+  if (sag || S.ghost || (cut && plane.distanceToPoint(new THREE.Vector3(0, -0.12, -0.1)) > -0.05 && Math.abs(plane.distanceToPoint(new THREE.Vector3(0, -0.12, -0.1))) < 0.12)) set.add('midbrain');
+  for (const id in DEEP) { const s = DEEP[id]; if (S.ghost || (cut && s.box.intersectsPlane(plane)) || (s.out && (below || sag))) set.add(id); }
+  set.delete('cortex'); set.delete(undefined); return set;
+}
+
+/* where to look for each structure: [view, cut, position, flip] */
+const LATERAL = ['frontal', 'parietal', 'temporal', 'occipital', 'm1', 'premotor', 'dlpfc', 'broca', 's1', 'spl', 'smg', 'angular', 'a1', 'wernicke', 'itg', 'cerebellum', 'pons', 'medulla'];
+const MEDIAL = ['mpfc', 'sma', 'paracentral', 'precuneus', 'cuneus', 'lingual', 'cingulate', 'v1', 'cc', 'fornix', 'hypothalamus', 'pineal', 'ventricle4', 'midbrain', 'ventricle3'];
+const BELOW = ['ofc', 'fusiform', 'parahippocampal', 'olfactory', 'optic_chiasm', 'mammillary', 'pituitary'];
+const DEEPCUT = { thalamus: ['coronal', -0.12], caudate: ['horizontal', 0.1], putamen: ['horizontal', 0.03], globus_pallidus: ['horizontal', 0.02], internal_capsule: ['horizontal', 0.03], insula: ['horizontal', 0.02], lat_ventricle: ['horizontal', 0.13], hippocampus: ['coronal', -0.04], amygdala: ['coronal', 0.22], substantia_nigra: ['coronal', -0.075], white_matter: ['coronal', -0.1], cortex: ['coronal', -0.1] };
+function showMe(id) {
+  if (S.quiz) return;
+  const needAreas = !['frontal', 'parietal', 'temporal', 'occipital', 'cingulate'].includes(id);
+  if (needAreas && S.mode === 'lobes' && !STRUCTS.some(s => s.id === id) && !['cerebellum', 'pons', 'medulla', 'midbrain', 'white_matter'].includes(id)) S.mode = 'areas';
+  if (S.ghost && !STRUCTS.some(s => s.id === id)) { S.ghost = false; applyGhost(); }
+  S.flip = false;
+  if (id === 'broca_r' || id === 'wernicke_r') { setCut('none'); setView('right'); }
+  else if (LATERAL.includes(id)) { setCut('none'); setView('left'); }
+  else if (MEDIAL.includes(id)) { S.pos.sagittal = id === 'v1' || id === 'cuneus' || id === 'lingual' ? -0.03 : 0; setCut('sagittal'); }
+  else if (BELOW.includes(id)) { setCut('none'); setView('bottom'); }
+  else if (DEEPCUT[id]) { const [c, p] = DEEPCUT[id]; S.pos[c] = p; setCut(c); }
+  else { setCut('none'); setView('left'); }
+  S.sel = id; marker.visible = false; refresh();
+}
+
+function refresh() { document.querySelectorAll('#modeSeg button').forEach(b => b.classList.toggle('on', b.dataset.m === S.mode)); document.querySelectorAll('#tags .chip').forEach(b => b.classList.toggle('on', b.dataset.t === S.tag)); colorAll(); refreshInfo(); $('#vtag').innerHTML = S.ghost ? '<b>See-through</b> cortex' : ''; }
+function renderLegend() {
+  const L = $('#legend'); if (S.mode !== 'lobes') { L.innerHTML = S.mode === 'natural' ? '<span>Natural colour. Click any part to name it.</span>' : ''; return; }
+  L.innerHTML = ['frontal', 'parietal', 'temporal', 'occipital', 'cingulate', 'cerebellum'].map(i => `<span><i class="dot" style="background:${REG[i].c}"></i>${REG[i].n}</span>`).join('');
+}
+function refreshInfo() {
+  const box = $('#info');
+  if (S.quiz) { const q = S.quiz, l = q.last;
+    box.innerHTML = `<span class="eyebrow">Quiz</span><h2>Find the structure</h2><p class="muted">Click the part named at the top of the brain. You get two tries, then it lights up. Turn the brain, cut it open or switch colours at any time. The quiz only asks for parts you can reach in the current view.</p><h3>Score</h3><p style="font:700 1.6rem var(--mono)">${q.score} / ${q.total}</p>${l ? `<h3>Last answer: ${esc(REG[l].n)}</h3><p>${esc(REG[l].where)}</p><ul>${REG[l].fn.slice(0, 3).map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}`; return; }
+  const id = S.sel;
+  if (!id) {
+    if (S.tag) { const ids = Object.keys(REG).filter(i => REG[i].tags.includes(S.tag) && WHERE_OK(i));
+      box.innerHTML = `<span class="eyebrow">Light up by function</span><h2>${TAGS[S.tag]}</h2><p class="muted">Parts of the brain involved in this, lit up on the model. Some are deep inside: pick one to cut straight to it.</p><h3>Structures</h3><div class="picks">${ids.map(i => `<button class="chip" data-pick="${i}"><i class="dot" style="background:${REG[i].c};display:inline-block;margin-right:6px;vertical-align:-1px"></i>${esc(REG[i].n)}</button>`).join('')}</div>`;
+      box.querySelectorAll('[data-pick]').forEach(b => b.onclick = () => showMe(b.dataset.pick)); return; }
+    box.innerHTML = `<div class="welcome"><span class="eyebrow">Getting started</span><h2>Click any part of the brain</h2><p class="muted">Each part opens here with what it does, everyday skills that use it, what happens when it’s damaged, and a fact worth remembering.</p>
+      <h3>Three ways to cut</h3><dl><dt>Sagittal</dt><dd>Splits the brain into left and right. Right down the middle is “midsagittal”.</dd><dt>Coronal (frontal)</dt><dd>Splits it into front and back, like slicing a loaf from ear to ear.</dd><dt>Horizontal (axial, transverse)</dt><dd>Splits it into top and bottom, parallel to the floor. Most CT and MRI slices look like this.</dd></dl>
+      <h3>Direction words</h3><dl><dt>Anterior / posterior</dt><dd>Toward the front / the back.</dd><dt>Superior / inferior</dt><dd>Toward the top / the bottom.</dd><dt>Medial / lateral</dt><dd>Toward the midline / toward the side.</dd></dl>
+      <h3>Try this</h3><div class="picks">${['hippocampus', 'broca', 'thalamus', 'amygdala', 'cerebellum', 'v1'].map(i => `<button class="chip" data-pick="${i}">${esc(REG[i].n)}</button>`).join('')}</div></div>`;
+    box.querySelectorAll('[data-pick]').forEach(b => b.onclick = () => showMe(b.dataset.pick)); return;
+  }
+  const R = REG[id];
+  box.innerHTML = `<span class="cat"><i class="dot" style="background:${R.c}"></i>${esc(R.cat)}</span><h2>${esc(R.n)}</h2>${R.aka ? `<div class="aka">${esc(R.aka)}</div>` : ''}
+    <div class="where"><b>Where:</b> ${esc(R.where)}</div>
+    <h3>What it does</h3><ul>${R.fn.map(x => `<li>${esc(x)}</li>`).join('')}</ul>
+    ${R.sk && R.sk.length ? `<h3>Skills & everyday examples</h3><ul>${R.sk.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}
+    ${R.dmg ? `<h3>If it’s damaged</h3><p>${esc(R.dmg)}</p>` : ''}
+    ${R.fact ? `<h3>Did you know?</h3><p class="fact">${esc(R.fact)}</p>` : ''}
+    <div class="mtags">${R.tags.map(t => `<span>${TAGS[t]}</span>`).join('')}</div>
+    <div class="show"><button class="btn" id="showMe">Show me where it is</button><button class="btn ghost" id="clr">Clear</button></div>`;
+  $('#showMe').onclick = () => showMe(id); $('#clr').onclick = () => { S.sel = null; marker.visible = false; refresh(); };
+}
+const MODEL_IDS = new Set([...LATERAL, ...MEDIAL, ...BELOW, ...Object.keys(DEEPCUT), 'broca_r', 'wernicke_r']);
+const WHERE_OK = id => MODEL_IDS.has(id);
+
+/* pointer: hover names, click selects (drags rotate) */
+const tip = $('#tip'); let down = null, hoverT = 0;
+renderer.domElement.addEventListener('pointerdown', e => { down = { x: e.clientX, y: e.clientY }; });
+renderer.domElement.addEventListener('pointermove', e => {
+  if (e.pointerType === 'touch' || e.buttons || S.quiz || !CER) { tip.style.opacity = 0; return; }
+  const now = performance.now(); if (now - hoverT < 45) return; hoverT = now;
+  const h = pick(e.clientX, e.clientY); if (h && REG[h.id]) { tip.textContent = REG[h.id].n; tip.style.left = e.clientX + 14 + 'px'; tip.style.top = e.clientY + 12 + 'px'; tip.style.opacity = 1; } else tip.style.opacity = 0;
+});
+renderer.domElement.addEventListener('pointerleave', () => tip.style.opacity = 0);
+renderer.domElement.addEventListener('pointerup', e => {
+  if (!down || Math.hypot(e.clientX - down.x, e.clientY - down.y) > 5 || !CER) { down = null; return; } down = null;
+  const h = pick(e.clientX, e.clientY); tip.style.opacity = 0;
+  if (S.quiz) { if (h) answer(h.id); return; }
+  if (!h) { S.sel = null; marker.visible = false; refresh(); return; }
+  S.sel = h.id; marker.position.copy(h.p); marker.visible = true; refresh();
+});
+
+/* quiz */
+function nextQ(keep) {
+  const q = S.quiz; if (!q) return; q.busy = false; q.tries = 0; const ids = [...presentIds()].filter(i => REG[i]);
+  if (!(keep && q.target && ids.includes(q.target))) { const c = ids.filter(i => i !== q.target); q.target = c[Math.floor(Math.random() * c.length)]; }
+  $('#qT').textContent = REG[q.target].n; $('#qFb').textContent = ''; $('#qSc').textContent = `${q.score} / ${q.total}`; refreshInfo();
+}
+function flash(id, ok) { S.sel = id; const qz = S.quiz; S.quiz = null; colorAll(); S.quiz = qz; setTimeout(() => { S.sel = null; colorAll(); }, ok ? 800 : 1500); }
+function answer(id) {
+  const q = S.quiz; if (q.busy) return;
+  if (id === q.target) { q.score++; q.total++; q.last = id; q.busy = true; $('#qFb').textContent = '✓ Correct'; $('#qFb').style.color = 'var(--good)'; flash(id, true); setTimeout(() => nextQ(), 850); }
+  else { q.tries++; $('#qFb').style.color = 'var(--bad)';
+    if (q.tries >= 2) { q.total++; q.last = q.target; q.busy = true; $('#qFb').textContent = `That’s the ${REG[id].n}. Here’s the answer.`; flash(q.target, false); setTimeout(() => nextQ(), 1700); }
+    else $('#qFb').textContent = `That’s the ${REG[id].n}. Try again.`; }
+  $('#qSc').textContent = `${q.score} / ${q.total}`; refreshInfo();
+}
+$('#qSkip').onclick = () => { const q = S.quiz; if (!q || q.busy) return; q.total++; q.last = q.target; q.busy = true; flash(q.target, false); setTimeout(() => nextQ(), 1500); };
+
+/* search */
+const qi = $('#q'), res = $('#results'); let hits = [], act = 0;
+qi.addEventListener('input', () => { const s = qi.value.trim().toLowerCase(); if (!s) { res.style.display = 'none'; return; }
+  hits = [...MODEL_IDS].filter(id => REG[id] && (REG[id].n + ' ' + (REG[id].aka || '') + ' ' + REG[id].cat + ' ' + REG[id].fn.join(' ') + ' ' + REG[id].tags.map(t => TAGS[t]).join(' ')).toLowerCase().includes(s))
+    .sort((a, b) => REG[b].n.toLowerCase().startsWith(s) - REG[a].n.toLowerCase().startsWith(s)).slice(0, 12); act = 0;
+  res.innerHTML = hits.length ? hits.map((id, i) => `<button data-id="${id}" class="${i ? '' : 'act'}"><i class="dot" style="background:${REG[id].c}"></i>${esc(REG[id].n)}</button>`).join('') : '<div style="padding:9px 11px;color:var(--muted)">No match</div>';
+  res.style.display = 'block'; res.querySelectorAll('button').forEach(b => b.onmousedown = ev => { ev.preventDefault(); choose(b.dataset.id); }); });
+qi.addEventListener('blur', () => setTimeout(() => res.style.display = 'none', 120));
+qi.addEventListener('keydown', e => { if (!hits.length) return; if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); act = (act + (e.key === 'ArrowDown' ? 1 : -1) + hits.length) % hits.length; res.querySelectorAll('button').forEach((b, i) => b.classList.toggle('act', i === act)); } else if (e.key === 'Enter') choose(hits[act]); });
+function choose(id) { qi.value = ''; res.style.display = 'none'; if (S.quiz) $('#quizSw').click(); showMe(id); }
+
+/* boot */
+resize(); setView('left', true); requestAnimationFrame(loop); refreshInfo();
+build().then(() => { applyCut(); applyGhost(); refresh(); $('#loading').classList.add('done'); window.__ready = true; })
+  .catch(err => { $('#loadMsg').textContent = 'Something went wrong building the model: ' + err.message; console.error(err); });
+window.__S = S; window.__api = { setView, setCut, showMe, refresh, pick }; window.__present = presentIds; window.__cam = { camera, controls };
+</script>
+</body>
+</html>
