@@ -553,6 +553,24 @@ body.gfs .gh-frame { height: calc(100vh - 70px); height: calc(100dvh - 70px); }
 .hall-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
 .hall-chips button { display: inline-flex; align-items: center; gap: 6px; padding: 7px 13px; border-radius: 999px; border: 1px solid rgba(140, 170, 255, .3); background: rgba(255, 255, 255, .05); color: #d6e0ff; font: inherit; font-weight: 700; font-size: 14px; cursor: pointer; }
 .hall-chips button svg { width: 16px; height: 16px; } .hall-chips button[aria-selected="true"] { background: linear-gradient(180deg, #4f8cff, #2f62e0); border-color: transparent; color: #fff; }
+.hall-sec { display: grid; gap: 10px; margin-bottom: 22px; } .hall-sec[hidden] { display: none; }
+.hall-sh { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; padding-bottom: 8px; border-bottom: 1px solid rgba(140, 170, 255, .25); }
+.hall-sh h3 { display: inline-flex; align-items: center; gap: 8px; margin: 0; color: #fff; font-size: 1.15rem; } .hall-sh h3 svg { width: 20px; height: 20px; color: #ffc93c; }
+.hall-sh p { margin: 0; color: #a9b8e6; font-size: .9rem; }
+.hall-card.is-team { border-color: rgba(255, 201, 60, .55); }
+.hall-pic { position: relative; }
+.hall-team { position: absolute; left: 10px; top: 10px; display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; border-radius: 999px; background: #ffc93c; color: #2a1d00; font-size: .7rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; box-shadow: 0 2px 8px rgba(0, 0, 0, .35); }
+.hall-pic .hall-team svg { width: 13px; height: 13px; display: inline-block; }
+.tb-modal .mh svg { width: 14px; height: 14px; vertical-align: -2px; display: inline-block; }
+.tb-modal { max-width: 760px; }
+.tb-parts { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px; }
+.tb-part { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; background: var(--panel-2); }
+.tb-h { display: grid; gap: 1px; margin-bottom: 6px; } .tb-h span { color: var(--accent); font-weight: 650; font-size: 13px; }
+.tb-part ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: 13.5px; }
+.tb-part li { display: grid; grid-template-columns: 16px 1fr; gap: 4px; } .tb-arrow { color: var(--muted); }
+.tb-units { display: grid; gap: 4px; border: 1px dashed var(--line); border-radius: 12px; padding: 10px 12px; font-size: 13.5px; }
+.tb-units div { display: grid; grid-template-columns: minmax(150px, 230px) 1fr; gap: 10px; } .tb-units span { color: var(--muted); }
+@media (max-width: 600px) { .tb-units div { grid-template-columns: 1fr; gap: 0; } }
 .hall-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(215px, 1fr)); gap: 14px; }
 .hall-card { display: grid; grid-template-rows: auto 1fr; border-radius: 16px; overflow: hidden; background: #111a46; border: 1.5px solid rgba(140, 170, 255, .28); box-shadow: 0 8px 22px rgba(0, 0, 0, .35); transition: transform .15s, border-color .15s; }
 .hall-card[hidden] { display: none; } .hall-card:hover { transform: translateY(-3px); border-color: #7fb0ff; }
@@ -7955,6 +7973,44 @@ const GAMES = [
   { id: 'm-atom', band: 'ms', course: 'ms-phys', title: 'Atom Blaster', tag: 'Arcade · atoms', diff: 'Medium', time: '5–10 min', blurb: 'Capture protons, neutrons and electrons to build hydrogen through carbon. The protons decide the element.', ext: 'games/arcade-ms/index.html?g=atom', thumb: 'games/arcade-ms/thumbs/atom.webp' },
   { id: 'm-genetic', band: 'ms', course: 'ms-life', title: 'Genetic Detective', tag: 'Puzzle · heredity', diff: 'Medium', time: '10 min', blurb: 'Crack six heredity cases with Punnett squares and dominant and recessive traits.', ext: 'games/arcade-ms/index.html?g=genetic', thumb: 'games/arcade-ms/thumbs/genetic.webp' }
 ];
+/* Team games: who plays, and the science students need before they play (High school games → Team games → Before you play) */
+const TEAM_PREP = {
+  'g-gene': { who: '2–6 teams, or solo', where: 'Student devices, with the case on the projector', subject: 'Biology · genetics',
+    note: 'Every case uses all four stations, so cover all of these first.',
+    parts: [
+      ['🩸 Serology Bench', 'Blood typing', ['Antigens on red blood cells and the antibodies (anti-A, anti-B, anti-Rh) that clump them (agglutination)', 'ABO alleles Iᴬ, Iᴮ and i: dominance and codominance (type AB)', 'The Rh factor (Rh+ and Rh−)', 'Predicting children’s blood types from parents’ genotypes']],
+      ['🧬 Sequencing Lab', 'DNA base pairing', ['DNA structure: sugar–phosphate backbone and base “rungs”', 'Complementary base pairing (A–T, C–G) held by hydrogen bonds', 'Chargaff’s rule (%A = %T, %C = %G)', 'Antiparallel strands (5′→3′ and 3′→5′)']],
+      ['📊 Electrophoresis Bay', 'Gel electrophoresis (DNA fingerprinting)', ['Restriction enzymes cut DNA into fragments', 'DNA is negative (phosphate groups), so it moves toward the + electrode', 'Smaller fragments travel farther through the gel', 'Reading fragment sizes against a DNA ladder', 'Why two people’s DNA fingerprints are different']],
+      ['🔲 Genealogy Desk', 'Punnett squares', ['Genotype vs. phenotype; homozygous vs. heterozygous', 'Dominant and recessive alleles', 'Monohybrid crosses and the 3 : 1 ratio', 'Mendel’s law of segregation', 'Test crosses (crossing with a homozygous recessive)']]
+    ] },
+  'g-chemdet': { who: '2–6 teams, or solo', where: 'Student devices, with the case on the projector', subject: 'Chemistry',
+    note: 'Every case uses all four stations, so cover all of these first.',
+    parts: [
+      ['🔥 Spectroscopy Bench', 'Flame tests', ['Electrons in energy levels: absorbing energy (excitation) and emitting light', 'Each element has its own emission spectrum', 'Wavelength, frequency and energy of light (E = hf)', 'Flame colors come from the metal ion (Li, Na, K, Ca, Cu, Ba)']],
+      ['🖊️ Chromatography Station', 'Paper chromatography', ['Mixtures vs. pure substances', 'Separating dyes by their attraction to the paper vs. the solvent', 'Calculating Rf = spot distance ÷ solvent-front distance', 'Technique: pencil start line, solvent below the line']],
+      ['⚖️ Density Lab', 'Density', ['Density = mass ÷ volume (g/mL, g/cm³)', 'Finding volume by water displacement', 'Density as a characteristic property (same for any size of sample)', 'Predicting sinking and floating from density']],
+      ['🧪 Acid–Base Bench', 'pH calculations', ['pH = −log[H⁺], pOH = −log[OH⁻] and pH + pOH = 14', 'The log scale: each pH unit is a 10× change in [H⁺]', 'Arrhenius acids and bases; neutralization makes a salt and water', 'Scientific notation (1.0 × 10⁻ⁿ M)']]
+    ] },
+  'g-contaminated': { who: 'Whole class (4–40 players)', where: 'Host on the projector, students on their own devices', subject: 'Biology with some chemistry',
+    note: 'When you host, you choose a unit, and only that unit’s tasks appear. Pick the one that matches what you’ve covered.',
+    units: [['Ch 6: The Chemistry of Life', 'Atoms, balancing, pH, macromolecules, enzymes'], ['Ch 7: Cell Structure & Function', 'Microscopes, organelles, plant vs. animal cells, osmosis, transport, macromolecules'], ['Ch 6 + 7 (no genetics)', 'Everything except Punnett squares and DNA'], ['Mixed review (Ch 6, 7 + genetics)', 'All 12 tasks']],
+    parts: [
+      ['🔬 Microscopy Bay', 'Microscopes', ['Total magnification = eyepiece × objective']],
+      ['🧫 Cell Lab', 'Cells', ['Organelles and their jobs', 'Plant vs. animal cells (cell wall, chloroplasts, central vacuole, centrioles)']],
+      ['🫧 Membrane Lab', 'Membranes', ['Osmosis and tonicity (hypotonic, isotonic, hypertonic)', 'Passive, facilitated and active transport (ATP), endocytosis and exocytosis']],
+      ['⚗️ Chem Station', 'Chemistry of life', ['The pH scale (acidic, neutral, basic; 10× per unit)', 'Atomic structure: protons, neutrons, electrons, mass number and charge', 'Balancing equations (conservation of mass)']],
+      ['🧪 Biochem Lab', 'Biomolecules', ['The four macromolecules and their monomers', 'Enzymes: optimum temperature and pH, denaturation, lock and key']],
+      ['🧬 Genetics Lab', 'Genetics (mixed review only)', ['Punnett squares and recessive phenotypes', 'DNA base pairing (and why DNA has no uracil)']]
+    ] },
+  game: { who: '2–4 teams', where: 'One screen on the projector', subject: 'Mixed review',
+    note: 'A board of 25 questions in five categories (100–500 points). The questions are general high school review, so students don’t need all of it, but it works best after a few units.',
+    parts: [
+      ['🧬 Biology', 'Cells to ecosystems', ['Mitochondria and ATP; photosynthesis reactants', 'DNA base pairing, mRNA, meiosis and gametes', 'Punnett squares (Pp × Pp)', 'Enzymes, negative feedback (insulin), silent mutations', 'Energy transfer between trophic levels (about 10 %)']],
+      ['⚗️ Chemistry', 'Atoms to moles', ['Subatomic particles, atomic number, covalent bonds', 'Balancing equations, molar mass, the mole (6.02 × 10²³)', 'pH of water, strong acids', 'Why temperature speeds up reactions']],
+      ['🚀 Physics', 'Motion, energy, waves, circuits', ['Speed, Newton’s laws, F = ma, g ≈ 9.8 m/s²', 'Kinetic energy, momentum conservation', 'Ohm’s law (I = V/R), wave speed (v = fλ)']],
+      ['🥽 Lab Safety and 🔎 Science Practices', 'Every lab', ['Goggles, spills, broken glass, eyewash, wafting', 'Safety data sheets and hazard pictograms', 'Variables, fair tests, measuring tools, repeat trials, means']]
+    ] }
+};
 const GBAND = { hs: { name: 'High school games', short: 'High school' }, ms: { name: 'Middle school games', short: 'Middle school' }, arcade: { name: 'Science Arcade', short: 'Arcade' } };
 
 /* full screen for games (labs have their own button in Kit). Like labs, the whole page goes full screen so pop-ups and
@@ -7989,14 +8045,18 @@ const GameHub = {
 function gameHall(band, list) {
   const team = g => /team|whole class|projector/i.test(g.tag);
   const subOf = g => band === 'arcade' ? 'all' : [g.fsub || g.course || 'mixed'].concat(band === 'hs' && team(g) ? ['team'] : []).join(' ');
-  const SUBS = band === 'hs' ? [['all', 'All games', 'pad'], ['hs-bio', 'Biology', 'dna'], ['hs-chem', 'Chemistry', 'flask'], ['team', 'Whole class', 'users'], ['mixed', 'Mixed review', 'bolt']]
+  const SUBS = band === 'hs' ? [['all', 'All games', 'pad'], ['hs-bio', 'Biology', 'dna'], ['hs-chem', 'Chemistry', 'flask'], ['mixed', 'Mixed review', 'bolt']]
     : [['all', 'All games', 'pad'], ['ms-life', 'Life science', 'leaf'], ['ms-earth', 'Earth & space', 'globe'], ['ms-phys', 'Physical science', 'magnet'], ['mixed', 'Mixed review', 'bolt']];
   const fk = 'hallF' + band, f = band === 'arcade' ? 'all' : SUBS.some(x => x[0] === APP[fk]) ? APP[fk] : 'all', hit = g => f === 'all' || subOf(g).split(' ').includes(f), DC = { Easy: '#3ed17a', Medium: '#ffc93c', Hard: '#ff5d5d' };
-  const card = g => `<article class="hall-card" data-sub="${subOf(g)}" ${hit(g) ? '' : 'hidden'}><button class="hall-pic" data-game="${g.id}" aria-label="Play ${esc(g.title)}">${gameThumb(g.id)}</button>
-    <div class="hall-b"><span class="hall-t">${esc(g.tag)}</span><h3>${esc(g.title)}</h3><p>${esc(g.blurb)}</p><div class="hall-f"><span class="hall-m">${g.diff ? `<span class="hall-d" style="--d:${DC[g.diff]}"><i></i>${g.diff}</span>` : ''}<span class="hall-d hall-time" style="--d:#9fb0cc">${ico('clock')}${esc(g.time)}</span></span><button class="btn primary sm" data-game="${g.id}">Play ${ico('play')}</button></div></div></article>`;
+  const tp = g => band === 'hs' && TEAM_PREP[g.id];
+  const card = g => `<article class="hall-card ${tp(g) ? 'is-team' : ''}" data-sub="${subOf(g)}" ${hit(g) ? '' : 'hidden'}><button class="hall-pic" data-game="${g.id}" aria-label="${tp(g) ? 'About' : 'Play'} ${esc(g.title)}">${gameThumb(g.id)}${tp(g) ? `<span class="hall-team">${ico('users')}Team game</span>` : ''}</button>
+    <div class="hall-b"><span class="hall-t">${esc(tp(g) ? TEAM_PREP[g.id].who : g.tag)}</span><h3>${esc(g.title)}</h3><p>${esc(g.blurb)}</p><div class="hall-f"><span class="hall-m">${g.diff ? `<span class="hall-d" style="--d:${DC[g.diff]}"><i></i>${g.diff}</span>` : ''}<span class="hall-d hall-time" style="--d:#9fb0cc">${ico('clock')}${esc(g.time)}</span></span><button class="btn primary sm" data-game="${g.id}">${tp(g) ? `See topics ${ico('list')}` : `Play ${ico('play')}`}</button></div></div></article>`;
+  const teams = list.filter(tp), solo = list.filter(g => !tp(g)), shown = l => l.some(hit) ? '' : 'hidden';
+  const grid = band === 'hs' ? `<div class="hall-sec" data-sec="team" ${shown(teams)}><div class="hall-sh"><h3>${ico('users')}Team games</h3><p>Played in teams or as a whole class. Click one to see the science students need to know before you play.</p></div><div class="hall-grid">${teams.map(card).join('')}</div></div>
+    <div class="hall-sec" data-sec="solo" ${shown(solo)}><div class="hall-sh"><h3>${ico('pad')}Solo games</h3><p>Students play on their own devices.</p></div><div class="hall-grid">${solo.map(card).join('')}</div></div>` : `<div class="hall-grid">${list.map(card).join('')}</div>`;
   return `<section class="hall"><div class="hall-main"><div class="hall-ban"><h2><em>${band === 'arcade' ? 'Science' : band === 'hs' ? 'High School' : 'Interactive'}</em> ${band === 'arcade' ? 'Arcade' : band === 'hs' ? 'Science Games' : 'Science Games'}</h2><p>${band === 'arcade' ? 'Retro biology games for high school.' : band === 'hs' ? 'Biology and chemistry review for the projector or on their own.' : 'Play, learn and master key concepts!'}</p></div>
     ${band === 'arcade' ? '' : `<div class="hall-chips" role="tablist">${SUBS.map(([k, l, ic]) => `<button role="tab" data-hf="${k}" aria-selected="${k === f}">${ico(ic)}${l}</button>`).join('')}</div>`}
-    <div class="hall-grid">${list.map(card).join('')}</div></div>${arcadeProgress()}</section>`;
+    ${grid}</div>${arcadeProgress()}</section>`;
 }
 /* level, XP and badges from the arcade games, saved only in this browser */
 function arcadeProgress() {
@@ -8014,7 +8074,24 @@ function gameCard(g) {
     <div class="meta"><span class="chip">${ico('clock')}${esc(g.time)}</span>${g.diff ? `<span class="chip diff-${g.diff}">${g.diff}</span>` : ''}${g.ext ? '<span class="chip acc">Full game</span>' : ''}</div>
     <div class="row" style="margin-top:4px"><button class="btn primary sm" data-game="${g.id}">${ico('play')}Play</button></div></div></article>`;
 }
-function bindGameCards(m) { $$('[data-game]', m).forEach(b => b.onclick = () => go(b.dataset.game)); }
+function bindGameCards(m) { $$('[data-game]', m).forEach(b => b.onclick = () => { const id = b.dataset.game; if (TEAM_PREP[id] && !APP.student) teamBrief(id); else go(id); }); }
+/* "Before you play" for a team game: the game's parts, and the science students need for each one */
+function teamBrief(id) {
+  const g = GAMES.find(x => x.id === id), t = TEAM_PREP[id]; if (!g || !t) return go(id);
+  const sc = document.createElement('div'); sc.className = 'scrim';
+  sc.innerHTML = `<div class="modal tb-modal" role="dialog" aria-modal="true" aria-labelledby="tbT"><div class="mh"><span class="eyebrow">${ico('users')} Team game · ${esc(t.subject)}</span><h2 id="tbT">${esc(g.title)}</h2><p class="muted">${esc(g.blurb)}</p>
+      <div class="meta" style="margin-top:6px"><span class="chip">${ico('users')}${esc(t.who)}</span><span class="chip">${ico('clock')}${esc(g.time)}</span><span class="chip">${esc(t.where)}</span></div></div>
+    <div class="mb"><div><span class="eyebrow">Before you play: what students need to know</span><p class="small muted" style="margin:4px 0 0">${esc(t.note)}</p></div>
+      ${t.units ? `<div class="tb-units"><span class="eyebrow">Unit choices when you host</span>${t.units.map(u => `<div><b>${esc(u[0])}</b><span>${esc(u[1])}</span></div>`).join('')}</div>` : ''}
+      <div class="tb-parts">${t.parts.map(([where, what, topics]) => `<section class="tb-part"><div class="tb-h"><b>${esc(where)}</b><span>${esc(what)}</span></div><ul>${topics.map(x => `<li><span class="tb-arrow">→</span>${esc(x)}</li>`).join('')}</ul></section>`).join('')}</div></div>
+    <div class="mf"><button class="btn ghost" id="tbCopy">${ico('copy')}Copy topic list</button><button class="btn" id="tbX">Cancel</button><button class="btn primary" id="tbGo">${ico('play')}Open the game</button></div></div>`;
+  document.body.appendChild(sc); $('#tbGo', sc).focus();
+  const close = () => { sc.remove(); document.removeEventListener('keydown', key); }, key = e => { if (e.key === 'Escape') close(); };
+  document.addEventListener('keydown', key); sc.onclick = e => { if (e.target === sc) close(); };
+  $('#tbX', sc).onclick = close; $('#tbGo', sc).onclick = () => { close(); go(id); };
+  $('#tbCopy', sc).onclick = e => { const txt = `${g.title}: what students need to know\n` + t.parts.map(([w, what, tp]) => `\n${w.replace(/^\S+\s/, '')} (${what})\n` + tp.map(x => `- ${x}`).join('\n')).join('\n');
+    (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(() => { e.currentTarget.textContent = 'Copied'; }, () => {}); };
+}
 function pageGames(m, band) {
   const list = GAMES.filter(g => g.band === band), others = ['hs', 'ms', 'arcade'].filter(b => b !== band);
   const lead = { hs: 'Review games for high school biology, chemistry and physics. Project them for the whole class or let students play on their own.', ms: 'Games made for middle school science: life, Earth and space, and physical science. They’re different games from the high school set.', arcade: 'Six retro arcade games for biology: cells, signaling, the immune system, mitosis, DNA and enzymes. Fast, solo and built around real science, with boss fights. They also open in their own tab for full screen play.' }[band];
@@ -8022,7 +8099,7 @@ function pageGames(m, band) {
     <div class="row">${others.map(o => `<button class="btn sm" data-gb2="games-${o}">${ico(o === 'hs' ? 'atom' : o === 'ms' ? 'leaf' : 'pad')}See ${o === 'arcade' ? 'the Science Arcade' : GBAND[o].name.toLowerCase()}</button>`).join('')}${band === 'arcade' ? `<a class="btn sm primary" href="${gameURL('games/arcade/index.html')}" target="_blank" rel="noopener">${ico('link')}Open the arcade in a new tab</a>` : ''}</div>
     ${gameHall(band, list)}`;
   bindGameCards(m); $$('[data-gb2]', m).forEach(b => b.onclick = e => go(e.currentTarget.dataset.gb2));
-  $$('[data-hf]', m).forEach(b => b.onclick = () => { const f = b.dataset.hf; APP['hallF' + band] = f; $$('[data-hf]', m).forEach(x => x.setAttribute('aria-selected', String(x === b))); $$('.hall-card', m).forEach(c => { c.hidden = f !== 'all' && !c.dataset.sub.split(' ').includes(f); }); });
+  $$('[data-hf]', m).forEach(b => b.onclick = () => { const f = b.dataset.hf; APP['hallF' + band] = f; $$('[data-hf]', m).forEach(x => x.setAttribute('aria-selected', String(x === b))); $$('.hall-card', m).forEach(c => { c.hidden = f !== 'all' && !c.dataset.sub.split(' ').includes(f); }); $$('.hall-sec', m).forEach(x => { x.hidden = !$$('.hall-card', x).some(c => !c.hidden); }); });
 }
 /* games that live in their own folder (Contaminated, Gene Detectives, Chem Detectives, Signal Cascade) open in a frame, or in a new tab */
 const gameURL = p => (CLEAN_URLS || /\/j\//.test(location.pathname) ? '/' : '') + p;
