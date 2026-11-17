@@ -205,6 +205,15 @@ table.rec tr.rs-det td { padding: 0 10px 12px 10px; }
 .brief > div { display: grid; gap: 6px; align-content: start; }
 .brief ul { margin: 0; padding-left: 18px; display: grid; gap: 3px; font-size: 14px; }
 @media (max-width: 600px) { .brief { grid-template-columns: 1fr; } }
+.xm-pick { display: grid; gap: 8px; }
+.xm-o { display: grid; grid-template-columns: 18px 34px 1fr; gap: 10px; align-items: center; border: 1px solid var(--line); border-radius: 12px; padding: 9px 12px; cursor: pointer; }
+.xm-o:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+.xm-o input { accent-color: var(--accent); margin: 0; }
+.xm-o .ic { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: var(--accent); color: var(--accent-ink); }
+.xm-o .ic svg { width: 19px; height: 19px; }
+.xm-o small { display: block; color: var(--muted); font-size: 12.5px; }
+.xl-wait { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(8, 20, 36, .3); z-index: 200; }
+.xl-wait div { background: var(--panel); color: var(--ink); padding: 14px 22px; border-radius: 14px; font-weight: 650; box-shadow: var(--shadow); }
 .std { display: grid; gap: 8px; }
 .std .s { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; font-size: 13.5px; }
 
@@ -1093,7 +1102,7 @@ function renderGate() {
     $('#sForm').addEventListener('submit', async e => {
       e.preventDefault(); const err = $('#sErr'), code = $('#sCode').value, no = stuNo($('#sNo').value);
       const k = await readLabCode(code);
-      if (!k) { err.textContent = 'That code doesn\u2019t look right. Check it with your teacher (it has 13 to 25 letters and numbers).'; return; }
+      if (!k) { err.textContent = 'That code doesn\u2019t look right. Check it with your teacher (it has 13 to 27 letters and numbers).'; return; }
       if (!k.labs.length && !k.games.length) { err.textContent = 'This code doesn\u2019t include any labs or games. Ask your teacher for a new one.'; return; }
       if (!no) { err.textContent = 'Enter the student number your teacher gave you (a number from 1 to 999).'; $('#sNo').focus(); return; }
       const b = $('#sGo'); b.disabled = true; b.textContent = 'Checking code…'; const op = await codeOpen(k.code); b.disabled = false; b.textContent = 'Start';
@@ -1188,7 +1197,7 @@ function labCard(l, c) {
   return `<article class="card labcard"><div class="thumb">${l.thumb ? l.thumb() : ''}</div><div class="body">
     <span class="eyebrow">${esc(c ? c.band.replace(' Science', '') + ' · ' + c.name : l.courseLabel)}</span>
     <h3>${esc(l.title)}</h3><p class="small muted">${esc(l.summary)}</p>
-    <div class="meta">${((l.ngssBy && c && l.ngssBy[c.id]) || l.ngss).slice(0, 3).map(n => `<span class="chip ngss">${n[0]}</span>`).join('')}<span class="chip">${ico('clock')}${esc(l.time)}</span></div>
+    <div class="meta">${((l.ngssBy && c && l.ngssBy[c.id]) || l.ngss).slice(0, l.grade ? 2 : 3).map(n => `<span class="chip ngss">${n[0]}</span>`).join('')}${l.grade ? `<span class="chip">${esc(l.grade)}</span>` : ''}<span class="chip">${ico('clock')}${esc(l.time)}</span></div>
     <div class="row" style="margin-top:4px"><button class="btn primary sm" data-lab="${l.id}" data-course="${c ? c.id : ''}">${ico('play')}Open lab</button></div></div></article>`;
 }
 function bindLabButtons(m) { $$('[data-lab]', m).forEach(b => b.onclick = () => openBrief(LABS.find(l => l.id === b.dataset.lab), b.dataset.course)); }
@@ -1241,17 +1250,19 @@ function openBrief(l, cid) {
   const ngss = (l.ngssBy && l.ngssBy[c.id]) || l.ngss;
   const sc = document.createElement('div'); sc.className = 'scrim';
   sc.innerHTML = `<div class="modal" role="dialog" aria-modal="true" aria-labelledby="bT"><div class="mh"><span class="eyebrow">${esc(c.band)} · ${esc(c.name)}</span><h2 id="bT">${esc(l.title)}</h2><p class="muted">${esc(l.objective)}</p></div>
-    <div class="mb"><div class="brief"><div><span class="eyebrow">Materials</span><ul>${l.materials.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>
-      <div><span class="eyebrow">Safety</span><ul>${l.safety.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div></div>
+    <div class="mb"><div class="brief">${l.objectives ? `<div style="grid-column:1/-1"><span class="eyebrow">You will</span><ul>${l.objectives.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>` : ''}<div><span class="eyebrow">Materials</span><ul>${l.materials.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>
+      <div><span class="eyebrow">${l.grade ? 'Level and time' : 'Safety'}</span><ul>${l.grade ? `<li>${esc(l.grade)}</li><li>About ${esc(l.time)}</li>` : l.safety.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div></div>
+      ${l.modes ? `<div class="xm-pick" role="radiogroup" aria-label="Mode"><span class="eyebrow">Choose a mode</span>${[['guided', 'list', 'Guided Experiment', 'Step-by-step challenges with predictions, instant feedback and a short quiz.' + (APP.student ? ' Your results go to your teacher.' : '')], ['free', 'chart', 'Free Investigation', 'Design your own experiment: record data, graph it, test your prediction and download a report.'], ['game', 'trophy', 'Game Challenge', 'Use the science to beat the levels and earn stars.']].map(([k, ic, t, dd], i) => `<label class="xm-o"><input type="radio" name="xMode" value="${k}" ${i ? '' : 'checked'}><span class="ic">${ico(ic)}</span><span><b>${t}</b><small>${dd}</small></span></label>`).join('')}</div>` : ''}
       <div class="std"><span class="eyebrow">NGSS connections</span>${ngss.map(n => `<div class="s"><span class="chip ngss">${n[0]}</span><span>${esc(n[1])}</span></div>`).join('')}</div>
       <label class="fld" for="stName">Student name<input type="text" id="stName" placeholder="First name and last initial" value="${esc(LS.get('lastStudent', ''))}"></label>
-      <p class="small muted">Use a mouse. Hold the left button to pour or squeeze, and move the mouse to stir, mash or shake. About ${esc(l.time)}.</p></div>
+      <p class="small muted">${l.howto ? esc(l.howto) : `Use a mouse. Hold the left button to pour or squeeze, and move the mouse to stir, mash or shake. About ${esc(l.time)}.`}</p></div>
     <div class="mf"><button class="btn" id="bX">Cancel</button><button class="btn primary" id="bGo">${ico('play')}Start lab</button></div></div>`;
   document.body.appendChild(sc); ($('#stName', sc) || $('#bGo', sc)).focus();
   const close = () => sc.remove();
   $('#bX', sc).onclick = close; sc.addEventListener('pointerdown', e => { if (e.target === sc) close(); });
+  if (l.modes && typeof XLAB !== 'undefined') XLAB.prefetch(l.id);
   if (APP.student) { const nf = $('#stName', sc).closest('label'); nf.innerHTML = `<span class="small">Working as <b>${esc(APP.student.name)}</b>. Your results go to your teacher when you finish.</span>`; }
-  $('#bGo', sc).onclick = () => { const nm = APP.student ? APP.student.name : $('#stName', sc).value.trim(); if (!APP.student) LS.set('lastStudent', nm); close(); SND.ac(); APP.curLab = l.id; Kit.noHints = !!(APP.student && !(APP.student.k.opts & 1)); l.run({ student: nm, course: c, back: APP.student ? 'home' : APP.view, labId: l.id }); };
+  $('#bGo', sc).onclick = () => { const nm = APP.student ? APP.student.name : $('#stName', sc).value.trim(); if (!APP.student) LS.set('lastStudent', nm); close(); SND.ac(); APP.curLab = l.id; Kit.noHints = !!(APP.student && !(APP.student.k.opts & 1)); l.run({ student: nm, course: c, back: APP.student ? 'home' : APP.view, labId: l.id, mode: (sc.querySelector('input[name="xMode"]:checked') || {}).value }); };
 }
 
 /* small confetti burst used by the lab results and the game */
@@ -1671,7 +1682,7 @@ const ASSIST = {
   otter: { name: 'Pippin', pal: { fur: '#a8754f', dark: '#7d5638', belly: '#f6e6cc', line: '#4a3426' } },
   sheep: { name: 'Puff', pal: { wool: '#fffdf8', face: '#f3dcc3', dark: '#5b4c45', line: '#5a4a42' } }
 };
-const ASSIST_BY_LAB = { 'dna-strawberry': 'otter', titration: 'sheep', flame: 'otter', pendulum: 'sheep', ohm: 'otter', mass: 'otter', erosion: 'sheep', onion: 'sheep', heart: 'otter', projectile: 'sheep', helix: 'otter', ecosystem: 'sheep', cellcity: 'otter', volcano: 'sheep', weather: 'otter', reactions: 'sheep', coaster: 'otter' };
+const ASSIST_BY_LAB = { 'dna-strawberry': 'otter', titration: 'sheep', flame: 'otter', pendulum: 'sheep', ohm: 'otter', mass: 'otter', erosion: 'sheep', onion: 'sheep', heart: 'otter', projectile: 'sheep', helix: 'otter', ecosystem: 'sheep', cellcity: 'otter', volcano: 'sheep', weather: 'otter', reactions: 'sheep', coaster: 'otter', osmosis: 'sheep' };
 const assist = () => ASSIST_BY_LAB[(typeof APP !== 'undefined' && APP.curLab) || ''] || 'otter';
 const asstName = () => ASSIST[assist()].name;
 function pipFace(mood = 'happy', size = 64, kind = assist()) { return charFace(kind, mood, size); }
@@ -2397,6 +2408,69 @@ function labThumb(id, big) {
       <circle cx="310" cy="174" r="30" fill="none" stroke="#3b2f2a" stroke-width="6"/><circle cx="310" cy="174" r="30" fill="none" stroke="#e5484d" stroke-width="2.6"/><path d="M272,204 H380" stroke="#3b2f2a" stroke-width="6"/><path d="M272,204 H380" stroke="#e5484d" stroke-width="2.6"/>
       <g transform="translate(70 126) rotate(72)"><rect x="-14" y="-12" width="28" height="12" rx="4" fill="#2f6fd6"/><circle cx="-5" cy="-15" r="3.6" fill="#ffcf9a"/><circle cx="6" cy="-15" r="3.6" fill="#ffcf9a"/></g>
       <g transform="translate(150 20)"><rect width="110" height="56" rx="8" fill="#0b1020" fill-opacity=".72"/>${[['#4f8ff7', .35, 'PE'], ['#ff9a3c', .6, 'KE']].map(([c, k, t], i) => `<text x="8" y="${20 + i * 22}" font-size="10" fill="#fff">${t}</text><rect x="28" y="${12 + i * 22}" width="74" height="7" rx="3.5" fill="#fff" fill-opacity=".15"/><rect x="28" y="${12 + i * 22}" width="${74 * k}" height="7" rx="3.5" fill="${c}"/>`).join('')}</g>`,
+    osmosis: `<rect width="400" height="240" fill="#0f3a52"/>${[[40, 40], [90, 200], [150, 30], [330, 60], [360, 190], [60, 120], [300, 210], [250, 30]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="5" fill="#7fd3ff" opacity=".7"/>`).join('')}${[[110, 70], [290, 120], [80, 170], [340, 30]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="7" fill="#ffb347"/>`).join('')}
+      <path d="M200,42 C262,40 300,80 298,122 C296,168 252,200 200,198 C146,196 104,166 104,120 C104,74 142,44 200,42Z" fill="#ffd6e0" fill-opacity=".85" stroke="#ff7aa2" stroke-width="5" stroke-dasharray="10 5"/>
+      <circle cx="210" cy="118" r="26" fill="#c46a9a" opacity=".8"/><circle cx="214" cy="112" r="9" fill="#8e3b6c"/>
+      <path d="M318,118 l-18,0 m6,-7 l-7,7 7,7" stroke="#7fd3ff" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M84,118 l18,0 m-6,-7 l7,7 -7,7" stroke="#7fd3ff" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <g transform="translate(20 196)"><rect width="96" height="30" rx="8" fill="#0b1020" fill-opacity=".7"/><text x="48" y="20" font-size="13" font-weight="800" fill="#7ee0a1" text-anchor="middle">ISOTONIC</text></g>`,
+    greenhouse: `<rect width="400" height="240" fill="#bfe6ff"/><circle cx="350" cy="40" r="24" fill="#ffd34d"/>${[0, 1, 2, 3].map(i => `<line x1="350" y1="40" x2="${300 - i * 30}" y2="${80 + i * 16}" stroke="#ffd34d" stroke-width="3" opacity=".6"/>`).join('')}
+      <path d="M40,200 L40,110 L200,40 L360,110 L360,200Z" fill="#e8f7ff" fill-opacity=".55" stroke="#7aa6c2" stroke-width="4"/><line x1="200" y1="40" x2="200" y2="200" stroke="#7aa6c2" stroke-width="3"/><line x1="40" y1="110" x2="360" y2="110" stroke="#7aa6c2" stroke-width="2"/>
+      <rect y="196" width="400" height="44" fill="#7a5236"/>${[90, 150, 250, 310].map((x, i) => `<g transform="translate(${x} 198)"><path d="M0,0 C0,-30 0,-50 0,${-60 - i * 8}" stroke="#2f8a3a" stroke-width="4" fill="none"/><ellipse cx="-12" cy="-30" rx="13" ry="6" fill="#43b04f" transform="rotate(-30 -12 -30)"/><ellipse cx="12" cy="-44" rx="13" ry="6" fill="#43b04f" transform="rotate(30 12 -44)"/><circle cy="${-62 - i * 8}" r="7" fill="#ff6b8a"/></g>`).join('')}
+      ${[[120, 150], [128, 128], [282, 140], [276, 116]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="5" fill="#fff" stroke="#9fd0ea" stroke-width="1.5"/>`).join('')}
+      <g transform="translate(14 14)"><rect width="118" height="30" rx="8" fill="#0b1020" fill-opacity=".72"/><text x="59" y="20" font-size="12.5" font-weight="800" fill="#7ee0a1" text-anchor="middle">O₂ 42 mL/h</text></g>`,
+    enzyme: `<rect width="400" height="240" fill="#2a2140"/><rect y="170" width="400" height="70" fill="#3a2f55"/><rect x="0" y="176" width="400" height="16" fill="#5a4b80"/>${[30, 110, 190, 270, 350].map(x => `<circle cx="${x}" cy="184" r="9" fill="#2a2140" stroke="#8a7bb5" stroke-width="2"/>`).join('')}
+      <path d="M120,150 C100,90 140,50 190,56 C240,50 270,90 256,124 L224,124 L214,104 L190,104 L180,124 L150,124 C150,140 140,150 120,150Z" fill="#7c5cff" stroke="#c9b8ff" stroke-width="3"/>
+      <path d="M190,104 L214,104 L224,124 L180,124Z" fill="#2a2140"/><path d="M186,128 L218,128 L208,108 L196,108Z" fill="#ffb347" stroke="#fff" stroke-width="2"/>
+      <circle cx="168" cy="82" r="5" fill="#fff"/><circle cx="208" cy="80" r="5" fill="#fff"/><path d="M176,94 Q190,102 204,92" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/>
+      ${[[300, 150], [330, 140], [352, 158]].map(([x, y]) => `<path d="M${x},${y} l10,0 l-5,-10z" fill="#ffb347"/>`).join('')}${[[56, 152], [76, 140]].map(([x, y]) => `<path d="M${x},${y} l14,0 l-7,-14z" fill="#ffd27a"/>`).join('')}
+      <g transform="translate(270 20)"><rect width="114" height="56" rx="8" fill="#0b1020" fill-opacity=".72"/><text x="10" y="22" font-size="12" fill="#a9b6cc">37 °C · pH 7</text><text x="10" y="44" font-size="15" font-weight="800" fill="#7ee0a1">Rate ▲ 92%</text></g>`,
+    genetics: `<rect width="400" height="240" fill="#1d3b2e"/><g transform="translate(20 34)"><rect width="150" height="150" rx="10" fill="#f6f1e3"/>${['BB', 'Bb', 'Bb', 'bb'].map((t, i) => `<rect x="${(i % 2) * 70 + 8}" y="${Math.floor(i / 2) * 70 + 8}" width="64" height="64" rx="6" fill="${t === 'bb' ? '#ffe0b3' : '#cfe8ff'}"/><text x="${(i % 2) * 70 + 40}" y="${Math.floor(i / 2) * 70 + 48}" font-size="22" font-weight="800" fill="#25312f" text-anchor="middle">${t}</text>`).join('')}</g>
+      ${[[250, 92, '#4f8ff7'], [330, 92, '#4f8ff7'], [250, 176, '#4f8ff7'], [330, 176, '#ffb347']].map(([x, y, c]) => `<g transform="translate(${x} ${y})"><ellipse rx="30" ry="24" fill="${c}"/><circle cx="-10" cy="-6" r="7" fill="#fff"/><circle cx="10" cy="-6" r="7" fill="#fff"/><circle cx="-9" cy="-5" r="3.5" fill="#222"/><circle cx="11" cy="-5" r="3.5" fill="#222"/><path d="M-8,8 Q0,14 8,8" stroke="#222" stroke-width="2" fill="none"/><path d="M-18,-20 l-6,-14 M18,-20 l6,-14" stroke="${c}" stroke-width="4" stroke-linecap="round"/></g>`).join('')}
+      <text x="290" y="34" font-size="15" font-weight="800" fill="#ffd27a" text-anchor="middle">3 : 1</text>`,
+    immune: `<rect width="400" height="240" fill="#4a0f22"/><path d="M0,40 Q200,0 400,40 L400,200 Q200,240 0,200Z" fill="#7a1c34"/>${[[50, 70], [120, 180], [300, 60], [360, 170], [210, 200]].map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="14" ry="9" fill="#d9465f" stroke="#ff8a9a" stroke-width="2"/>`).join('')}
+      ${[[280, 120], [320, 150], [250, 160]].map(([x, y]) => `<g transform="translate(${x} ${y})"><rect x="-13" y="-7" width="26" height="14" rx="7" fill="#7ee081"/>${[-8, 0, 8].map(d => `<line x1="${d}" y1="-7" x2="${d + 2}" y2="-13" stroke="#7ee081" stroke-width="2"/>`).join('')}</g>`).join('')}
+      <g transform="translate(150 110)"><circle r="34" fill="#e8f1ff" stroke="#9fc2ff" stroke-width="3"/><circle cx="4" cy="-2" r="14" fill="#7c9cff"/><path d="M30,-10 Q50,-20 60,-4" stroke="#e8f1ff" stroke-width="10" fill="none" stroke-linecap="round"/></g>
+      ${[[200, 60, 20], [230, 90, -30], [190, 40, 60]].map(([x, y, r]) => `<path d="M${x},${y} l0,-10 m0,0 l-6,-8 m6,8 l6,-8" stroke="#ffd27a" stroke-width="3" fill="none" stroke-linecap="round" transform="rotate(${r} ${x} ${y})"/>`).join('')}
+      <g transform="translate(14 14)"><rect width="130" height="30" rx="8" fill="#0b1020" fill-opacity=".72"/><text x="65" y="20" font-size="12.5" font-weight="800" fill="#ffd27a" text-anchor="middle">WAVE 2 · MEMORY</text></g>`,
+    equilibrium: `<rect width="400" height="240" fill="#14233f"/><g transform="translate(200 150)"><path d="M-150,0 L150,0" stroke="#cfe0f2" stroke-width="6"/><path d="M0,0 L-18,40 L18,40Z" fill="#cfe0f2"/>
+      <g transform="rotate(-6)"><rect x="-160" y="-60" width="110" height="56" rx="10" fill="#2f6fd6" opacity=".9"/><rect x="50" y="-60" width="110" height="56" rx="10" fill="#e5484d" opacity=".9"/>
+      ${[[-140, -40], [-120, -24], [-96, -44], [-74, -22]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="7" fill="#9fd0ff"/>`).join('')}${[[70, -40], [96, -22], [120, -42], [140, -24], [108, -30]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="7" fill="#ffb3b8"/>`).join('')}</g></g>
+      <text x="200" y="60" font-size="30" font-weight="800" fill="#ffd27a" text-anchor="middle">⇌</text><text x="110" y="64" font-size="20" font-weight="800" fill="#9fd0ff" text-anchor="middle">N₂ + 3H₂</text><text x="292" y="64" font-size="20" font-weight="800" fill="#ffb3b8" text-anchor="middle">2NH₃</text>
+      <g transform="translate(150 206)"><rect width="100" height="26" rx="8" fill="#0b1020" fill-opacity=".72"/><text x="50" y="18" font-size="12.5" font-weight="800" fill="#7ee0a1" text-anchor="middle">Q = K</text></g>`,
+    collision: `<rect width="400" height="240" fill="#101a2e"/><rect x="16" y="16" width="368" height="208" rx="14" fill="#16243f" stroke="#2d4470" stroke-width="3"/>
+      ${[[60, 60, '#4f8ff7'], [120, 170, '#4f8ff7'], [300, 70, '#ff9a3c'], [330, 180, '#ff9a3c'], [90, 120, '#ff9a3c'], [250, 150, '#4f8ff7']].map(([x, y, c]) => `<circle cx="${x}" cy="${y}" r="11" fill="${c}"/><line x1="${x}" y1="${y}" x2="${x - 22}" y2="${y + 10}" stroke="${c}" stroke-opacity=".4" stroke-width="5" stroke-linecap="round"/>`).join('')}
+      <circle cx="196" cy="104" r="11" fill="#4f8ff7"/><circle cx="214" cy="112" r="11" fill="#ff9a3c"/><g transform="translate(205 108)">${[0, 45, 90, 135, 180, 225, 270, 315].map(a => `<line x1="0" y1="0" x2="${Math.cos(a * Math.PI / 180) * 30}" y2="${Math.sin(a * Math.PI / 180) * 30}" stroke="#ffd27a" stroke-width="3" stroke-linecap="round" transform="translate(${Math.cos(a * Math.PI / 180) * 14} ${Math.sin(a * Math.PI / 180) * 14})"/>`).join('')}</g>
+      <g transform="translate(250 28)"><rect width="120" height="28" rx="8" fill="#0b1020" fill-opacity=".72"/><text x="60" y="19" font-size="12.5" font-weight="800" fill="#ffd27a" text-anchor="middle">✓ 14 successful</text></g>`,
+    calorimetry: `<rect width="400" height="240" fill="#22313a"/><rect y="196" width="400" height="44" fill="#3a4a54"/>
+      <g transform="translate(200 120)"><rect x="-74" y="-60" width="148" height="140" rx="14" fill="#e9eef2" stroke="#9fb0bb" stroke-width="4"/><rect x="-60" y="-46" width="120" height="112" rx="8" fill="#cfe7f5"/><rect x="-60" y="0" width="120" height="66" rx="6" fill="#7fc4ec"/>
+      <rect x="-80" y="-74" width="160" height="16" rx="6" fill="#c8d2d9"/><rect x="30" y="-118" width="10" height="120" rx="5" fill="#fff" stroke="#9fb0bb" stroke-width="2"/><rect x="32" y="-40" width="6" height="40" fill="#e5484d"/><circle cx="35" cy="4" r="9" fill="#e5484d"/>
+      <rect x="-30" y="14" width="34" height="26" rx="4" fill="#c27a3a" stroke="#ffb37a" stroke-width="2"/>${[0, 1, 2].map(i => `<path d="M${-22 + i * 10},10 q4,-8 0,-16" stroke="#fff" stroke-width="2" fill="none" opacity=".7"/>`).join('')}</g>
+      <g transform="translate(14 14)"><rect width="128" height="30" rx="8" fill="#0b1020" fill-opacity=".72"/><text x="64" y="20" font-size="12.5" font-weight="800" fill="#ffb37a" text-anchor="middle">q = mcΔT</text></g><g transform="translate(270 20)"><rect width="114" height="30" rx="8" fill="#0b1020" fill-opacity=".72"/><text x="57" y="20" font-size="13" font-weight="800" fill="#7ee0a1" text-anchor="middle">ΔT +6.4 °C</text></g>`,
+    stoich: `<rect width="400" height="240" fill="#2b2f3a"/><rect y="150" width="400" height="20" fill="#4a5060"/>${Array.from({ length: 12 }, (_, i) => `<circle cx="${i * 36 + 10}" cy="160" r="7" fill="#2b2f3a" stroke="#7d8597" stroke-width="2"/>`).join('')}
+      <g transform="translate(40 40)"><path d="M0,0 L60,0 L48,70 L12,70Z" fill="#4f8ff7" stroke="#cfe0f2" stroke-width="3"/><text x="30" y="40" font-size="15" font-weight="800" fill="#fff" text-anchor="middle">2H₂</text></g>
+      <g transform="translate(130 40)"><path d="M0,0 L60,0 L48,70 L12,70Z" fill="#e5484d" stroke="#ffd0d3" stroke-width="3"/><text x="30" y="40" font-size="15" font-weight="800" fill="#fff" text-anchor="middle">O₂</text></g>
+      <path d="M210,80 L250,80 M240,70 L252,80 L240,90" stroke="#ffd27a" stroke-width="5" fill="none" stroke-linecap="round"/>
+      ${[0, 1, 2].map(i => `<g transform="translate(${280 + i * 36} ${126 - (i % 2) * 6})"><rect x="-14" y="-24" width="28" height="24" rx="5" fill="#7ee0a1"/><text y="-8" font-size="10" font-weight="800" fill="#123" text-anchor="middle">H₂O</text></g>`).join('')}
+      <g transform="translate(110 190)"><rect width="180" height="34" rx="8" fill="#0b1020" fill-opacity=".72"/><text x="90" y="22" font-size="13" font-weight="800" fill="#ffd27a" text-anchor="middle">Limiting: O₂ · 98% yield</text></g>`,
+    bridge: `<rect width="400" height="240" fill="#a9d8f5"/><path d="M0,170 L60,150 L60,240 L0,240Z M400,170 L340,150 L340,240 L400,240Z" fill="#8a6d55"/><rect y="200" width="400" height="40" fill="#3f8fd6" opacity=".7"/>
+      <g stroke-width="6" stroke-linecap="round">${[[60, 150, 130, 150, '#e5484d'], [130, 150, 200, 150, '#e5484d'], [200, 150, 270, 150, '#e5484d'], [270, 150, 340, 150, '#e5484d'], [95, 100, 165, 100, '#2f6fd6'], [165, 100, 235, 100, '#2f6fd6'], [235, 100, 305, 100, '#2f6fd6'], [60, 150, 95, 100, '#2f6fd6'], [95, 100, 130, 150, '#e5484d'], [130, 150, 165, 100, '#2f6fd6'], [165, 100, 200, 150, '#e5484d'], [200, 150, 235, 100, '#e5484d'], [235, 100, 270, 150, '#2f6fd6'], [270, 150, 305, 100, '#e5484d'], [305, 100, 340, 150, '#2f6fd6']].map(([a, b, c, d, k]) => `<line x1="${a}" y1="${b}" x2="${c}" y2="${d}" stroke="${k}"/>`).join('')}</g>
+      ${[60, 130, 200, 270, 340, 95, 165, 235, 305].map((x, i) => `<circle cx="${x}" cy="${i < 5 ? 150 : 100}" r="6" fill="#fff" stroke="#333" stroke-width="2"/>`).join('')}
+      <g transform="translate(176 118)"><rect width="48" height="26" rx="4" fill="#ffb347" stroke="#7a4a12" stroke-width="2"/><text x="24" y="18" font-size="12" font-weight="800" fill="#4a2a08" text-anchor="middle">5 t</text></g>
+      <g transform="translate(14 14)"><rect width="150" height="30" rx="8" fill="#0b1020" fill-opacity=".72"/><text x="12" y="20" font-size="12" font-weight="800" fill="#ff8a8a">tension</text><text x="82" y="20" font-size="12" font-weight="800" fill="#8ab8ff">compression</text></g>`,
+    waves: `<rect width="400" height="240" fill="#0d2238"/>${[60, 120, 180].map((y, k) => `<path d="${Array.from({ length: 81 }, (_, i) => `${i ? 'L' : 'M'}${20 + i * 4.5},${y + Math.sin(i / 80 * Math.PI * (k === 2 ? 4 : 3 + k)) * (k === 2 ? 26 : 16)}`).join(' ')}" fill="none" stroke="${['#4f8ff7', '#ff9a3c', '#7ee0a1'][k]}" stroke-width="${k === 2 ? 4 : 3}"/>`).join('')}
+      ${[0, 1, 2, 3, 4].map(i => `<circle cx="${20 + i * 90}" cy="180" r="4" fill="#fff"/>`).join('')}<text x="380" y="66" font-size="16" font-weight="800" fill="#4f8ff7" text-anchor="end">+</text><text x="380" y="126" font-size="16" font-weight="800" fill="#ff9a3c" text-anchor="end">=</text>
+      <g transform="translate(270 206)"><rect width="116" height="26" rx="8" fill="#0b1020" fill-opacity=".72"/><text x="58" y="18" font-size="12.5" font-weight="800" fill="#7ee0a1" text-anchor="middle">v = f λ</text></g>`,
+    laser: `<rect width="400" height="240" fill="#0a0f1e"/>${Array.from({ length: 9 }, (_, i) => `<line x1="${i * 50}" y1="0" x2="${i * 50}" y2="240" stroke="#16213a"/>`).join('')}${Array.from({ length: 5 }, (_, i) => `<line x1="0" y1="${i * 60}" x2="400" y2="${i * 60}" stroke="#16213a"/>`).join('')}
+      <rect x="20" y="104" width="44" height="22" rx="4" fill="#5a6270"/><rect x="60" y="110" width="8" height="10" fill="#e5484d"/>
+      <polyline points="68,115 180,115 180,190 300,190" fill="none" stroke="#ff3b4e" stroke-width="3"/><polyline points="68,115 180,115 180,190 300,190" fill="none" stroke="#ff3b4e" stroke-width="9" opacity=".25"/>
+      <line x1="166" y1="101" x2="194" y2="129" stroke="#cfe0f2" stroke-width="6" stroke-linecap="round"/><path d="M230,150 L262,150 L246,122Z" fill="#9fd0ff" fill-opacity=".35" stroke="#9fd0ff" stroke-width="2"/>
+      <g transform="translate(320 190)"><circle r="18" fill="none" stroke="#7ee0a1" stroke-width="4"/><circle r="8" fill="#7ee0a1"/></g>${[[300, 50], [340, 80]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="10" fill="none" stroke="#ffd27a" stroke-width="3"/>`).join('')}
+      <g transform="translate(14 14)"><rect width="158" height="28" rx="8" fill="#0b1020" fill-opacity=".8"/><text x="79" y="19" font-size="12" font-weight="800" fill="#ffd27a" text-anchor="middle">n₁ sin θ₁ = n₂ sin θ₂</text></g>`,
+    crash: `<rect width="400" height="240" fill="#dfe8f0"/><rect y="168" width="400" height="12" fill="#6b7a88"/><rect y="180" width="400" height="60" fill="#c5d0da"/>
+      <g transform="translate(110 140)"><rect x="-44" y="-26" width="88" height="40" rx="8" fill="#2f6fd6"/><circle cx="-26" cy="20" r="9" fill="#222"/><circle cx="26" cy="20" r="9" fill="#222"/><ellipse cx="-6" cy="-36" rx="9" ry="12" fill="#fff6e0" stroke="#d9c9a0" stroke-width="2"/></g>
+      <g transform="translate(270 140)"><rect x="-44" y="-26" width="88" height="40" rx="8" fill="#e5484d"/><circle cx="-26" cy="20" r="9" fill="#222"/><circle cx="26" cy="20" r="9" fill="#222"/></g>
+      <path d="M164,124 l26,0 m-8,-8 l8,8 -8,8" stroke="#ff9a3c" stroke-width="5" fill="none" stroke-linecap="round"/><g transform="translate(190 128)">${[0, 60, 120, 180, 240, 300].map(a => `<line x1="0" y1="0" x2="${Math.cos(a * Math.PI / 180) * 16}" y2="${Math.sin(a * Math.PI / 180) * 16}" stroke="#ffd27a" stroke-width="3" transform="translate(${Math.cos(a * Math.PI / 180) * 8} ${Math.sin(a * Math.PI / 180) * 8})"/>`).join('')}</g>
+      <g transform="translate(14 14)"><rect width="178" height="30" rx="8" fill="#0b1020" fill-opacity=".72"/><text x="89" y="20" font-size="12.5" font-weight="800" fill="#7ee0a1" text-anchor="middle">p before = p after</text></g>`,
   };
   void big;
   return `<svg viewBox="0 0 400 240" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${bg}${art[id] || ''}</svg>`;
@@ -6175,6 +6249,96 @@ const CoasterLab = (() => {
   });
 })();
 
+/* ═══════════ Interactive labs in /labs/ (Nov 2026): 13 high school labs with three modes each ═══════════
+   Guided Experiment, Free Investigation and Game Challenge. Only the cards live in this page: a lab's code is in
+   labs/<id>.js and the shared engine in labs/xlab.js, loaded the first time the lab is opened (and prefetched when its brief opens). */
+const XLAB = {
+  v: '20261117', mods: {}, loading: {},
+  /* labs whose code is in /labs/ and ready. Cards for the others stay hidden until their file is added: then add the id
+     here AND at the end of LAB_ORDER (class codes). Still to build (Nov 2026): greenhouse, enzyme, genetics, immune,
+     equilibrium, collision, calorimetry, stoich, bridge, waves, laser, crash. */
+  built: ['osmosis'],
+  load(file) {
+    return this.loading[file] || (this.loading[file] = new Promise((ok, bad) => { const s = document.createElement('script'); s.src = gameURL('labs/' + file + '?v=' + this.v); s.async = true;
+      s.onload = ok; s.onerror = () => { delete this.loading[file]; s.remove(); bad(new Error(file)); }; document.head.appendChild(s); }));
+  },
+  async ready(id) { await this.load('xlab.js'); await this.load(id + '.js'); if (!this.mods[id]) throw new Error(id); },
+  prefetch(id) { this.ready(id).catch(() => {}); },
+  async open(l, r) {
+    const w = document.createElement('div'); w.className = 'xl-wait'; w.innerHTML = '<div>Loading the lab…</div>'; const tm = setTimeout(() => document.body.appendChild(w), 150);
+    try { await this.ready(l.id); } catch (e) { clearTimeout(tm); w.remove(); alertBox('Couldn’t open the lab', 'The lab didn’t load. Check your internet connection and try again.'); return; }
+    clearTimeout(tm); w.remove(); this.mods[l.id].start(r);
+  }
+};
+[
+  { id: 'osmosis', short: 'Osmosis Crisis', title: 'Osmosis Crisis: Save the Cell', courses: ['hs-bio'], time: '35–45 min', grade: 'Grades 9–10',
+    summary: 'Change solute concentrations and membrane permeability, watch water and solutes cross the membrane, and rescue cells in hypotonic and hypertonic danger.',
+    objective: 'Explain diffusion and osmosis across a selectively permeable membrane, predict how a cell’s volume changes in hypotonic, isotonic and hypertonic solutions, and use this to keep cells alive.',
+    objectives: ['Explain how diffusion and osmosis move particles from high to low concentration', 'Predict whether water enters or leaves a cell in hypotonic, isotonic and hypertonic solutions', 'Measure how solute concentration and membrane permeability change the rate of osmosis', 'Explain how cells and organisms keep water balance (homeostasis)'],
+    ngss: [['HS-LS1-3', 'Plan and conduct an investigation to provide evidence that feedback mechanisms maintain homeostasis.'], ['HS-LS1-2', 'Develop and use a model to illustrate the hierarchical organization of interacting systems that provide specific functions within multicellular organisms.'], ['SEP 3', 'Planning and carrying out investigations: change one variable and measure cell volume over time.'], ['CCC 7', 'Stability and change: a cell stays stable when water in equals water out.']] },
+  { id: 'greenhouse', short: 'Greenhouse Tycoon', title: 'Photosynthesis: Greenhouse Tycoon', courses: ['hs-bio'], time: '35–45 min', grade: 'Grades 9–10',
+    summary: 'Run a virtual greenhouse: tune light, CO₂, temperature and water, measure the photosynthesis rate from oxygen bubbles, find the limiting factor, and grow the best crop.',
+    objective: 'Measure how light intensity, carbon dioxide, temperature and water affect the rate of photosynthesis, identify limiting factors, and explain how light energy is stored as chemical energy in glucose.',
+    objectives: ['Write the overall equation for photosynthesis and name its inputs and outputs', 'Measure the photosynthesis rate from the oxygen a plant gives off', 'Identify the limiting factor in a set of growing conditions', 'Explain why rate levels off with light and CO₂ but peaks and falls with temperature'],
+    ngss: [['HS-LS1-5', 'Use a model to illustrate how photosynthesis transforms light energy into stored chemical energy.'], ['HS-LS2-5', 'Develop a model to illustrate the role of photosynthesis and cellular respiration in the cycling of carbon among the biosphere, atmosphere, hydrosphere, and geosphere.'], ['SEP 3', 'Planning and carrying out investigations: control variables and measure a rate.'], ['CCC 2', 'Cause and effect: the factor in shortest supply limits the rate.']] },
+  { id: 'enzyme', short: 'Enzyme Rush', title: 'Enzyme Rush: Reaction Factory', courses: ['hs-bio'], time: '35–45 min', grade: 'Grades 9–11',
+    summary: 'Run a biochemical factory: adjust temperature, pH, enzyme concentration and substrate, measure reaction rates, discover each enzyme’s optimum, and avoid denaturing your workers.',
+    objective: 'Investigate how temperature, pH, enzyme concentration and substrate concentration affect the rate of an enzyme-catalyzed reaction, and explain the results with the active site, collisions, saturation and denaturation.',
+    objectives: ['Describe how an enzyme’s active site binds a specific substrate', 'Measure reaction rate and find an enzyme’s optimum temperature and pH', 'Explain saturation: why the rate levels off at high substrate concentration', 'Explain denaturation and why it can’t be undone by cooling'],
+    ngss: [['HS-LS1-6', 'Construct and revise an explanation based on evidence for how carbon, hydrogen, and oxygen from sugar molecules may combine with other elements to form amino acids and/or other large carbon-based molecules.'], ['HS-LS1-3', 'Plan and conduct an investigation to provide evidence that feedback mechanisms maintain homeostasis.'], ['HS-PS1-5', 'Apply scientific principles and evidence to provide an explanation about the effects of changing the temperature or concentration of the reacting particles on the rate at which a reaction occurs.'], ['CCC 6', 'Structure and function: the shape of the active site fits one substrate.']] },
+  { id: 'genetics', short: 'Genetic Architect', title: 'Genetic Architect: Creature Creator', courses: ['hs-bio'], time: '35–45 min', grade: 'Grades 9–10',
+    summary: 'Design and breed fictional creatures: choose alleles, predict offspring with Punnett squares, test predictions with big litters, and explore dominance, codominance, sex linkage and mutation.',
+    objective: 'Use Punnett squares and probability to predict offspring genotypes and phenotypes, compare predictions with breeding results, and explain how dominance patterns and mutations create variation.',
+    objectives: ['Tell apart genotype and phenotype, homozygous and heterozygous', 'Predict offspring ratios with Punnett squares for one and two traits', 'Explain why real litters don’t match predicted ratios exactly (probability and sample size)', 'Describe incomplete dominance, codominance, sex-linked traits and mutations'],
+    ngss: [['HS-LS3-1', 'Ask questions to clarify relationships about the role of DNA and chromosomes in coding the instructions for characteristic traits passed from parents to offspring.'], ['HS-LS3-2', 'Make and defend a claim based on evidence that inheritable genetic variations may result from new genetic combinations through meiosis, viable errors occurring during replication, and/or mutations caused by environmental factors.'], ['HS-LS3-3', 'Apply concepts of statistics and probability to explain the variation and distribution of expressed traits in a population.'], ['SEP 5', 'Using mathematics: probability and ratios.']] },
+  { id: 'immune', short: 'Immune Defense', title: 'Immune Defense: Pathogen Invasion', courses: ['hs-bio'], time: '30–40 min', grade: 'Grades 9–11',
+    summary: 'Command the immune system in an animated defense: identify bacteria and viruses, deploy innate and adaptive defenders, make antibodies, and build immune memory for the next wave.',
+    objective: 'Explain how innate and adaptive immunity work together, how B cells, T cells and antibodies recognize specific antigens, and why memory cells make the second response faster and stronger.',
+    objectives: ['Compare innate (fast, general) and adaptive (slow, specific) immune responses', 'Explain how antibodies match a specific antigen', 'Measure the primary and secondary immune responses and explain immune memory', 'Explain how vaccines prepare the immune system'],
+    ngss: [['HS-LS1-2', 'Develop and use a model to illustrate the hierarchical organization of interacting systems that provide specific functions within multicellular organisms.'], ['HS-LS1-3', 'Plan and conduct an investigation to provide evidence that feedback mechanisms maintain homeostasis.'], ['HS-LS1-1', 'Construct an explanation based on evidence for how the structure of DNA determines the structure of proteins, which carry out the essential functions of life through systems of specialized cells.'], ['CCC 4', 'Systems and system models: many cell types work together to defend the body.']] },
+  { id: 'equilibrium', short: 'Equilibrium Shift', title: 'Equilibrium Shift: Chemical Chaos', courses: ['hs-chem'], time: '35–45 min', grade: 'Grades 10–12',
+    summary: 'Push a reversible reaction around: change concentrations, temperature and pressure, watch the forward and reverse rates rebalance, and use Le Châtelier’s principle and K to predict the shift.',
+    objective: 'Explain dynamic equilibrium, predict and observe how changes in concentration, temperature and pressure shift a reversible reaction (Le Châtelier’s principle), and calculate K and Q.',
+    objectives: ['Explain why equilibrium is dynamic: forward and reverse rates are equal', 'Predict the direction of a shift after a change in concentration, temperature or pressure', 'Calculate the equilibrium constant K and the reaction quotient Q', 'Explain why only temperature changes the value of K'],
+    ngss: [['HS-PS1-6', 'Refine the design of a chemical system by specifying a change in conditions that would produce increased amounts of products at equilibrium.'], ['HS-PS1-5', 'Apply scientific principles and evidence to provide an explanation about the effects of changing the temperature or concentration of the reacting particles on the rate at which a reaction occurs.'], ['SEP 5', 'Using mathematics: equilibrium constants and reaction quotients.'], ['CCC 7', 'Stability and change: a system at equilibrium responds to a change by partly undoing it.']] },
+  { id: 'collision', short: 'Collision Lab', title: 'Collision Lab: Reaction Accelerator', courses: ['hs-chem'], time: '30–40 min', grade: 'Grades 10–12',
+    summary: 'Watch molecules collide: change temperature, concentration and activation energy, count successful collisions, add a catalyst, and connect the energy diagram to the reaction rate.',
+    objective: 'Use collision theory to explain how temperature, concentration, activation energy and catalysts change reaction rate, using particle collisions, energy distributions and energy diagrams.',
+    objectives: ['Explain collision theory: particles must collide with enough energy and the right orientation', 'Measure how temperature and concentration change the rate', 'Relate activation energy to the fraction of successful collisions', 'Explain how a catalyst speeds up a reaction without being used up'],
+    ngss: [['HS-PS1-5', 'Apply scientific principles and evidence to provide an explanation about the effects of changing the temperature or concentration of the reacting particles on the rate at which a reaction occurs.'], ['HS-PS1-4', 'Develop a model to illustrate that the release or absorption of energy from a chemical reaction system depends upon the changes in total bond energy.'], ['SEP 2', 'Developing and using models: a particle model of a reaction.'], ['CCC 3', 'Scale, proportion and quantity: a small rise in temperature makes many more particles energetic enough.']] },
+  { id: 'calorimetry', short: 'Thermal Reactor', title: 'Thermal Reactor: Calorimetry Lab', courses: ['hs-chem'], time: '35–45 min', grade: 'Grades 10–12',
+    summary: 'Mix hot metals, water and reacting solutions in an insulated calorimeter, measure temperature changes, calculate heat with q = mcΔT, find specific heats and enthalpies, and check that energy is conserved.',
+    objective: 'Use calorimetry and q = mcΔT to measure heat transfer, identify an unknown metal by its specific heat, find the enthalpy change of a reaction, and explain energy conservation.',
+    objectives: ['Explain that heat flows from hot to cold until both reach the same temperature', 'Calculate heat with q = mcΔT', 'Identify an unknown metal from its specific heat', 'Find ΔH for a reaction and tell exothermic from endothermic'],
+    ngss: [['HS-PS3-4', 'Plan and conduct an investigation to provide evidence that the transfer of thermal energy when two components of different temperature are combined within a closed system results in a more uniform energy distribution among the components in the system.'], ['HS-PS3-1', 'Create a computational model to calculate the change in the energy of one component in a system when the change in energy of the other component(s) and energy flows in and out of the system are known.'], ['HS-PS1-4', 'Develop a model to illustrate that the release or absorption of energy from a chemical reaction system depends upon the changes in total bond energy.'], ['CCC 5', 'Energy and matter: energy lost by one part of the system is gained by another.']] },
+  { id: 'stoich', short: 'Mole Factory', title: 'Mole Factory: Stoichiometry Challenge', courses: ['hs-chem'], time: '35–45 min', grade: 'Grades 10–12',
+    summary: 'Run a chemical production line: balance equations, load reactants in grams and moles, find the limiting reactant, predict theoretical yield, and fill customer orders without waste.',
+    objective: 'Balance chemical equations, convert between mass and moles, use mole ratios to find the limiting reactant and theoretical yield, and calculate percent yield.',
+    objectives: ['Balance chemical equations so atoms are conserved', 'Convert between grams and moles with molar mass', 'Use mole ratios to find the limiting and excess reactants', 'Calculate theoretical yield and percent yield'],
+    ngss: [['HS-PS1-7', 'Use mathematical representations to support the claim that atoms, and therefore mass, are conserved during a chemical reaction.'], ['HS-PS1-2', 'Construct and revise an explanation for the outcome of a simple chemical reaction based on the outermost electron states of atoms, trends in the periodic table, and knowledge of the patterns of chemical properties.'], ['SEP 5', 'Using mathematics and computational thinking: mole ratios and yields.'], ['CCC 3', 'Scale, proportion and quantity: counting particles by weighing them.']] },
+  { id: 'bridge', short: 'Bridge Breaker', title: 'Bridge Breaker: Engineering Challenge', courses: ['hs-phys'], time: '35–45 min', grade: 'Grades 10–12',
+    summary: 'Build truss bridges from beams and supports, load them until something gives, see tension and compression in every member, and engineer the strongest bridge for the lowest cost.',
+    objective: 'Use forces in equilibrium to explain how truss bridges carry loads, identify members in tension and compression, and design, test and improve a bridge under cost and strength constraints.',
+    objectives: ['Explain static equilibrium: the forces on every joint add to zero', 'Identify members in tension and in compression', 'Explain why triangles make structures rigid', 'Design, test and refine a bridge to meet cost and load constraints'],
+    ngss: [['HS-ETS1-2', 'Design a solution to a complex real-world problem by breaking it down into smaller, more manageable problems that can be solved through engineering.'], ['HS-ETS1-3', 'Evaluate a solution to a complex real-world problem based on prioritized criteria and trade-offs that account for a range of constraints, including cost, safety, reliability, and aesthetics.'], ['HS-PS2-1', 'Analyze data to support the claim that Newton’s second law of motion describes the mathematical relationship among the net force on a macroscopic object, its mass, and its acceleration.'], ['CCC 6', 'Structure and function: the shape of a truss decides how it carries a load.']] },
+  { id: 'waves', short: 'Wave Lab', title: 'Wave Lab: Interference Playground', courses: ['hs-phys'], time: '30–40 min', grade: 'Grades 10–12',
+    summary: 'Make waves on a string and in a ripple tank: change amplitude, frequency and wavelength, measure wave speed, add waves together, and build standing waves and interference patterns.',
+    objective: 'Use v = fλ to relate wave speed, frequency and wavelength, apply superposition to explain constructive and destructive interference, and find the frequencies that make standing waves.',
+    objectives: ['Measure amplitude, wavelength, frequency and period', 'Use v = fλ to calculate wave speed', 'Explain constructive and destructive interference with superposition', 'Predict the frequencies of standing waves (harmonics) on a string'],
+    ngss: [['HS-PS4-1', 'Use mathematical representations to support a claim regarding relationships among the frequency, wavelength, and speed of waves traveling in various media.'], ['HS-PS4-3', 'Evaluate the claims, evidence, and reasoning behind the idea that electromagnetic radiation can be described either by a wave model or a particle model.'], ['SEP 5', 'Using mathematics: v = fλ and harmonics.'], ['CCC 1', 'Patterns: nodes and antinodes in standing waves and interference.']] },
+  { id: 'laser', short: 'Laser Maze', title: 'Laser Maze: Optics Challenge', courses: ['hs-phys'], time: '35–45 min', grade: 'Grades 10–12',
+    summary: 'Place mirrors, glass blocks, prisms and lenses to steer a laser to its targets: measure angles, use the law of reflection and Snell’s law, find critical angles and focal lengths.',
+    objective: 'Apply the law of reflection and Snell’s law to predict a light ray’s path, explain total internal reflection, dispersion and lenses, and use them to solve optical puzzles.',
+    objectives: ['Use the law of reflection: angle of incidence = angle of reflection', 'Use Snell’s law (n₁ sin θ₁ = n₂ sin θ₂) to predict refraction', 'Find the critical angle for total internal reflection', 'Find the focal length of a converging lens'],
+    ngss: [['HS-PS4-1', 'Use mathematical representations to support a claim regarding relationships among the frequency, wavelength, and speed of waves traveling in various media.'], ['HS-PS4-5', 'Communicate technical information about how some technological devices use the principles of wave behavior and wave interactions with matter to transmit and capture information and energy.'], ['SEP 5', 'Using mathematics: angles, sines and Snell’s law.'], ['CCC 2', 'Cause and effect: light changes direction because its speed changes.']] },
+  { id: 'crash', short: 'Crash Test Lab', title: 'Crash Test Lab: Momentum', courses: ['hs-phys'], time: '35–45 min', grade: 'Grades 10–12',
+    summary: 'Launch carts on a track: set masses, speeds and bumpers, crash them in elastic and inelastic collisions, measure momentum and kinetic energy, and design a crumple zone that protects the egg.',
+    objective: 'Use conservation of momentum to predict the outcome of collisions, compare elastic and inelastic collisions using kinetic energy, and apply impulse (FΔt = Δp) to design a safer collision.',
+    objectives: ['Calculate momentum (p = mv) and show total momentum is conserved', 'Compare kinetic energy in elastic and inelastic collisions', 'Predict final velocities after a collision', 'Use impulse to explain why a longer collision time means a smaller force'],
+    ngss: [['HS-PS2-2', 'Use mathematical representations to support the claim that the total momentum of a system of objects is conserved when there is no net force on the system.'], ['HS-PS2-3', 'Apply scientific and engineering ideas to design, evaluate, and refine a device that minimizes the force on a macroscopic object during a collision.'], ['HS-PS3-1', 'Create a computational model to calculate the change in the energy of one component in a system when the change in energy of the other component(s) and energy flows in and out of the system are known.'], ['CCC 5', 'Energy and matter: momentum is always conserved; kinetic energy only in elastic collisions.']] }
+].filter(m => XLAB.built.includes(m.id)).forEach(m => LABS.push(Object.assign(m, { modes: true, materials: ['A computer, Chromebook or tablet', 'A calculator', 'Your lab notebook (or download the report)'], safety: ['No safety gear needed. This is a simulation.'],
+  howto: 'Works with a mouse, trackpad or touch screen. Choose a mode above: each lab has a guided experiment, a free investigation and a game.', run: r => XLAB.open(m, r), thumb: big => labThumb(m.id, big) })));
+
 /* ═══════════ Science Showdown: team quiz board for the projector ═══════════
    Teams take turns picking a tile. A wrong answer lets the next team steal for half the points.
    One hidden tile is a Lab Bonus (double points, no steal). Answer order is shuffled every time.
@@ -7290,7 +7454,7 @@ const Zombies = {
    SITE_KEY. Students join with it (no account), run the labs, and each finished lab is posted to the sign-up Apps Script,
    which saves it in the "educator-space.com · Lab results" tab. Teachers read back only their own students' results.
    LAB_ORDER is the bit order inside codes: only ever ADD new labs at the end, never reorder. */
-const LAB_ORDER = ['dna-strawberry', 'titration', 'flame', 'pendulum', 'ohm', 'mass', 'erosion', 'onion', 'heart', 'vsepr', 'projectile', 'helix', 'ecosystem', 'cellcity', 'volcano', 'weather', 'reactions', 'coaster'];
+const LAB_ORDER = ['dna-strawberry', 'titration', 'flame', 'pendulum', 'ohm', 'mass', 'erosion', 'onion', 'heart', 'vsepr', 'projectile', 'helix', 'ecosystem', 'cellcity', 'volcano', 'weather', 'reactions', 'coaster', 'osmosis'];
 /* GAME_ORDER is also append-only. A code with games = the usual 13 signed characters + a short tail holding a bitmask
    (labs in bits 0–11, games from bit 12). The 13-character core is version 2 and carries a 10-bit check of the tail, so the
    tail can't be edited. Only the core is sent with results, so the Apps Script needs no change. */
@@ -7303,8 +7467,9 @@ const teacherKey = async email => parseInt((await sha256hex('t|' + SITE_KEY + '|
 const fmtLabCode = c => c.slice(0, 4) + '-' + c.slice(4, 8) + '-' + c.slice(8);
 /* where each lab lives in a class code's extension: the first 12 labs use bits 0–11, games bits 12–39, later labs bits 40 and up */
 const labBit = i => i < 12 ? i : i < 22 ? 40 + (i - 12) : 56 + (i - 22);
-/* games: bits 12–39 for the first 28, then bits 50–55 (labs 13–22 use 40–49, any labs after that 56+) */
-const gameBit = i => i < 28 ? 12 + i : 50 + (i - 28);
+/* games: bits 12–39 for the first 28, then bits 50–55 (labs 13–22 use 40–49, labs 23–31 use 56–64), then 65 and up.
+   A tail up to bit 64 is 14 characters, so codes are 13 to 27 characters (the sign-up script accepts tails up to 16). */
+const gameBit = i => i < 28 ? 12 + i : i < 34 ? 50 + (i - 28) : 65 + (i - 34);
 async function makeLabCode(email, labIds, opts, set, gameIds = []) {
   let labs = 0, ver = 1n, ext = '';
   if (gameIds.length || labIds.some(id => LAB_ORDER.indexOf(id) >= 10)) {
@@ -7318,7 +7483,7 @@ async function makeLabCode(email, labIds, opts, set, gameIds = []) {
   return r.core + (ext ? '-' + ext : '');
 }
 async function readLabCode(code) {
-  const all = normCode(code); if (all.length !== 13 && (all.length < 19 || all.length > 25)) return null; const c = all.slice(0, 13), ext = all.slice(13);
+  const all = normCode(code); if (all.length !== 13 && (all.length < 19 || all.length > 29)) return null; const c = all.slice(0, 13), ext = all.slice(13);
   let n = 0n; for (const ch of c) { const i = CODE_ABC.indexOf(ch); if (i < 0) return null; n = n * 31n + BigInt(i); }
   if (n >= (1n << 64n)) return null;
   const payload = n >> 24n, sg = Number(n & 0xFFFFFFn);
