@@ -6275,7 +6275,7 @@ const XLAB = {
   /* labs whose code is in /labs/ and ready. Cards for the others stay hidden until their file is added: then add the id
      here AND at the end of LAB_ORDER (class codes). Still to build (Nov 2026): greenhouse, enzyme, genetics, immune,
      equilibrium, collision, calorimetry, stoich, bridge, waves, laser, crash. */
-  built: ['osmosis'],
+  built: ['osmosis', 'greenhouse', 'enzyme', 'genetics', 'immune', 'equilibrium', 'collision', 'calorimetry', 'stoich', 'bridge', 'waves', 'laser', 'crash'],
   load(file) {
     return this.loading[file] || (this.loading[file] = new Promise((ok, bad) => { const s = document.createElement('script'); s.src = gameURL('labs/' + file + '?v=' + this.v); s.async = true;
       s.onload = ok; s.onerror = () => { delete this.loading[file]; s.remove(); bad(new Error(file)); }; document.head.appendChild(s); }));
@@ -7472,7 +7472,7 @@ const Zombies = {
    SITE_KEY. Students join with it (no account), run the labs, and each finished lab is posted to the sign-up Apps Script,
    which saves it in the "educator-space.com · Lab results" tab. Teachers read back only their own students' results.
    LAB_ORDER is the bit order inside codes: only ever ADD new labs at the end, never reorder. */
-const LAB_ORDER = ['dna-strawberry', 'titration', 'flame', 'pendulum', 'ohm', 'mass', 'erosion', 'onion', 'heart', 'vsepr', 'projectile', 'helix', 'ecosystem', 'cellcity', 'volcano', 'weather', 'reactions', 'coaster', 'osmosis'];
+const LAB_ORDER = ['dna-strawberry', 'titration', 'flame', 'pendulum', 'ohm', 'mass', 'erosion', 'onion', 'heart', 'vsepr', 'projectile', 'helix', 'ecosystem', 'cellcity', 'volcano', 'weather', 'reactions', 'coaster', 'osmosis', 'greenhouse', 'enzyme', 'genetics', 'immune', 'equilibrium', 'collision', 'calorimetry', 'stoich', 'bridge', 'waves', 'laser', 'crash'];
 /* GAME_ORDER is also append-only. A code with games = the usual 13 signed characters + a short tail holding a bitmask
    (labs in bits 0–11, games from bit 12). The 13-character core is version 2 and carries a 10-bit check of the tail, so the
    tail can't be edited. Only the core is sent with results, so the Apps Script needs no change. */
