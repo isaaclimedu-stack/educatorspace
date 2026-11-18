@@ -57,6 +57,11 @@
     if (o.grid) for (let x = 0; x <= span; x++) for (let y = -3; y <= 3; y++) { const [X, Y] = P2(x, y); g += `<circle cx="${X}" cy="${Y}" r="3" fill="#fff" opacity=".55"/>`; }
     if (o.grid) for (let x = .5; x < span; x++) for (let y = -2.5; y <= 3; y += 1) { const [X, Y] = P2(x, y); g += `<circle cx="${X}" cy="${Y}" r="2" fill="#fff" opacity=".3"/>`; }
     const pos = i => { const j = B.J[i], [X, Y] = P2(j.x, j.y); if (!S || !W) return [X, Y]; return [X + S.U[2 * i] * W * SC * 120 * sag, Y - S.U[2 * i + 1] * W * SC * 120 * sag]; };
+    if (o.truck != null) { const [tx] = P2(o.truck, 0);
+      /* sit the wheels on the (sagging) deck: interpolate between the deck joints either side of the truck */
+      let ty = P2(0, 0)[1]; const dk = B.J.map((j, i) => [j, i]).filter(([j]) => Math.abs(j.y) < 1e-6).sort((p, q) => p[0].x - q[0].x);
+      for (let k = 0; k < dk.length - 1; k++) { const [ja, ia] = dk[k], [jb, ib] = dk[k + 1]; if (o.truck >= ja.x - 1e-6 && o.truck <= jb.x + 1e-6) { const t = jb.x > ja.x ? (o.truck - ja.x) / (jb.x - ja.x) : 0; ty = pos(ia)[1] * (1 - t) + pos(ib)[1] * t; break; } }
+      g += `<g transform="translate(${tx - 34} ${ty - 57})" opacity=".8"><rect width="68" height="40" rx="6" fill="#e5484d"/><rect x="44" y="6" width="18" height="14" fill="#cfe7f5"/><circle cx="14" cy="44" r="9" fill="#222"/><circle cx="54" cy="44" r="9" fill="#222"/></g>`; o.tag = `<g transform="translate(${tx} ${ty + 34})"><rect x="-34" y="-13" width="68" height="22" rx="11" fill="#e5484d"/><text y="3" font-size="12" font-weight="800" fill="#fff" text-anchor="middle">${f(W)} kN</text></g>`; }
     B.M.forEach((m, i) => { if (m.broken) return; const [x1, y1] = pos(m.a), [x2, y2] = pos(m.b), F = S && W ? S.force[i] * W : 0, c = cap(B, m), r = F > 0 ? F / c.t : -F / c.c;
       const col = !S || !W || Math.abs(F) < .05 ? MAT[m.mat].col : F > 0 ? `rgb(${Math.round(200 + 55 * Math.min(1, r))},${Math.round(120 - 100 * Math.min(1, r))},${Math.round(120 - 100 * Math.min(1, r))})` : `rgb(${Math.round(110 - 90 * Math.min(1, r))},${Math.round(150 - 80 * Math.min(1, r))},${Math.round(230)})`;
       g += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${o.sel === i ? '#ffd27a' : col}" stroke-width="${(m.mat === 'steel' ? 9 : 7) + (S && W ? Math.min(6, Math.abs(F) / 8) : 0)}" stroke-linecap="round" data-mem="${i}"/>`;
@@ -64,8 +69,7 @@
     B.J.forEach((j, i) => { const [X, Y] = pos(i); g += `<circle cx="${X}" cy="${Y}" r="${o.pick === i ? 9 : 6}" fill="${o.pick === i ? '#ffd27a' : '#fff'}" stroke="#333" stroke-width="2"/>`; });
     const [a0, b0] = P2(0, 0), [a1, b1] = P2(span, 0);
     g += `<path d="M${a0},${b0 + 6} l-14,24 h28z" fill="#5a6270"/><circle cx="${a1}" cy="${b1 + 16}" r="10" fill="#5a6270"/><rect x="${a1 - 18}" y="${b1 + 26}" width="36" height="6" fill="#5a6270"/>`;
-    if (o.truck != null) { const [tx] = P2(o.truck, 0), dx = S && W ? 0 : 0; g += `<g transform="translate(${tx + dx - 34} ${b0 - 62})"><rect width="68" height="40" rx="6" fill="#e5484d"/><rect x="44" y="6" width="18" height="14" fill="#cfe7f5"/><circle cx="14" cy="44" r="9" fill="#222"/><circle cx="54" cy="44" r="9" fill="#222"/><text x="30" y="27" font-size="12" font-weight="800" fill="#fff" text-anchor="middle">${f(W)} kN</text></g>`; }
-    return g + (o.extra || '');
+    return g + (o.tag || '') + (o.extra || '');
   }
   const hudB = (B, rows, title) => SimLab.hud(700, 24, 285, rows, title || 'Bridge report');
   const legend = `<g transform="translate(700 430)"><rect width="285" height="62" rx="8" fill="#0b1020" fill-opacity=".8"/><line x1="14" y1="22" x2="54" y2="22" stroke="#e5484d" stroke-width="7"/><text x="62" y="26" font-size="12" fill="#fff">tension (pulled)</text><line x1="14" y1="46" x2="54" y2="46" stroke="#2f6fd6" stroke-width="7"/><text x="62" y="50" font-size="12" fill="#fff">compression (pushed)</text><text x="272" y="38" font-size="11" fill="#a9b6cc" text-anchor="end">numbers in kN</text></g>`;
@@ -109,7 +113,7 @@
       } else g.innerHTML = scene(B, o) + (cfg.hud ? cfg.hud(B, null, 0) : '');
     };
   }
-  const report = (B, w, W) => hudB(B, [['Members', B.M.length], ['Cost', `$${f(cost(B))}`, '#ffd27a'], ['Current load', `${f(W, 1)} kN`], ['Strength (worst spot)', w ? (w.unstable ? 'unstable!' : `${f(w.W, 1)} kN`) : 'press Load test', w && !w.unstable ? '#7ee0a1' : '#ff8a8a'], ['Weakest member', w && w.mi >= 0 && !w.unstable ? `${w.S.force[w.mi] > 0 ? 'tension' : 'compression'}, ${f(len(B, B.M[w.mi]), 2)} m` : '—']]);
+  const report = (B, w, W) => hudB(B, [['Members', B.M.length], ['Cost', `$${f(cost(B))}`, '#ffd27a'], ['Current load', `${f(W, 1)} kN`], ['Holds up to', w ? (w.unstable ? 'unstable!' : `${f(w.W, 1)} kN`) : 'not tested', w && !w.unstable ? '#7ee0a1' : '#ff8a8a'], ['Weak link', w && w.mi >= 0 && !w.unstable ? `${w.S.force[w.mi] > 0 ? 'tension' : 'compression'}, ${f(len(B, B.M[w.mi]), 2)} m` : '—']]);
 
   /* ═════ Guided ═════ */
   const steps = [
